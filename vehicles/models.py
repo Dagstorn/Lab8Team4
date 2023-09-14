@@ -1,3 +1,61 @@
 from django.db import models
+from accounts.models import Driver
+from tasks.models import Task
 
-# Create your models here.
+class Vehicle(models.Model):
+    BODY_TYPES =(
+        ("Sedan", "Sedan"), ("SUV", "SUV"), ("Hatchback", "Hatchback"), ("Coupe", "Coupe"), ("Convertible", "Convertible"), ("Wagon", "Wagon"), ("Minivan", "Minivan"), ("Pickup Truck", "Pickup Truck"), ("Crossover", "Crossover"), ("Van", "Van"), ("Sports Car", "Sports Car")
+    )
+    STATUS_TYPES = (
+        ("active", "Active"),
+        ("notactive", "Not Active"),
+    )
+    make = models.CharField(max_length=100)
+    model = models.CharField(max_length=100)
+    type = models.CharField(max_length=20, choices=BODY_TYPES, default="Sedan")
+    year = models.PositiveIntegerField()
+    license_plat = models.CharField(max_length=15, verbose_name="Licence plate")
+    capacity = models.PositiveIntegerField(verbose_name="Sitting capacity")
+    mileage = models.PositiveIntegerField(verbose_name="Mileage in km", default=0)
+    class Meta:
+        ordering = ["-type", "make", "model", "year"]
+
+    def __str__(self):
+        return f'{self.model} {self.year} | {self.license_plat} | {self.type}'
+    
+    def is_available(self):
+        return not Task.objects.filter(car=self).exists()
+    
+
+class FuelingInfo(models.Model):
+    vehicle = models.OneToOneField(Vehicle, on_delete=models.CASCADE, null=True)
+    fuelType = models.CharField(max_length=100)
+
+class FuelingRecord(models.Model):
+    vehicle = models.OneToOneField(Vehicle, on_delete=models.CASCADE, null=True)
+    driver_photo = models.ImageField(verbose_name="Mileage photo", upload_to ='fueling_records/')
+    mileage_photo = models.ImageField(verbose_name="Driver photo", upload_to ='fueling_records/')
+    image_before = models.ImageField(verbose_name="image before fueling", upload_to ='fueling_records/')
+    image_after = models.ImageField(verbose_name="image after fueling", upload_to ='fueling_records/')
+    date = models.DateTimeField(auto_now_add=True)
+
+
+class MaintenanceJob(models.Model):
+    vehicle = models.ForeignKey(Vehicle, on_delete=models.CASCADE, null=True)
+    date = models.DateTimeField(auto_now_add=True)
+
+    
+class MaintenanceRecord(models.Model):
+    vehicle = models.ForeignKey(Vehicle, on_delete=models.CASCADE, null=True)
+    service_type = models.CharField(max_length=100)
+    cost = models.PositiveIntegerField()
+    replaced_part_number = models.CharField()
+    replaced_part_photo = models.ImageField(upload_to ='maintenance_records/')
+    completed_on = models.DateTimeField(auto_now_add=True)
+
+
+class AuctionVehicle(models.Model):
+    image = models.ImageField(upload_to ='auction_vehicles/')
+    status = models.CharField()
+    cost = models.CharField()
+
