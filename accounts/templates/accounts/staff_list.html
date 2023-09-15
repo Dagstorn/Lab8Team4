@@ -1,0 +1,96 @@
+{% extends 'create_page.html' %}
+{% block title %}
+Staff list
+{% endblock title %}
+
+{% block content %}
+<div class="row">
+    <h3 class="m-0">List of staff accounts in VMS</h3>
+</div>
+<hr>
+<div class="row">
+    <div class="col">
+        {% if fueling_list_to_approve or maintenance_list_to_approve %}
+        <h4>Staff Users waiting approve</h4>
+        <table class="table table-sm table-hover table-striped align-middle"> 
+            <thead>
+                <tr>
+                    <th  class="w-25" scope="col">Role</th>
+                    <th scope="col">Users</th>
+                    <th scope="col" style="text-align: end;">
+                        <form action="" method="POST">
+                            {% csrf_token %}
+                            <button class="btn btn-success" name="all">Approve all</button>
+                        </form>
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for fueling in fueling_list_to_approve %}
+                <tr>
+                    <td>Fueling staff</td>
+                    <td>{{ fueling.user.first_name }} {{ fueling.user.last_name }}</td>
+                    <td style="text-align: end;">
+                        <form action="" method="POST">
+                            {% csrf_token %}
+                            <input type="hidden" name="uid" value="{{fueling.id}}">
+                            <input type="hidden" name="role" value="fueling">
+                            <button class="btn btn-outline-success" name="approve">Approve</button>
+                            <button class="btn btn-outline-danger" name="delete">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+                {% for maintenance in maintenance_list_to_approve %}
+                <tr>
+                    <td>Maintenance staff</td>
+                    <td>{{ maintenance.user.first_name }} {{ maintenance.user.last_name }}</td>
+                    <td style="text-align: end;">
+                        <form action="" method="POST">
+                            {% csrf_token %}
+                            <input type="hidden" name="uid" value="{{maintenance.id}}">
+                            <input type="hidden" name="role" value="maintenance">
+                            <button class="btn btn-outline-success" name="approve">Approve</button>
+                            <button class="btn btn-outline-danger" name="delete">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p>No staff to approve</p>
+        {% endif %}
+        
+    </div>
+</div>
+
+<div class="row mt-5">
+    <div class="col">
+        {% if fueling_list or maintenance_list %}
+        <h4>Approved Staff Users</h4>
+
+        <table class="table table-sm table-hover table-striped align-middle"> 
+            <tbody>
+                {% for fueling in fueling_list %}
+                <tr>
+                    <td class="w-25">Fueling staff</td>
+                    <td>{{ fueling.user.first_name }} {{ fueling.user.last_name }}</td>
+                </tr>
+                {% endfor %}
+                {% for maintenance in maintenance_list %}
+                <tr>
+                    <td  class="w-25">Maintenance staff</td>
+                    <td>{{ maintenance.user.first_name }} {{ maintenance.user.last_name }}</td>
+
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p>No staff users</p>
+        {% endif %}
+        
+    </div>
+</div>
+{% endblock content %}

@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% block title %}
+Vehicles list
+{% endblock title %}
+{% block content %}
+<div class="row">
+    <div class="col">
+        <div class="row">
+            <div class="col d-flex align-items-center">
+                <h3 class="m-0">Vehicles list</h3>
+            </div>
+            <div class="col d-flex justify-content-end">
+                <a href="{% url 'vehicles_add' %}" class="btn btn-outline-success">Add Vehicle</a>
+            </div>
+        </div>
+        <hr>
+        {% if vehicles %}
+        <table class="table table-striped align-middle"> 
+            <thead>
+                <tr>
+                    <th scope="col">Vehicle</th>
+                    <th scope="col">License plate</th>
+                    <th scope="col">Body type</th>
+                    <th scope="col">Status</th>
+                    <th scope="col"></th>
+                  </tr>
+            </thead>
+            <tbody>
+                {% for vehicle in vehicles %}
+                <tr>
+                    <td>{{ vehicle }}</td>
+                    <td>{{ vehicle.license_plat }}</td>
+                    <td>{{ vehicle.type }}</td>
+                    <td>
+                        {% if vehicle.is_available %}
+                        Available
+                        {% else %}
+                        Assigned to driver
+                        {% endif %}
+                    </td>
+                    <td style="text-align: end;"><a href="{% url 'vehicles_detail' vehicle.id %}" class="btn btn-outline-secondary">View</a></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% endif %}
+    </div>
+</div>
+{% endblock content %}

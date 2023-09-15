@@ -1,0 +1,50 @@
+{% extends 'create_page.html' %}
+{% block title %}
+Register an account
+{% endblock title %}
+
+{% block styles %}
+<style>
+  .errorlist { 
+    color: rgb(171, 0, 0);
+    font-weight: bold;
+  }
+</style>
+{% endblock styles %}
+
+{% block content %}
+<div class="row mt-5 justify-content-center">
+    <div class="col-6">
+        <h3>Create account as </h3>
+        <hr>
+        {% if messages %}
+          {% for message in messages %}
+            <div {% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %} class="alert alert-danger" {% else %} class="alert alert-success" {% endif %} role="alert">
+              {{message}}
+            </div>
+          {% endfor %}
+        {% endif %}
+        <form method="POST" action="">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label for="role" class="form-label">Role</label>
+                <select class="form-select" aria-label="Role select" name="role">
+                    <option selected>select</option>
+                    <option value="gas">Gas Fueling person</option>
+                    <option value="maintenance">Maintenance person</option>
+                </select>
+            </div>
+            {{form.as_p}}
+              
+
+            <button type="submit" class="btn btn-primary mt-2" style="width: 100%;">Register</button>
+            <hr>
+            <div class="d-flex justify-content-center">
+                <a href="{% url 'signin' %}" class="">Login with existing account</a>
+
+            </div>
+          </form>
+    </div>
+</div>
+
+{% endblock content %}

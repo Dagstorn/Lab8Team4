@@ -1,0 +1,35 @@
+{% extends 'create_page.html' %}
+{% block title %}Sign in to VMS{% endblock title %}
+{% block content %}
+<div class="row mt-5 justify-content-center">
+    <div class="col-4 ">
+        <h3>Login to VMS</h3>
+        <hr>
+        {% if messages %}
+          {% for message in messages %}
+            <div {% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %} class="alert alert-danger" {% else %} class="alert alert-success" {% endif %} role="alert">
+              {{message}}
+            </div>
+          {% endfor %}
+        {% endif %}
+        <form method="POST" action="{% url 'signin' %}">
+            {% csrf_token %}
+            <div class="mb-3">
+              <label for="username" class="form-label">Username</label>
+              <input type="text" name="username" class="form-control" id="username" aria-describedby="username">
+            </div>
+            
+            <div class="mb-3">
+              <label for="password" class="form-label">Password</label>
+              <input type="password"  name="password" class="form-control" id="password">
+            </div>
+            <button type="submit" class="btn btn-primary" style="width: 100%;">Login</button>
+            <hr>
+            <a href="{% url 'register' %}" class="btn btn-outline-primary mb-2" style="width: 100%;">Create Fueling person account</a>
+            <a href="{% url 'register' %}" class="btn btn-outline-primary" style="width: 100%;">Create Maintenance person account</a>
+      
+          </form>
+    </div>
+</div>
+
+{% endblock content %}

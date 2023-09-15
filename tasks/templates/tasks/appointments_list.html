@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% block title %}Appointments list{% endblock title %}
+
+{% block content %}
+<div class="row">
+    <div class="col">
+        <h3>Appointments list</h3>
+        <hr>
+    </div>
+</div>
+<div class="row">
+    <div class="col">
+        {% if appointments %}
+        <table class="table table-striped align-middle"> 
+            <thead>
+                <tr>
+                    <th scope="col">Appointment</th>
+                    <th scope="col"></th>
+                  </tr>
+            </thead>
+            <tbody>
+                {% for appointment in appointments %}
+                <tr>
+                    <td>{{ appointment }}</td>
+                    <td style="text-align: end;"><a href="{% url 'process_appointment' appointment.id %}" class="btn btn-outline-secondary">View</a></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        
+        {% else %}
+        <div class="alert alert-info" role="alert">
+            No appointments yet...
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock content %}
