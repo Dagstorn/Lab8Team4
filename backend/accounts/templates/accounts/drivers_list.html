@@ -1,0 +1,45 @@
+{% extends 'create_page.html' %}
+{% block title %}
+Drivers list
+{% endblock title %}
+
+{% block content %}
+<div class="row">
+    <div class="col d-flex align-items-end">
+        <h3 class="m-0">List of drivers in VMS</h3>
+    </div>
+    <div class="col d-flex justify-content-end">
+        <a href="{% url 'drivers_add' %}" class="mainBtn">Add Driver</a>
+    </div>
+</div>
+<hr>
+<div class="row">
+    <div class="col">
+        {% if drivers %}
+        <table class="table table-striped align-middle"> 
+            <thead>
+                <tr>
+                    <th scope="col">Driver</th>
+                    <th scope="col">Phone number</th>
+                    <th scope="col">Email</th>
+                    <th scope="col">Password</th>
+                  </tr>
+            </thead>
+            <tbody>
+                {% for driver in drivers %}
+                <tr>
+                    <td>{{ driver.name }} {% if driver.middle_name %}{{ driver.middle_name }}{% endif%} {{ driver.surname }}</td>
+                    <td>{{ driver.phone }}</td>
+                    <td>{{ driver.email }}</td>
+                    <td>{{ driver.password }}</td>
+                    <td style="text-align: end;"><a href="{% url 'drivers_detail' driver.user.username %}" class="btn btn-outline-secondary">View</a> <a href="{% url 'drivers_edit' driver.id %}" class="btn btn-outline-primary">Edit</a>  <a href="{% url 'drivers_delete' driver.id %}" class="btn btn-outline-danger">Delete</a></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p>No drivers yet. Maybe add one?</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock content %}

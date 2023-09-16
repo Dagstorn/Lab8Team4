@@ -1,0 +1,136 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Appointments list{% endblock title %}
+{% block scripts %}
+    <script src="{% static 'js/addRoute.js' %}"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBiEgnwnW0STa5XZcpJ0ErLq4DkUxiSPnk&libraries=places&callback=initMap" async defer></script>
+{% endblock scripts %}
+
+{% block styles %}
+<style>
+    #map {
+      height: 400px;
+      width: 100%;
+    }
+  </style>
+{% endblock styles %}
+
+{% block content %}
+
+<div class="row justify-content-between mb-5">
+    <div class="col-5">
+        <h3>Create Task</h3>
+        <hr>
+        <div class="card shadow">
+            <div class="card-body">
+                <h5>Appointment details</h5>
+                
+                <div class="row">
+                    <div class="col-sm-4">
+                        <span>Description</span>
+                    </div>
+                    <div class="col-sm-8">
+                        {{appointment.description}}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-4">
+                        <span>Driver</span>
+                    </div>
+                    <div class="col-sm-8">
+                        {{appointment.driver}}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-4">
+                        <span>Preffered car type</span>
+                    </div>
+                    <div class="col-sm-8">
+                        {{appointment.car_type}}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-4">
+                        <span>Date</span>
+                    </div>
+                    <div class="col-sm-8">
+                        {{appointment.date}}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-7">
+        {% if cars %}
+        <form method="POST">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label for="id_car" class="form-label">Select vehicle:</label>
+                <select name="car" class="form-control" required="" id="id_car">
+                    <option value="" selected="">---------</option>
+                    {% for car in cars %}
+                    <option value="{{car.id}}">{{car}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="row">
+                <div class="col" >
+                    <div class="row mb-3">
+                        <div class="col">
+                            <span>Specify departure location</span>
+                            <input type="text" id="searchInputFrom" class="form-control" placeholder="Search for a location" >
+        
+                        </div>
+                        <div class="col">
+                            <span>Specify arrival location</span>
+                            <input type="text" id="searchInputTo" class="form-control" placeholder="Search for a location" >
+                        </div>
+                        </div>
+                    <div class="col">
+                        <div id="map" class="mb-3"></div>
+                    </div>
+                    <div class="col d-none">
+                        <span>Departure point</span>
+                        <div class="row mb-3">
+                            <div class="col-6">
+                                <label for="latitudeFrom" class="form-label">Latitude:</label>
+                                <input type="text" id="latitudeFrom" name="latitudeFrom" class="form-control" readonly>
+                            </div>
+                            <div class="col-6">
+                                <label for="longitudeFrom" class="form-label">Longitude:</label>
+                                <input type="text" id="longitudeFrom" name="longitudeFrom" class="form-control" readonly>
+                            </div>
+                        </div>
+                    </div>
+                   
+                    <div class="col d-none">
+                        <span>Arrival point</span>
+                        <div class="row mb-3">
+                            <div class="col-6">
+                                <label for="latitudeTo" class="form-label">Latitude:</label>
+                                <input type="text" id="latitudeTo" name="latitudeTo" class="form-control" readonly>
+                            </div>
+                            <div class="col-6">
+                                <label for="longitudeTo" class="form-label">Longitude:</label>
+                                <input type="text" id="longitudeTo" name="longitudeTo" class="form-control" readonly>
+                            </div>
+                        </div>
+                    </div>
+                    
+                </div>
+                
+            </div>
+            <button style="width: 100%;" type="submit" class="btn btn-primary">Add</button>
+        </form>
+        {% else %}
+        <div class="infoAlert" role="alert">
+            There are no available cars at the moment! <br>
+            Complete other tasks or add more vehicles...
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock content %}
+<h1 class="mb-4">Map Point Selector</h1>
