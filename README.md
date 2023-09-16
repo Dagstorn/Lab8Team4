@@ -1,4 +1,4 @@
 # Lab8Team4
 
-Frontend - React\_\_
+Frontend - React\
 Backedn - Django, Postrgresql
