@@ -7,7 +7,7 @@ SECRET_KEY = 'django-insecure-l#o-dan)#1j_&ow4(qh08r3fvfm)_p7)-sdswjefk!_c$#0o2m
 
 DEBUG = True
 
-ALLOWED_HOSTS = ['10.0.2.2', '127.0.0.1', 'localhost']
+ALLOWED_HOSTS = ['10.0.2.2', '127.0.0.1', 'localhost', 'http://127.0.0.1:5173']
 
 
 INSTALLED_APPS = [
@@ -38,6 +38,7 @@ REST_FRAMEWORK = {
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(hours=1),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
+    "TOKEN_OBTAIN_SERIALIZER": "api.serializers.MyTokenObtainPairSerializer",
 }
 
 MIDDLEWARE = [
@@ -113,3 +114,19 @@ STATICFILES_DIRS = [ BASE_DIR / "static" ]
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CORS_ALLOW_ALL_ORIGINS = True
+
+# CORS_ALLOWED_ORIGINS = [
+#     "http://127.0.0.1:5173",
+#     "http://localhost:8080",
+#     "http://localhost:5173",
+#     "http://127.0.0.1:8000",
+# ]
+
+CORS_ALLOW_METHODS = [
+  'DELETE',
+  'GET',
+  'OPTIONS',
+  'PATCH',
+  'POST',
+  'PUT',
+]

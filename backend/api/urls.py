@@ -13,6 +13,7 @@ urlpatterns = [
     path('users/token/verify/', TokenVerifyView.as_view(), name='token_verify'),
 
     path('driver/', views.getDriver),
+    path('drivers/', views.getDrivers),
     path('user/role/', views.getRole),
 
 ]
