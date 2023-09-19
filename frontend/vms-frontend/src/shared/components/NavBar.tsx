@@ -4,7 +4,8 @@ import { Menu } from "lucide-react";
 import { Button } from "@/shared/shad-ui/ui/button";
 import { Link } from "react-router-dom";
 import ProfileButton from "./ProfileButton";
-
+import { useContext } from "react";
+import { AuthContext } from "../contex/auth-context";
 let routes = [
   {
     href: "/",
@@ -28,6 +29,7 @@ let routes = [
   },
 ];
 function NavBar() {
+  const auth = useContext(AuthContext);
   return (
     <div className="sm:flex sm:justify-between px-3 border-b">
       <Container>
@@ -52,15 +54,47 @@ function NavBar() {
             </h1>
           </div>
           <nav className="mx-6 flex items-center space-x-4 lg:space-x-6 hidden md:block">
-            {routes.map((route, i) => (
-              <Link to={route.href} key={i}>
-                <Button variant="ghost" >
-                  {route.label}
-                </Button>
-              </Link>
-            ))}
+            <Link to="/">
+              <Button variant="ghost" >
+                About Us
+              </Button>
+            </Link>
+            <Link to="/">
+              <Button variant="ghost" >
+                Contacts
+              </Button>
+            </Link>
+            <Link to="/">
+              <Button variant="ghost" >
+                Staff
+              </Button>
+            </Link>
+            <Link to="/">
+              <Button variant="ghost" >
+                Vehicles
+              </Button>
+            </Link>
+            {auth.isLoggedIn && auth.role == "driver" && <Link to="/appointments/add">
+              <Button variant="ghost" >
+                Make an appointment
+              </Button>
+            </Link>
+            }
+            {auth.isLoggedIn && auth.role == "admin" && <Link to="/admin">
+              <Button variant="ghost" >
+                Admin dashboard
+              </Button>
+            </Link>
+            }
           </nav>
-          <ProfileButton></ProfileButton>
+          {auth.isLoggedIn ?
+            <ProfileButton /> :
+            <Link to="login">
+              <Button>
+                Login
+              </Button>
+            </Link>
+          }
         </div>
       </Container>
     </div>

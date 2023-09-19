@@ -1,0 +1,188 @@
+import * as z from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Button } from "@/shared/shad-ui/ui/button";
+import { useForm } from "react-hook-form";
+import {
+    Form,
+    FormControl,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
+} from "@/shared/shad-ui/ui/form";
+import { Input } from "@/shared/shad-ui/ui/input";
+import { Separator } from "@/shared/shad-ui/ui/separator";
+import { useEffect, useState } from "react";
+import useAuth from "./hooks/useAuth";
+import { useNavigate, useLocation } from "react-router-dom";
+import axios from "axios";
+import { Spinner } from "@nextui-org/react";
+import { useToast } from "@/shared/shad-ui/ui/use-toast";
+import jwt_decode from "jwt-decode";
+
+const formSchema = z.object({
+    username: z.string().nonempty("Username is required ").min(2).max(50),
+    password: z.string().nonempty("Password is required "),
+});
+
+const LoginPage = () => {
+    // global auth state which stores current logged in user state
+    const auth = useAuth();
+    const navigate = useNavigate();
+
+    // will be launched when LoginPage components is initialized
+    useEffect(() => {
+        // if user is logged in we redirect user back where he/she came from or to home page
+        if (auth.isLoggedIn) {
+            navigate(location.state?.from?.pathname || "/");
+        }
+    }, []);
+
+    // browser navigation and location helpers
+    const location = useLocation();
+    const from = location.state?.from?.pathname || "/";
+
+    // form states
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState("");
+    // display toast messages library
+    const { toast } = useToast();
+
+    // form schema
+    const form = useForm<z.infer<typeof formSchema>>({
+        resolver: zodResolver(formSchema),
+        defaultValues: {
+            username: "",
+            password: "",
+        },
+    });
+
+    // function which will handle submission of form
+    async function onSubmit(values: z.infer<typeof formSchema>) {
+        // set form state to loading
+        setIsLoading(true);
+        // try and catch blocks to catch any errors from requests to api
+        try {
+            // make a authentication request to obtain JWT access token
+            const response = await axios.post("/api/users/token/", values);
+            // loading is done as we received data
+            setIsLoading(false);
+            // decode jwt token
+            let decoded_data: any = jwt_decode(response.data.access);
+            // save access token in user global state as we need it in future
+            auth.assignToken(response.data);
+            // save user data and login user
+            auth.defineRole(decoded_data.role);
+            auth.assignUsername(decoded_data.username);
+            localStorage.setItem('authTokens', JSON.stringify(response.data));
+            auth.login();
+            // role based redirect
+            // if user was redirected to login page from somewhere else, we redirect him back where he was
+            // otherwise we redirect user based on user role
+            console.log("from is ")
+            console.log(from)
+            if (from == "/") {
+                if (auth.role == 'admin') {
+                    navigate('/admin');
+                } else {
+                    navigate('/');
+                }
+            } else {
+                navigate(from);
+            }
+
+        } catch (err: any) {
+            // process received errors
+            let errMes = "";
+            if (err?.response?.status == 401 || err?.response?.status == 400) {
+                errMes = "Wrong credentials. Try again!";
+            } else {
+                errMes = "Something went wrong. Try again!";
+            }
+            toast({
+                title: errMes,
+                variant: "destructive",
+            })
+            setIsLoading(false);
+            setError(errMes)
+        };
+    }
+
+    // display user login form
+    return (
+        <div className="flex justify-center items-center flex-grow">
+            <div className="flex flex-col space-y-2">
+                <h1 className="text-2xl mb-3 font-semibold tracking-tight  text-center">
+                    Login to VMS
+                </h1>
+                <Separator />
+                <p className="text-red-500">{error}</p>
+
+                {isLoading && (
+                    <div className="flex justify-center">
+                        <span style={{ margin: 0 }} className="absolute inset-0 bg-black z-10 bg-opacity-50">
+                        </span>
+                        <Spinner
+                            className="z-20"
+                            size="lg"
+                            color="default"
+                        />
+                    </div>
+                )}
+
+                <Form {...form}>
+                    <form
+                        onSubmit={form.handleSubmit(onSubmit)}
+                        className="space-y-4 w-80"
+                    >
+                        <FormField
+                            control={form.control}
+                            name="username"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Username</FormLabel>
+                                    <FormControl>
+                                        <Input placeholder="" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="password"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Password</FormLabel>
+                                    <FormControl>
+                                        <Input type="password" placeholder="" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <Button type="submit" className="self-center w-full font-bold">
+                            Login
+                        </Button>
+
+                        <div className="relative">
+                            <div className="absolute inset-0 flex items-center">
+                                <span className="w-full border-t" />
+                            </div>
+                            <div className="relative flex justify-center text-xs uppercase">
+                                <span className="bg-background px-2 text-muted-foreground">
+                                    Or create staff account
+                                </span>
+                            </div>
+                        </div>
+                        <Button variant="outline" className="self-center w-full">
+                            Create staff account
+                        </Button>
+                    </form>
+                </Form>
+            </div>
+        </div >
+    );
+};
+
+export default LoginPage;

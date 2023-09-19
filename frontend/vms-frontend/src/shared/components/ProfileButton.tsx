@@ -7,23 +7,26 @@ import {
   DropdownMenuTrigger,
 } from "@/shared/shad-ui/ui/dropdown-menu";
 
-import { Avatar, AvatarFallback } from "@/shared/shad-ui/ui/avatar";
-import { User2 } from "lucide-react";
+import { User } from "lucide-react";
 import { Badge } from "@/shared/shad-ui/ui/badge";
-
+import useAuth from "../hooks/useAuth";
+import { useNavigate } from "react-router-dom";
 const ProfileButton = () => {
+
+  const auth = useAuth();
+
+  const navigate = useNavigate();
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger className="outline-none">
-        <Avatar>
-          <AvatarFallback>
-            <User2 />
-          </AvatarFallback>
-        </Avatar>
+        <span className="flex items-center bg-slate-50 px-4 py-1 rounded ">
+          <User size="16" /> {auth.username}
+        </span>
       </DropdownMenuTrigger>
       <DropdownMenuContent>
-        <DropdownMenuLabel>
-          Alex <Badge variant="secondary">Driver</Badge>
+        <DropdownMenuLabel className="flex items-center">
+          <span className="mr-2">Role</span> <Badge variant="secondary">{auth.role}</Badge>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem className="cursor-pointer">
@@ -31,7 +34,13 @@ const ProfileButton = () => {
         </DropdownMenuItem>
 
         <DropdownMenuSeparator />
-        <DropdownMenuItem className="cursor-pointer">Log Out</DropdownMenuItem>
+        <DropdownMenuItem
+          className="cursor-pointer"
+          onClick={() => {
+            auth.logout();
+            navigate("/");
+          }}
+        >Log Out</DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );
