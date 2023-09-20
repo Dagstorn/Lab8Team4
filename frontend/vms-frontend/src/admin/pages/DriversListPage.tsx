@@ -8,67 +8,47 @@ import {
   TableRow,
 } from "@/shared/shad-ui/ui/table";
 import { Separator } from "@/shared/shad-ui/ui/separator";
-interface Driver {
-  id: number;
-  goverment_id: String;
-  department: String;
-  name: String;
-  surname: String;
-  middle_name: String;
-  address: String;
-  phone: String;
-  email: String;
-  license_code: String;
-  password: String;
-}
+import { Driver } from "@/shared/types/types";
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
-import axios from '@/shared/hooks/axios';
 import useAuth from "@/shared/hooks/useAuth";
+import { Spinner } from "@nextui-org/react";
+import { useHttp } from "@/shared/hooks/http-hook";
+import { useToast } from "@/shared/shad-ui/ui/use-toast";
+
+
 const DriversListPage = () => {
   const auth = useAuth();
 
   // state which stores drivers list
   const [drivers, setDrivers] = useState<Driver[]>([]);
-  const [error, setError] = useState("");
+  const { loading, error, sendRequest, clearError } = useHttp();
+  const { toast } = useToast();
+
+
   // when conponent mounts - meaning when it is created we get data
   useEffect(() => {
-    let isMounted = true;
-    const controller = new AbortController();
-    let tokensObj: any = auth.tokens;
-    let accessToken: any = tokensObj.access;
-    const getDrivers = async () => {
+    // clear error at start to get rid of any not actual previous errors
+    clearError();
+    // retrieve data from api
+    const getData = async () => {
+      // try and catch to catch errors if any
       try {
-        const response = await axios.get('/api/drivers', {
-          signal: controller.signal,
-          headers: {
-            Authorization: `Bearer ${accessToken}`
-          }
-        });
-        console.log(response.data);
-        if (response.status === 200) {
-          isMounted && setDrivers(response.data);
-          setError('');
-        }
+        // get data with custom Hook
+        const responseData = await sendRequest('/api/drivers', 'get', {
+          Authorization: `Bearer ${auth.tokens.access}`
+        })
+        // set data to response result
+        setDrivers(responseData)
       } catch (err: any) {
-        console.log(err);
-        if (err.response?.status === 401 || err.response?.status === 400) {
-          setError("Log out and Login again! Your credentials are outdated...")
-          auth.logout();
-        } else {
-          setError("Unable to fetch data from server. Try again!");
-        }
+        // show error toast message
+        toast({
+          title: err.message,
+          variant: "destructive",
+        })
       }
     }
-
-
-    getDrivers();
-    // comnponent unmounts
-    return () => {
-      isMounted = false;
-      // abort any request because component is removed from page
-      controller.abort();
-    }
+    getData();
   }, []);
 
   return (
@@ -79,7 +59,10 @@ const DriversListPage = () => {
       </div>
 
       <Separator />
-      <Table>
+      {loading && <div className="flex justify-center mt-4">
+        <Spinner></Spinner>
+      </div>}
+      {!loading && <Table>
         <TableHeader>
           <TableRow>
             <TableHead>Driver</TableHead>
@@ -106,8 +89,8 @@ const DriversListPage = () => {
           }
 
         </TableBody>
-      </Table>
-      {error.length > 0 ? <span>{error}</span> : null}
+      </Table>}
+      {error ? <span>{error}</span> : null}
 
     </>
   );

@@ -2,54 +2,83 @@ import { Button } from "@/shared/shad-ui/ui/button";
 import {
     Table,
     TableBody,
-    TableCell,
     TableHead,
     TableHeader,
     TableRow,
 } from "@/shared/shad-ui/ui/table";
 import { Separator } from "@/shared/shad-ui/ui/separator";
-
-interface Appointment {
-    id: number;
-    name: string;
-    date: string;
-}
+import { Appointment } from "@/shared/types/types";
 import { Link } from "react-router-dom";
+import useAuth from "@/shared/hooks/useAuth";
+import { useEffect, useState } from "react";
+import { useHttp } from "@/shared/hooks/http-hook";
+import { useToast } from "@/shared/shad-ui/ui/use-toast";
+import { Spinner } from "@nextui-org/react";
+import AppointmentDetails from '../components/AppointmentDetails';
+
 const DriversListPage = () => {
-    let appointments: Appointment[] = [
-        { id: 1, name: "Alex Colson", date: "19.09.2023, 14:00 - 16:00" },
-        { id: 2, name: "John Doe", date: "19.09.2023, 17:00 - 19:00" },
-        { id: 3, name: "Tim Smith", date: "20.09.2023, 12:00 - 13:00" },
-        { id: 4, name: "Garry Olsen", date: "20.09.2023, 15:00 - 15:30" },
-    ];
+    const auth = useAuth();
+
+    // state which stores drivers list
+    const [appointments, setAppointments] = useState<Appointment[]>([]);
+    const { loading, error, sendRequest, clearError } = useHttp();
+    const { toast } = useToast();
+
+
+    // when conponent mounts - meaning when it is created we get data
+    useEffect(() => {
+        // clear error at start to get rid of any not actual previous errors
+        clearError();
+        // retrieve data from api
+        const getData = async () => {
+            // try and catch to catch errors if any
+            try {
+                // get data with custom Hook
+                const responseData = await sendRequest('/api/appointments', 'get', {
+                    Authorization: `Bearer ${auth.tokens.access}`
+                })
+                // set data to response result
+                setAppointments(responseData)
+            } catch (err: any) {
+                // show error toast message
+                toast({
+                    title: err.message,
+                    variant: "destructive",
+                })
+            }
+        }
+        getData();
+    }, []);
+
 
     return (
         <>
             <h1 className="text-2xl font-bold mb-4">Appointments list</h1>
+
+
             <Separator />
+            {loading && <div className="flex justify-center mt-4">
+                <Spinner></Spinner>
+            </div>}
             <Table>
                 <TableHeader>
                     <TableRow>
                         <TableHead>Driver</TableHead>
-                        <TableHead>Date time</TableHead>
+                        <TableHead>Requested time frame</TableHead>
                         <TableHead className="text-right">Action</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
                     {
                         appointments.map((appointment) => {
-                            return <TableRow key={appointment.id}>
-                                <TableCell className="font-medium">{appointment.name}</TableCell>
-                                <TableCell>{appointment.date}</TableCell>
-                                <TableCell className="text-right">
-                                    <Link to={`/admin/appointments/${appointment.id}`}><Button variant="outline">View details</Button></Link>
-                                </TableCell>
-                            </TableRow>
+                            console.log(appointment)
+                            return <AppointmentDetails appointment={appointment} />
                         })
                     }
 
                 </TableBody>
             </Table>
+            {error ? <span>{error}</span> : null}
         </>
     );
 };

@@ -11,54 +11,88 @@ import {
     FormLabel,
     FormMessage,
 } from "@/shared/shad-ui/ui/form";
-
+import useAuth from "@/shared/hooks/useAuth";
+import { useHttp } from "@/shared/hooks/http-hook";
+import { DateTimeInput } from "@/shared/components/DateTimeInput"
+import { toast } from "@/shared/shad-ui/ui/use-toast";
+import { Spinner } from "@nextui-org/react";
 const formSchema = z.object({
-    routeDescription: z.string().nonempty({
+    currentPosition: z.string().nonempty({
         message: "This is required information",
     }),
-    jobDescription: z.string(),
+    destination: z.string().nonempty({
+        message: "This is required information",
+    }),
+    description: z.string().nonempty({
+        message: "This is required information",
+    }),
     carPereferences: z.string(),
     numberOfPeople: z.number().gte(0).lte(10),
     additionalInfo: z.string(),
-    startDateTime: z.string().nonempty({
-        message: "Please select a date and time",
-    }),
-    endDateTime: z.string().nonempty({
-        message: "Please select a date and time",
-    }),
-
+    startDate: z.string().transform((str) => new Date(str)),
+    endDate: z.string().transform((str) => new Date(str)),
 })
+
+
 const MakeAppointmentPage = () => {
+    const auth = useAuth();
+    const { loading, error, sendRequest, clearError } = useHttp();
+
+    // let decoded_data: any = jwt_decode(auth.tokens.access);
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            routeDescription: "",
-            jobDescription: "",
+            currentPosition: '',
+            destination: '',
+            description: '',
+            carPereferences: '',
             numberOfPeople: 1,
-            additionalInfo: "",
-            startDateTime: "",
-            endDateTime: "",
+            additionalInfo: '',
+            startDate: new Date().toISOString().slice(0, 16),
+            endDate: new Date().toISOString().slice(0, 16),
         },
     })
-    function onSubmit(values: z.infer<typeof formSchema>) {
-        // Do something with the form values.
-        // ✅ This will be type-safe and validated.
+    async function onSubmit(values: z.infer<typeof formSchema>) {
+        clearError();
+        try {
+            // get data with custom Hook
+            const driverData = await sendRequest('/api/driver', 'get', {
+                Authorization: `Bearer ${auth.tokens.access}`
+            })
+            // set data to response result
+            console.log(driverData)
+            const responseData = await sendRequest('/api/appointments/add/', 'post', {
+                Authorization: `Bearer ${auth.tokens.access}`
+            }, values)
+        } catch (err: any) {
+            // show error toast message
+            toast({
+                title: err.message,
+                variant: "destructive",
+            })
+        }
         console.log(values)
     }
     return (
         <div className="aa h-full flex flex-col justify-center">
             <div className="">
                 <h1 className="text-2xl text-center font-bold">Make an appointment request</h1>
+                {loading && <div className="flex justify-center mt-4">
+                    <Spinner></Spinner>
+                </div>}
+                {error ? <div className="flex justify-center">
+                    <span className="text-red-500 justify-self-center">{error}</span>
+                </div> : null}
                 <div className="">
                     <Form {...form}>
                         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 mt-4 flex flex-col items-center">
                             <div className="sm:w-full md:w-full lg:w-1/2">
                                 <FormField
                                     control={form.control}
-                                    name="routeDescription"
+                                    name="currentPosition"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>Tell where you are and wher you want to go</FormLabel>
+                                            <FormLabel>Your current position</FormLabel>
                                             <FormControl>
                                                 <Input {...field} />
                                             </FormControl>
@@ -68,10 +102,36 @@ const MakeAppointmentPage = () => {
                                 />
                                 <FormField
                                     control={form.control}
-                                    name="jobDescription"
+                                    name="destination"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>Describe a job - Optional</FormLabel>
+                                            <FormLabel>Destination</FormLabel>
+                                            <FormControl>
+                                                <Input {...field} />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={form.control}
+                                    name="description"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Job description</FormLabel>
+                                            <FormControl>
+                                                <Input {...field} />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={form.control}
+                                    name="carPereferences"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Car pereferences</FormLabel>
                                             <FormControl>
                                                 <Input {...field} />
                                             </FormControl>
@@ -106,39 +166,34 @@ const MakeAppointmentPage = () => {
                                     )
                                     }
                                 />
+
                                 <FormField
                                     control={form.control}
-                                    name="startDateTime"
+                                    name="startDate"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>Start of booking time</FormLabel>
+                                            <FormLabel>Any additional information if needed</FormLabel>
                                             <FormControl>
-                                                <input className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                                                    type="datetime-local"
-                                                    name={field.name}
-                                                    ref={field.ref}
-                                                />
+                                                <DateTimeInput {...field} />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
-                                    )}
+                                    )
+                                    }
                                 />
                                 <FormField
                                     control={form.control}
-                                    name="endDateTime"
+                                    name="endDate"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>End of booking time</FormLabel>
+                                            <FormLabel>Any additional information if needed</FormLabel>
                                             <FormControl>
-                                                <input className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                                                    type="datetime-local"
-                                                    name={field.name}
-                                                    ref={field.ref}
-                                                />
+                                                <DateTimeInput {...field} />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
-                                    )}
+                                    )
+                                    }
                                 />
                             </div>
                             <Button className="sm:w-full md:w-full lg:w-1/2 " type="submit">Submit</Button>

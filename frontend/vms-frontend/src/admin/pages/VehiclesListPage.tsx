@@ -8,27 +8,49 @@ import {
     TableRow,
 } from "@/shared/shad-ui/ui/table";
 import { Separator } from "@/shared/shad-ui/ui/separator";
-interface Vehicle {
-    id: number;
-    name: string;
-    licensePlate: string;
-    bodyType: string;
-    status: string;
-}
-import { Checkbox } from "@nextui-org/react";
-import { Chip } from "@nextui-org/react";
+import { Vehicle } from "@/shared/types/types";
+
+import { Spinner } from "@nextui-org/react";
 import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import useAuth from "@/shared/hooks/useAuth";
+import { useHttp } from "@/shared/hooks/http-hook";
+import { useToast } from "@/shared/shad-ui/ui/use-toast";
+
 const VehiclesListPage = () => {
-    let vehicles: Vehicle[] = [
-        { id: 1, name: "Transit 2023 | 385APM01 | Van", licensePlate: "385APM01", bodyType: "Van", status: "Available" },
-        { id: 2, name: "Suburban 2023 | 302EZA01 | SUV", licensePlate: "302EZA01", bodyType: "SUV", status: "Available" },
-        { id: 3, name: "A4 2019 | 17ABE244 | Sedan", licensePlate: "17ABE244", bodyType: "Sedan", status: "Assigned to driver" },
-        { id: 4, name: "Sonata 2022 | 540OJD01 | Sedan", licensePlate: "540OJD01", bodyType: "Sedan", status: "Available" },
-        { id: 5, name: "Camry 2022 | 464OPO01 | Sedan", licensePlate: "464OPO01", bodyType: "Sedan", status: "Available" },
-        { id: 6, name: "F-150 2023 | 595ABE01 | Pickup Truck", licensePlate: "595ABE01", bodyType: "Pickup Truck", status: "Available" },
-        { id: 7, name: "Pacifica 2022 | 980RKA01 | Minivan", licensePlate: "980RKA01", bodyType: "Minivan", status: "Available" },
-        { id: 8, name: "X5 2010 | 439SOH01 | Crossover", licensePlate: "439SOH01", bodyType: "Crossover", status: "Available" },
-    ];
+    const auth = useAuth();
+
+    // state which stores drivers list
+    const [vehicles, setVehicles] = useState<Vehicle[]>([]);
+    const { loading, error, sendRequest, clearError } = useHttp();
+    const { toast } = useToast();
+
+
+    // when conponent mounts - meaning when it is created we get data
+    useEffect(() => {
+        // clear error at start to get rid of any not actual previous errors
+        clearError();
+        // retrieve data from api
+        const getData = async () => {
+            // try and catch to catch errors if any
+            try {
+                // get data with custom Hook
+                const responseData = await sendRequest('/api/vehicles', 'get', {
+                    Authorization: `Bearer ${auth.tokens.access}`
+                })
+                // set data to response result
+                setVehicles(responseData)
+            } catch (err: any) {
+                // show error toast message
+                toast({
+                    title: err.message,
+                    variant: "destructive",
+                })
+            }
+        }
+        getData();
+    }, []);
+
 
 
     return (
@@ -39,29 +61,39 @@ const VehiclesListPage = () => {
             </div>
 
             <Separator />
+            {loading && <div className="flex justify-center mt-4">
+                <Spinner></Spinner>
+            </div>}
             <Table>
                 <TableHeader>
                     <TableRow>
-                        <TableHead>Vehicle</TableHead>
-                        <TableHead>license plate</TableHead>
+                        <TableHead>Driver</TableHead>
                         <TableHead>Body type</TableHead>
-                        <TableHead>Status</TableHead>
+                        <TableHead>Year</TableHead>
+                        <TableHead>License plate number</TableHead>
                         <TableHead className="text-right">Action</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
                     {
                         vehicles.map((vehicle) => {
-                            return <TableRow key={vehicle.id}>
-                                <TableCell className="font-medium">{vehicle.name}</TableCell>
-                                <TableCell>{vehicle.licensePlate}</TableCell>
-                                <TableCell>{vehicle.bodyType}</TableCell>
+                            return <TableRow key={vehicle.driver.id}>
+                                <TableCell className="font-medium">
+                                    {vehicle.make} {vehicle.model}
+                                </TableCell>
                                 <TableCell>
-                                    <Chip color={vehicle.status != "Available" ? "warning" : "secondary"}>{vehicle.status}</Chip>
+                                    <div className="flex items-center">
+                                        <img className="w-10 h-auto mr-2"
+                                            src={`/vehicleIcons/${vehicle.type.toLowerCase()}.png`} alt="" />
+                                        {vehicle.type}
+                                    </div>
 
                                 </TableCell>
+                                <TableCell>{vehicle.year}</TableCell>
+                                <TableCell>{vehicle.license_plat}</TableCell>
+
                                 <TableCell className="text-right">
-                                    <Link to={`/admin/vehicle/${vehicle.id}/detail`}><Button variant="outline">View details</Button></Link>
+                                    <Link to={`/admin/vehicles/${vehicle.id}/detail`}><Button variant="outline">View details</Button></Link>
                                 </TableCell>
                             </TableRow>
                         })
@@ -69,6 +101,7 @@ const VehiclesListPage = () => {
 
                 </TableBody>
             </Table>
+            {error ? <span>{error}</span> : null}
         </>
     );
 };

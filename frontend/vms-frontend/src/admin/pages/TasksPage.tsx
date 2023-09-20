@@ -25,7 +25,12 @@ const TasksPage = () => {
 
     return (
         <>
-            <h1 className="text-2xl font-bold mb-4">Driver Tasks & Jobs</h1>
+            <div className="flex justify-between">
+                <h1 className="text-2xl font-bold mb-4">Driver Tasks & Jobs</h1>
+                <Link to='admin/tasks/add'>
+                    <Button variant='default'>Add Task</Button>
+                </Link>
+            </div>
             <Separator />
             <Table>
                 <TableHeader>
