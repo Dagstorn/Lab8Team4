@@ -17,6 +17,7 @@ urlpatterns = [
     path('user/role/', views.getRole),
     path('vehicles/', views.getVehicles),
     path('appointments/', views.getAppointments),
+    path('appointments/add/', views.makeAppointment),
 
 
 ]

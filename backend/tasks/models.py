@@ -14,7 +14,8 @@ class Appointment(models.Model):
     car_type = models.CharField(max_length=20, choices=BODY_TYPES, default="Sedan")
     time_from = models.DateTimeField(auto_now_add=False, blank=True, null=True)
     time_to = models.DateTimeField(auto_now_add=False, blank=True, null=True)
-
+    number_of_people = models.PositiveIntegerField(default=1)
+    additionalInfo = models.CharField(max_length=100, default="")
     def __str__(self):
         return f"{self.driver.name}'s appointment"
     
