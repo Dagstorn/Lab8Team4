@@ -15,5 +15,8 @@ urlpatterns = [
     path('driver/', views.getDriver),
     path('drivers/', views.getDrivers),
     path('user/role/', views.getRole),
+    path('vehicles/', views.getVehicles),
+    path('appointments/', views.getAppointments),
+
 
 ]

@@ -1,7 +1,10 @@
 from rest_framework import serializers
 from accounts.models import Driver
+from vehicles.models import Vehicle
+from tasks.models import Appointment
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
+
 
 def getRole(user):
     if hasattr(user, 'admin_acc'):
@@ -34,4 +37,16 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
 class DriverSerializer(serializers.ModelSerializer):
     class Meta:
         model = Driver
-        fields = ['id', 'user','goverment_id','name','surname','middle_name','address','phone','email','license_code']
+        fields = '__all__'
+
+    
+class VehicleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Vehicle
+        fields = '__all__'
+
+class AppointmentSerializer(serializers.ModelSerializer):
+    driver = DriverSerializer(many=False)
+    class Meta:
+        model = Appointment
+        fields = '__all__'

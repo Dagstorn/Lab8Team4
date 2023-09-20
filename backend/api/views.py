@@ -1,7 +1,9 @@
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
-from .serializers import DriverSerializer
+from .serializers import DriverSerializer, VehicleSerializer, AppointmentSerializer
 from accounts.models import Driver
+from vehicles.models import Vehicle
+from tasks.models import Appointment
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 
 
@@ -37,3 +39,17 @@ def getRole(request):
     return Response({'role': role})
 
 
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def getVehicles(request):
+    vehicles = Vehicle.objects.all()
+    serializer = VehicleSerializer(vehicles, many=True)
+    return Response(serializer.data)
+
+
+@api_view(['GET'])
+def getAppointments(request):
+    appointments = Appointment.objects.all()
+    serializer = AppointmentSerializer(appointments, many=True)
+    return Response(serializer.data)

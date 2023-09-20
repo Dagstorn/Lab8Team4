@@ -7,6 +7,8 @@ class Appointment(models.Model):
     BODY_TYPES =(
         ("Sedan", "Sedan"), ("SUV", "SUV"), ("Hatchback", "Hatchback"), ("Coupe", "Coupe"), ("Convertible", "Convertible"), ("Wagon", "Wagon"), ("Minivan", "Minivan"), ("Pickup Truck", "Pickup Truck"), ("Crossover", "Crossover"), ("Van", "Van"), ("Sports Car", "Sports Car")
     )
+    currentPosition = models.CharField(max_length=100,default='')
+    destination = models.CharField(max_length=100, default='')
     description = models.TextField()
     driver = models.ForeignKey(Driver, related_name="appointments", on_delete=models.CASCADE, null=True)
     car_type = models.CharField(max_length=20, choices=BODY_TYPES, default="Sedan")
@@ -28,6 +30,7 @@ class Task(models.Model):
     )
     driver = models.ForeignKey(Driver, related_name="tasks", on_delete=models.CASCADE, null=True)
     car = models.ForeignKey('vehicles.Vehicle', on_delete=models.CASCADE, related_name="assigned_task", null=True)
+    description = models.TextField(default='')
     from_point = models.JSONField(verbose_name="departure point")
     to_point = models.JSONField(verbose_name="arrival point")
     time_from = models.DateTimeField(auto_now_add=False, blank=True, null=True)
@@ -46,12 +49,13 @@ class CompletedRoutes(models.Model):
     driver = models.ForeignKey(Driver, related_name="routes", on_delete=models.CASCADE, null=True)
     from_point = models.JSONField(verbose_name="departure point")
     to_point = models.JSONField(verbose_name="arrival point")
-    date = models.DateTimeField(auto_now_add=False)
+    time_from = models.DateTimeField(auto_now_add=False, blank=True, null=True)
+    time_to = models.DateTimeField(auto_now_add=False, blank=True, null=True)
     distance_covered = models.CharField()
     time_spent = models.CharField()
 
     class Meta:
-        ordering = ['-date']
+        ordering = ['-time_from']
 
 
 @receiver(pre_save, sender=Task)
