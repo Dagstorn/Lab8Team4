@@ -19,5 +19,9 @@ urlpatterns = [
     path('appointments/', views.getAppointments),
     path('appointments/add/', views.makeAppointment),
 
+    path('tasks/', views.getTasks),
+    path('tasks/checktime/', views.getTimes),
+    path('tasks/create/', views.createTask),
+
 
 ]
