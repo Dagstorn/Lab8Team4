@@ -77,7 +77,7 @@ const VehiclesListPage = () => {
                 <TableBody>
                     {
                         vehicles.map((vehicle) => {
-                            return <TableRow key={vehicle.driver.id}>
+                            return <TableRow key={vehicle.id}>
                                 <TableCell className="font-medium">
                                     {vehicle.make} {vehicle.model}
                                 </TableCell>

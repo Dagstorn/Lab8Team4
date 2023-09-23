@@ -10,7 +10,6 @@ import AppointmentsPage from "./admin/pages/AppointmentsPage";
 import AddDriverPage from "./admin/pages/AddDriverPage";
 import TasksPage from "./admin/pages/TasksPage";
 import AppointmentDetailPage from "./admin/pages/AppointmentDetailPage";
-import TaskDetailPage from "./admin/pages/TaskDetailPage";
 import StaffListPage from "./admin/pages/StaffList";
 import VehiclesListPage from "./admin/pages/VehiclesListPage";
 import MakeAppointmentPage from "./driver/pages/MakeAppointmentPage";
@@ -24,6 +23,7 @@ import RequireAuth from "./shared/components/RequireAuth.tsx";
 import jwt_decode from "jwt-decode";
 import axios from "./shared/hooks/axios";
 import { useToast } from "./shared/shad-ui/ui/use-toast.ts";
+import AddTaskPage from "./admin/pages/AddTaskPage.tsx";
 interface tokenInt {
   refresh: string,
   access: string,
@@ -156,7 +156,7 @@ function App() {
               <Route path="appointments" element={<AppointmentsPage />} />
               <Route path="appointments/:appointmentId" element={<AppointmentDetailPage />} />
               <Route path="tasks" element={<TasksPage />} />
-              <Route path="tasks/:taskId" element={<TaskDetailPage />} />
+              <Route path="tasks/add" element={<AddTaskPage />} />
               <Route path="staff" element={<StaffListPage />} />
               <Route path="vehicles" element={<VehiclesListPage />} />
             </Route>

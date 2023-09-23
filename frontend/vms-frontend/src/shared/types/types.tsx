@@ -35,3 +35,15 @@ export interface Appointment {
     additionalInfo: string;
     driver: Driver
 }
+
+export interface Task {
+    id: number;
+    driver: Driver;
+    car: Vehicle;
+    description: string;
+    from_point: string;
+    to_point: string;
+    time_from: string;
+    time_to: string;
+    status: string;
+}

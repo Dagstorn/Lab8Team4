@@ -1,4 +1,3 @@
-import { Button } from "@/shared/shad-ui/ui/button";
 import {
     Table,
     TableBody,
@@ -8,7 +7,6 @@ import {
 } from "@/shared/shad-ui/ui/table";
 import { Separator } from "@/shared/shad-ui/ui/separator";
 import { Appointment } from "@/shared/types/types";
-import { Link } from "react-router-dom";
 import useAuth from "@/shared/hooks/useAuth";
 import { useEffect, useState } from "react";
 import { useHttp } from "@/shared/hooks/http-hook";
@@ -71,7 +69,6 @@ const DriversListPage = () => {
                 <TableBody>
                     {
                         appointments.map((appointment) => {
-                            console.log(appointment)
                             return <AppointmentDetails appointment={appointment} />
                         })
                     }

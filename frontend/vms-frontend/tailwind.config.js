@@ -10,6 +10,7 @@ module.exports = {
     './components/**/*.{ts,tsx}',
     './app/**/*.{ts,tsx}',
     './src/**/*.{ts,tsx}',
+    'node_modules/flowbite-react/**/*.{js,jsx,ts,tsx}',
 	],
   theme: {
     container: {
@@ -78,5 +79,5 @@ module.exports = {
     
   },
   darkMode: "class",
-  plugins: [nextui(),require("tailwindcss-animate")],
+  plugins: [nextui(),require("tailwindcss-animate"), require('flowbite/plugin')],
 }
