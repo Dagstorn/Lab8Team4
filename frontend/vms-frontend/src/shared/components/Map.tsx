@@ -159,7 +159,6 @@ const Map: React.FC<MyMapProps> = ({ startPointCoordsRef, endPointCoordsRef }) =
             <Spinner />
         </div>
     }
-
     return (
         <div className=''>
             <div className="grid grid-cols-2 grid-rows-1 gap-4">

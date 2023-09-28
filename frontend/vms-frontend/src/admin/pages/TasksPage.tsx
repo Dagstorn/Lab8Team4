@@ -2,7 +2,6 @@ import { Button } from "@/shared/shad-ui/ui/button";
 import {
     Table,
     TableBody,
-    TableCell,
     TableHead,
     TableHeader,
     TableRow,
@@ -72,7 +71,7 @@ const TasksPage = () => {
                 <TableBody>
                     {
                         tasks.map((task) => {
-                            return <TaskDetails task={task} />
+                            return <TaskDetails key={task.id} task={task} />
                         })
                     }
 

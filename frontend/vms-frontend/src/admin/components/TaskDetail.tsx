@@ -38,7 +38,7 @@ const TaskDetails = ({ task }: Props) => {
     // google maps api to translate location coordinates to actual location name
     const { isLoaded } = useJsApiLoader({
         googleMapsApiKey: import.meta.env.VITE_REACT_GOOGLE_MAPS_API!,
-        libraries: ['places']
+        libraries: ['places', 'routes']
     })
     useEffect(() => {
         const getRoute = () => {

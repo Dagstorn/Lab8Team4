@@ -15,6 +15,7 @@ import {
     FormLabel,
     FormMessage,
 } from "@/shared/shad-ui/ui/form";
+import { toast } from "@/shared/shad-ui/ui/use-toast";
 
 const formSchema = z.object({
     firstname: z.string().nonempty({
@@ -43,15 +44,18 @@ const formSchema = z.object({
         message: "License code should contain 6 digits",
     }),
 })
-// interface Driver {
-//     id: number;
-//     name: string;
-//     email: string;
-// }
 
 import { Separator } from "@/shared/shad-ui/ui/separator";
+import { useNavigate } from "react-router-dom";
+import { useHttp } from "@/shared/hooks/http-hook";
+import useAuth from "@/shared/hooks/useAuth";
+import { Loader2 } from "lucide-react";
 
 const DriverDetailPage = () => {
+    const auth = useAuth();
+    const navigate = useNavigate();
+    const { loading, error, sendRequest, clearError } = useHttp();
+
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
@@ -66,15 +70,35 @@ const DriverDetailPage = () => {
             license: "",
         },
     })
-    function onSubmit(values: z.infer<typeof formSchema>) {
-        // Do something with the form values.
-        // ✅ This will be type-safe and validated.
+    async function onSubmit(values: z.infer<typeof formSchema>) {
         console.log(values)
+
+        clearError();
+        try {
+            // send task data to backend
+            await sendRequest('/api/drivers/add/', 'post', {
+                Authorization: `Bearer ${auth.tokens.access}`
+            }, values)
+            navigate("/admin/drivers/");
+            toast({
+                title: "Driver was added successfully!",
+            })
+        } catch (err: any) {
+            // if any erors
+            // show error toast message
+            toast({
+                title: err.message,
+                variant: "destructive",
+            })
+        }
     }
     return (
         <>
             <h1 className="text-2xl font-bold mb-4">Add driver</h1>
             <Separator />
+            {error ? <div className="flex justify-center">
+                <span className="text-red-500 justify-self-center">{error}</span>
+            </div> : null}
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 mt-4 flex flex-col items-start">
                     <div className="sm:w-full md:w-full xl:w-1/2">
@@ -196,7 +220,15 @@ const DriverDetailPage = () => {
                             )}
                         />
                     </div>
-                    <Button className="sm:w-full md:w-full lg:w-1/2 " type="submit">Add</Button>
+                    {loading ?
+                        <Button disabled className="mt-4 sm:w-full md:w-full lg:w-1/2 ">
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />Loading...
+                        </Button> :
+
+                        <Button className="mt-4sm:w-full md:w-full lg:w-1/2" type="submit">
+                            Submit
+                        </Button>
+                    }
                 </form>
             </Form>
         </>

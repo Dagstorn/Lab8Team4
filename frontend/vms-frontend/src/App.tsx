@@ -22,7 +22,7 @@ import NotFoundPage from "./shared/components/NotFoundPage.tsx";
 import RequireAuth from "./shared/components/RequireAuth.tsx";
 import jwt_decode from "jwt-decode";
 import axios from "./shared/hooks/axios";
-import { useToast } from "./shared/shad-ui/ui/use-toast.ts";
+// import { useToast } from "./shared/shad-ui/ui/use-toast.ts";
 import AddTaskPage from "./admin/pages/AddTaskPage.tsx";
 interface tokenInt {
   refresh: string,
@@ -41,7 +41,7 @@ function App() {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   // display toast messages library
-  const { toast } = useToast();
+  // const { toast } = useToast();
 
   // will be launched when App components is initialized
   useEffect(() => {
@@ -107,10 +107,10 @@ function App() {
 
     } catch (err) {
       logout();
-      toast({
-        title: "Something went wrong. Try to login again!",
-        variant: "destructive",
-      })
+      // toast({
+      //   title: "Something went wrong. Try to login again!",
+      //   variant: "destructive",
+      // })
     }
     if (loading) {
       setLoading(false);
