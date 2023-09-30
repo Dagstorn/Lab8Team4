@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from accounts.models import Driver
 from vehicles.models import Vehicle
-from tasks.models import Appointment, Task
+from tasks.models import Appointment, Task, CompletedRoutes
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
 
@@ -56,4 +56,11 @@ class TaskSerializer(serializers.ModelSerializer):
     car = VehicleSerializer(many=False)
     class Meta:
         model = Task
+        fields = '__all__'
+
+
+class CompletedRouteSerializer(serializers.ModelSerializer):
+    driver = DriverSerializer(many=False)
+    class Meta:
+        model = CompletedRoutes
         fields = '__all__'

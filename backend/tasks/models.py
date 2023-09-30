@@ -1,7 +1,5 @@
 from django.db import models
 from accounts.models import Driver
-from django.db.models.signals import pre_save
-from django.dispatch import receiver
 
 class Appointment(models.Model):
     BODY_TYPES =(
@@ -46,28 +44,16 @@ class Task(models.Model):
 
 
 class CompletedRoutes(models.Model):
-    task_id = models.ForeignKey(Task, on_delete=models.DO_NOTHING, null=True)
     driver = models.ForeignKey(Driver, related_name="routes", on_delete=models.CASCADE, null=True)
     from_point = models.JSONField(verbose_name="departure point")
     to_point = models.JSONField(verbose_name="arrival point")
     time_from = models.DateTimeField(auto_now_add=False, blank=True, null=True)
     time_to = models.DateTimeField(auto_now_add=False, blank=True, null=True)
-    distance_covered = models.CharField()
-    time_spent = models.CharField()
+    distance_covered = models.CharField(default="")
+    time_spent = models.CharField(default="")
 
     class Meta:
         ordering = ['-time_from']
 
 
-@receiver(pre_save, sender=Task)
-def create_route_record(sender, instance, **kwargs):
-    if instance.status == 'Completed':
-        record = CompletedRoutes.objects.filter(task_id=instance.id)
-        if len(record) == 0:
-            CompletedRoutes.objects.create(
-                task_id = instance,
-                driver = instance.driver,
-                from_point = instance.from_point,
-                to_point = instance.to_point,
-                date = instance.date
-            )   
+
