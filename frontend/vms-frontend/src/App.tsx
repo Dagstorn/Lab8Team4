@@ -24,6 +24,13 @@ import jwt_decode from "jwt-decode";
 import axios from "./shared/hooks/axios";
 // import { useToast } from "./shared/shad-ui/ui/use-toast.ts";
 import AddTaskPage from "./admin/pages/AddTaskPage.tsx";
+import PersonalPage from "./driver/pages/PersonalPage.tsx";
+import PersonalPageLayout from "./driver/PersonalPageLayout.tsx";
+import ViewTaskPage from "./driver/pages/ViewTaskPage.tsx";
+import RoutesHistory from "./driver/pages/RoutesHistory.tsx";
+import Appointments from "./driver/pages/Appointments.tsx";
+import Report from "./driver/pages/Report.tsx";
+import DriverTasksPage from "./driver/pages/DriverTasksPage.tsx";
 interface tokenInt {
   refresh: string,
   access: string,
@@ -33,6 +40,7 @@ function App() {
   // global state holders for currently logged in user
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [role, setRole] = useState("default");
+  const [id, setId] = useState("");
   const [username, setUsername] = useState("");
   const [tokens, setTokens] = useState<tokenInt>({
     refresh: '',
@@ -52,6 +60,7 @@ function App() {
       setTokens(storageTokens);
       let decodedData: any = jwt_decode(storageTokens.access);
       setUsername(decodedData.username);
+      setUserId(decodedData.user_id);
       setRole(decodedData.role);
       setIsLoggedIn(true);
     }
@@ -60,6 +69,9 @@ function App() {
   // helper functions to set auth state
   const defineRole = useCallback((userRole: string) => {
     setRole(userRole);
+  }, []);
+  const setUserId = useCallback((userId: string) => {
+    setId(userId);
   }, []);
   const login = useCallback(() => {
     setIsLoggedIn(true);
@@ -133,7 +145,7 @@ function App() {
 
   return (
     <>
-      <AuthContext.Provider value={{ isLoggedIn, role, username, tokens, defineRole, assignUsername, assignToken, login, logout, updateToken }}>
+      <AuthContext.Provider value={{ isLoggedIn, role, username, id, tokens, defineRole, setUserId, assignUsername, assignToken, login, logout, updateToken }}>
         <NavBar />
         <Routes>
           <Route path="/" element={<MainLayout />} >
@@ -141,8 +153,16 @@ function App() {
 
             <Route element={<RequireAuth allowedRole={"driver"} />}>
               <Route path="appointments/add" element={<MakeAppointmentPage />} />
-            </Route>
 
+              <Route path="driver" element={<PersonalPageLayout />} >
+                <Route path="personal_page" element={<PersonalPage />} />
+                <Route path="tasks" element={<DriverTasksPage />} />
+                <Route path="task/:taskId/" element={<ViewTaskPage />} />
+                <Route path="routes_history" element={<RoutesHistory />} />
+                <Route path="appointments" element={<Appointments />} />
+                <Route path="report" element={<Report />} />
+              </Route>
+            </Route>
             <Route path="login" element={<LoginPage />} />
           </Route>
 

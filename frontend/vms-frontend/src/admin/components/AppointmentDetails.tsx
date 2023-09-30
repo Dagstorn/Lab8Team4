@@ -3,6 +3,7 @@ import { formatTimeRange } from "@/shared/utils/utils";
 import { TableCell, TableRow } from "@/shared/shad-ui/ui/table";
 import { Button } from "@/shared/shad-ui/ui/button";
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@nextui-org/react";
+import { Link } from "react-router-dom";
 
 
 interface Props {
@@ -44,9 +45,11 @@ const AppointmentDetails = ({ appointment }: Props) => {
                                 <Button color="danger" variant="ghost" onClick={onClose}>
                                     Close
                                 </Button>
-                                <Button color="primary" onClick={onClose}>
-                                    Create Task
-                                </Button>
+                                <Link to={`/admin/appointments/${appointment.id}/`}>
+                                    <Button color="primary" onClick={onClose}>
+                                        Create Task
+                                    </Button>
+                                </Link>
                             </ModalFooter>
                         </>
                     )}

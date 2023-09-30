@@ -72,7 +72,9 @@ const LoginPage = () => {
             // save access token in user global state as we need it in future
             auth.assignToken(responseData);
             // save user data and login user
+            console.log(decoded_data);
             auth.defineRole(decoded_data.role);
+            auth.setUserId(decoded_data.user_id);
             auth.assignUsername(decoded_data.username);
             localStorage.setItem('authTokens', JSON.stringify(responseData));
             auth.login();

@@ -64,7 +64,7 @@ const AddTaskPage = () => {
     }
     const startDateHandler = (e: ChangeEvent<HTMLInputElement>) => {
         setError('startDate', { type: 'custom', message: '' });
-
+        console.log(e.target.value)
         if (getValues('endDate')) {
             getData(e.target.value, getValues('endDate'));
         }
@@ -117,8 +117,8 @@ const AddTaskPage = () => {
                 <h1 className="text-2xl font-bold mb-2">Create task for driver</h1>
                 <Separator />
 
-                <form className="mt-4 flex flex-col" onSubmit={handleSubmit(onSubmit)}>
-                    <div className="grid grid-cols-3 grid-rows-1 gap-10">
+                <form className="" onSubmit={handleSubmit(onSubmit)}>
+                    <div className=" mt-2 grid grid-cols-3 grid-rows-1 gap-10">
                         <div className="col-span-1">
                             {loading && <div className="flex justify-center mt-4">
                                 <Spinner></Spinner>
@@ -206,12 +206,12 @@ const AddTaskPage = () => {
                         <div className="col-span-2">
                             <div className="grid grid-cols-2 grid-rows-1 gap-4">
                                 <div className="">
-                                    <input type="text" ref={startPointCoords}
+                                    <input type="hidden" ref={startPointCoords}
                                         className="custom-input"
                                     />
                                 </div>
                                 <div className="">
-                                    <input type="text" ref={endPointCoords}
+                                    <input type="hidden" ref={endPointCoords}
                                         className="custom-input"
                                     />
                                 </div>

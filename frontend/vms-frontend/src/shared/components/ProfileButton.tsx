@@ -10,7 +10,7 @@ import {
 import { User } from "lucide-react";
 import { Badge } from "@/shared/shad-ui/ui/badge";
 import useAuth from "../hooks/useAuth";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 const ProfileButton = () => {
 
   const auth = useAuth();
@@ -29,9 +29,10 @@ const ProfileButton = () => {
           <span className="mr-2">Role</span> <Badge variant="secondary">{auth.role}</Badge>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem className="cursor-pointer">
-          Personal Page
-        </DropdownMenuItem>
+        {auth.role == 'driver' && <DropdownMenuItem className="cursor-pointer">
+          <Link to="/driver/personal_page/">Personal page</Link>
+        </DropdownMenuItem>}
+
 
         <DropdownMenuSeparator />
         <DropdownMenuItem

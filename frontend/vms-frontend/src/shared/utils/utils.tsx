@@ -53,10 +53,33 @@ export const formatTimeRange = (startISO: string, endISO: string) => {
         diffrence2.push(`${hour2}:${minute2}`);
     }
 
-    let commonDateAndTime = `${commonDate.join('-')} ${commonTime.join('-')}`
+    let commonDateAndTime = `${commonDate.join('-')}`;
+    if (commonTime.length != 0) {
+        commonDateAndTime += ` ${commonTime.join('-')}`;
+    }
     if (diffrence1.length != 0 && diffrence2.length != 0) {
-        commonDateAndTime += `${diffrence1.join(' ')} to ${diffrence2.join(' ')}`
+        commonDateAndTime += `, ${diffrence1.join(' ')} to ${diffrence2.join(' ')}`
 
     }
     return commonDateAndTime;
+}
+
+export const formatDateTime = (dateTimeString: string) => {
+    const date = new Date(dateTimeString);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+}
+
+export const getHoursAndMinutes = (dateTimeString: string) => {
+    if (dateTimeString === "") return "";
+    const date = new Date(dateTimeString);
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+
+    return `${hours}:${minutes}`;
 }

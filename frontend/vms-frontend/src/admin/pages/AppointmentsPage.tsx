@@ -69,7 +69,7 @@ const DriversListPage = () => {
                 <TableBody>
                     {
                         appointments.map((appointment) => {
-                            return <AppointmentDetails appointment={appointment} />
+                            return <AppointmentDetails key={appointment.id} appointment={appointment} />
                         })
                     }
 

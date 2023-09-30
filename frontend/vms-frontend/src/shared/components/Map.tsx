@@ -144,6 +144,7 @@ const Map: React.FC<MyMapProps> = ({ startPointCoordsRef, endPointCoordsRef }) =
                     travelMode: google.maps.TravelMode.DRIVING,
 
                 })
+                console.log(results)
                 const coords = results.routes[0].overview_path;
                 setRouteCoords(coords);
                 mapRef.current?.state.map?.panTo(results.routes[0].bounds.getCenter());
