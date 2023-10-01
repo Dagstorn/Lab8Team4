@@ -84,6 +84,8 @@ const LoginPage = () => {
             if (from == "/") {
                 if (decoded_data.role == 'admin') {
                     navigate('/admin');
+                } else if (decoded_data.role == 'driver') {
+                    navigate('/driver/personal_page');
                 } else {
                     navigate('/');
                 }

@@ -4,13 +4,13 @@ export const formatTimeRange = (startISO: string, endISO: string) => {
 
     // Function to format a date as "YYYY-MM-DD HH:mm:ss"
     const year1 = startDate.getFullYear();
-    const month1 = String(startDate.getMonth() + 1).padStart(2, '0');
+    const month1 = startDate.toLocaleString('en-US', { month: 'short' });
     const day1 = String(startDate.getDate()).padStart(2, '0');
     const hour1 = String(startDate.getHours()).padStart(2, '0');
     const minute1 = String(startDate.getMinutes()).padStart(2, '0');
     // return `${year}-${month}-${day} ${hour}:${minute}:${second}`;
     const year2 = endDate.getFullYear();
-    const month2 = String(endDate.getMonth() + 1).padStart(2, '0');
+    const month2 = endDate.toLocaleString('en-US', { month: 'short' });
     const day2 = String(endDate.getDate()).padStart(2, '0');
     const hour2 = String(endDate.getHours()).padStart(2, '0');
     const minute2 = String(endDate.getMinutes()).padStart(2, '0');
@@ -21,11 +21,14 @@ export const formatTimeRange = (startISO: string, endISO: string) => {
     let diffrence1 = [];
     let diffrence2 = [];
     // Compare date components (year, month, day)
-    if (year1 === year2) {
-        commonDate.push(year1);
-    } else {
-        diffrence1.push(year1);
-        diffrence2.push(year2);
+    const now = new Date();
+    if (now.getFullYear() !== year1) {
+        if (year1 === year2) {
+            commonDate.push(year1);
+        } else {
+            diffrence1.push(year1);
+            diffrence2.push(year2);
+        }
     }
     if (month1 === month2) {
         commonDate.push(month1);
@@ -40,23 +43,12 @@ export const formatTimeRange = (startISO: string, endISO: string) => {
         diffrence2.push(day2);
     }
 
-    if (hour1 === hour2) {
-        commonTime.push(hour1);
-        if (minute1 === minute2) {
-            commonTime.push(minute1);
-        } else {
-            diffrence1.push(minute1);
-            diffrence2.push(minute2);
-        }
-    } else {
-        diffrence1.push(`${hour1}:${minute1}`);
-        diffrence2.push(`${hour2}:${minute2}`);
-    }
 
-    let commonDateAndTime = `${commonDate.join('-')}`;
-    if (commonTime.length != 0) {
-        commonDateAndTime += ` ${commonTime.join('-')}`;
-    }
+    diffrence1.push(`${hour1}:${minute1}`);
+    diffrence2.push(`${hour2}:${minute2}`);
+
+    let commonDateAndTime = `${commonDate.join(' ')}`;
+
     if (diffrence1.length != 0 && diffrence2.length != 0) {
         commonDateAndTime += `, ${diffrence1.join(' ')} to ${diffrence2.join(' ')}`
 
@@ -82,4 +74,13 @@ export const getHoursAndMinutes = (dateTimeString: string) => {
     const minutes = String(date.getMinutes()).padStart(2, '0');
 
     return `${hours}:${minutes}`;
+}
+
+export const formatDistance = (distance: string) => {
+    const meters = parseInt(distance);
+    if (meters >= 1000) {
+        return `${meters / 1000} km`;
+    } else {
+        return `${meters} m`;
+    }
 }

@@ -47,3 +47,14 @@ export interface Task {
     time_to: string;
     status: string;
 }
+
+export interface CompletedRoute {
+    id: number;
+    driver: Driver;
+    from_point: string;
+    to_point: string;
+    time_from: string;
+    time_to: string;
+    distance_covered: string;
+    time_spent: string;
+}

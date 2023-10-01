@@ -3,8 +3,8 @@ import useAuth from "@/shared/hooks/useAuth";
 import { Button } from "@/shared/shad-ui/ui/button";
 import { Separator } from "@/shared/shad-ui/ui/separator";
 import { useToast } from "@/shared/shad-ui/ui/use-toast";
-import { Task } from "@/shared/types/types";
-import { formatTimeRange, getHoursAndMinutes } from "@/shared/utils/utils";
+import { CompletedRoute, Task } from "@/shared/types/types";
+import { formatDistance, formatTimeRange, getHoursAndMinutes } from "@/shared/utils/utils";
 import { Spinner } from "@nextui-org/react";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
@@ -16,7 +16,6 @@ import { useJsApiLoader } from "@react-google-maps/api";
 const ViewTaskPage = () => {
     const taskId = useParams().taskId;
     const [started, setStarted] = useState(false);
-    const [completed, setCompleted] = useState(false);
 
     const auth = useAuth();
     const [task, setTask] = useState<Task>();
@@ -30,7 +29,11 @@ const ViewTaskPage = () => {
     const { toast } = useToast();
 
     const [progressValue, setProgressValue] = useState(0);
-    let progressInterval: any;
+    const [progressIntervalId, setProgressIntervalId] = useState<any | null>(null);
+
+    const [completedRoute, setCompletedRoute] = useState<CompletedRoute>();
+
+
     const checkProgressInterval = (responseData: any) => {
         const now = new Date();
         const startTime = new Date(Date.parse(responseData.time_from));
@@ -40,7 +43,7 @@ const ViewTaskPage = () => {
         const minuteDifferenceFromStart = Math.abs(Math.floor((now.getTime() - startTime.getTime()) / 60000));
         const percentage = (minuteDifferenceFromStart / minuteDifference) * 100;
         if (percentage >= 100) {
-            clearInterval(progressInterval);
+            clearInterval(progressIntervalId);
         }
         setProgressValue(Math.min(100, Math.max(0, percentage)));
     }
@@ -54,7 +57,11 @@ const ViewTaskPage = () => {
             })
             // set data to response result
             setTask(responseData)
-            progressInterval = setInterval(() => checkProgressInterval(responseData), 500);
+            if (progressIntervalId) {
+                clearInterval(progressIntervalId);
+            }
+            const newIntervalId = setInterval(() => checkProgressInterval(responseData), 500);
+            setProgressIntervalId(newIntervalId);
         } catch (err: any) {
             // show error toast message
             toast({
@@ -71,8 +78,13 @@ const ViewTaskPage = () => {
     }, []);
 
     useEffect(() => {
-        return () => clearInterval(progressInterval);
-    }, []);
+
+        return () => {
+            if (progressIntervalId !== null) {
+                clearInterval(progressIntervalId);
+            }
+        };
+    }, [progressIntervalId]);
 
     const checkStartTime = (taskStartTime: string) => {
         const now = new Date();
@@ -84,18 +96,38 @@ const ViewTaskPage = () => {
         const endTime = new Date(Date.parse(taskEndTime));
         return now < endTime;
     }
+    function toIsoString(date: Date) {
+        var tzo = -date.getTimezoneOffset(),
+            dif = tzo >= 0 ? '+' : '-',
+            pad = function (num: number) {
+                return (num < 10 ? '0' : '') + num;
+            };
+
+        return date.getFullYear() +
+            '-' + pad(date.getMonth() + 1) +
+            '-' + pad(date.getDate()) +
+            'T' + pad(date.getHours()) +
+            ':' + pad(date.getMinutes()) +
+            ':' + pad(date.getSeconds()) +
+            dif + pad(Math.floor(Math.abs(tzo) / 60)) +
+            ':' + pad(Math.abs(tzo) % 60);
+    }
 
     const processStart = async () => {
         if (task && checkStartTime(task.time_from)) {
             try {
+                const now = new Date();
+                const timeStarted = toIsoString(now);
+                console.log(now)
+                console.log(timeStarted)
                 // get data with custom Hook
                 await sendRequest(`/api/task/${taskId}/update_status/`, 'post', {
                     Authorization: `Bearer ${auth.tokens.access}`
-                }, { status: "In progress" })
+                }, { status: "In progress", timeStarted: timeStarted })
                 // set data to response result
+
                 getData();
                 setStarted(true);
-
             } catch (err: any) {
                 // show error toast message
                 toast({
@@ -104,14 +136,12 @@ const ViewTaskPage = () => {
                 })
             }
         }
-
-
     }
     type latlng = {
         lat: number;
         lng: number;
-        // Add more properties as needed
     };
+
     const calculateDistance = async (point1: latlng, point2: latlng) => {
         if (isLoaded) {
             const directionService = new google.maps.DirectionsService();
@@ -123,27 +153,24 @@ const ViewTaskPage = () => {
             })
             return results.routes[0].legs[0].distance?.value
         }
-
     }
+
     const processComplete = async () => {
         if (task && checkStartTime(task.time_from)) {
             try {
                 const now = new Date();
                 const startTime = new Date(Date.parse(task.time_from));
                 const time_spent: number = Math.abs(Math.floor((now.getTime() - startTime.getTime()) / 60000));
-
+                const timeEnded = now.toISOString();
                 const distance_covered = await calculateDistance(JSON.parse(task.from_point), JSON.parse(task.to_point))
 
-                await sendRequest(`/api/task/${taskId}/update_status/`, 'post', {
-                    Authorization: `Bearer ${auth.tokens.access}`
-                }, { status: "Completed" })
                 // get data with custom Hook
-                const responseData = await sendRequest(`/api/complete_task/${task.id}/`, 'post', {
+                const completedRouteData = await sendRequest(`/api/complete_task/${task.id}/`, 'post', {
                     Authorization: `Bearer ${auth.tokens.access}`
-                }, { time_spent: time_spent, distance_covered: distance_covered })
-                console.log(responseData)
-                // set data to response result
+                }, { time_spent: time_spent, distance_covered: distance_covered, timeEnded: timeEnded })
 
+                // set data to response result
+                setCompletedRoute(completedRouteData);
                 // set data to response result
                 getData();
                 setStarted(true);
@@ -180,7 +207,7 @@ const ViewTaskPage = () => {
                             </Button>
                             }
 
-                            {(started && !completed) ? <Button onClick={processComplete} >
+                            {(started) ? <Button onClick={processComplete} >
                                 Complete task
                             </Button> : <Button disabled>
                                 Complete task
@@ -216,6 +243,17 @@ const ViewTaskPage = () => {
 
         return null;
     }
+    if (completedRoute) {
+        return <div className="flex flex-col">
+            {!loading && task && <h1 className="text-xl font-bold mb-2">Task on {formatTimeRange(task.time_from, task.time_to)} </h1>}
+            <Separator />
+            <div>
+                <p>You have completed the task successfully!</p>
+                <p>Total distance covered: {formatDistance(completedRoute.distance_covered)}</p>
+
+            </div>
+        </div>
+    }
     return (
         <div className="flex flex-col">
             {!loading && task && <h1 className="text-xl font-bold mb-2">Task on {formatTimeRange(task.time_from, task.time_to)} </h1>}
@@ -227,8 +265,6 @@ const ViewTaskPage = () => {
             </div>}
             {error ? <span>{error}</span> : null}
             {getControls()}
-
-
 
         </div>
     )
