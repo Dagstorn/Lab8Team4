@@ -267,10 +267,14 @@ def getTask(request, tid):
 def updateTaskStatus(request, tid):
     if getRole(request.user) != 'driver':
         raise ValidationError("You don't have correct role to make an API call", code=status.HTTP_400_BAD_REQUEST)
+    
+    
     try:
         task = Task.objects.get(id=tid)
         task.status = request.data.get('status')
+        task.time_from = request.data.get('timeStarted')
         task.save()
+
     except:
         raise ValidationError("Task does not exist", code=status.HTTP_400_BAD_REQUEST)
 
@@ -315,7 +319,11 @@ def completeTask(request, tid):
 
     try:
         task = Task.objects.get(id=tid)
+        task.status = "Completed"
         time_spent = request.data.get('time_spent')
+        timeEnded = request.data.get('timeEnded')
+        task.time_to = timeEnded
+        task.save()
 
         distance_covered = request.data.get('distance_covered')
         comp_route = CompletedRoutes.objects.create(
@@ -323,7 +331,7 @@ def completeTask(request, tid):
             from_point = task.from_point,
             to_point = task.to_point,
             time_from = task.time_from,
-            time_to = task.time_to,
+            time_to = timeEnded,
             time_spent = time_spent,
             distance_covered = distance_covered
         )
