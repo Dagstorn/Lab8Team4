@@ -1,10 +1,13 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Spinner } from "@nextui-org/react";
 import { useJsApiLoader, GoogleMap, Marker, Autocomplete, Polyline } from "@react-google-maps/api";
+import { RoutePoints } from "@/shared/types/types";
 
 const center = { lat: 51.089888409978656, lng: 71.40146902770996 }
-
-const Map: React.FC<MyMapProps> = () => {
+interface MyMapProps {
+    routePoints: RoutePoints | undefined
+}
+const Map: React.FC<MyMapProps> = ({ routePoints }) => {
     // use useJsApiLoader hook to use Google maps api
     const { isLoaded } = useJsApiLoader({
         googleMapsApiKey: import.meta.env.VITE_REACT_GOOGLE_MAPS_API!,
@@ -13,6 +16,23 @@ const Map: React.FC<MyMapProps> = () => {
     // google map ref
     const mapRef = useRef<GoogleMap>(null);
 
+    // store route
+    const [routeCoords, setRouteCoords] = useState<any[]>([]);
+    const constructRoute = async (routePoints: RoutePoints) => {
+        const directionService = new google.maps.DirectionsService();
+        const results = await directionService.route({
+            origin: routePoints.start,
+            destination: routePoints.end,
+            travelMode: google.maps.TravelMode.DRIVING,
+        })
+        setRouteCoords(results.routes[0].overview_path);
+        mapRef.current?.state.map?.panTo(results.routes[0].bounds.getCenter());
+        mapRef.current?.state.map?.fitBounds(results.routes[0].bounds)
+    }
+    useEffect(() => {
+        if (routePoints)
+            constructRoute(routePoints);
+    }, [routePoints])
 
 
 
@@ -24,6 +44,7 @@ const Map: React.FC<MyMapProps> = () => {
     }
     return (
         <div className='h-full'>
+
             <div className="h-full">
                 <GoogleMap
                     ref={mapRef}
@@ -35,6 +56,32 @@ const Map: React.FC<MyMapProps> = () => {
                         mapTypeControl: false
                     }}
                     mapContainerClassName="w-full h-full">
+                    {routePoints?.start && <>
+                        <Marker position={routePoints.start} draggable={false} label={{
+                            text: "Start",
+                            color: "blue",
+                            fontWeight: "bold",
+                            className: "mt-14"
+
+                        }}
+                        />
+                        <Marker position={routePoints.end} draggable={false} label={{
+                            text: "End",
+                            color: "blue",
+                            fontWeight: "bold",
+                            className: "mt-14"
+                        }}
+                        />
+                        {routeCoords.length > 0 && <Polyline
+                            path={routeCoords}
+                            options={{
+                                strokeColor: "#ff2343",
+                                strokeOpacity: 0.8,
+                                strokeWeight: 5,
+                                clickable: true
+                            }}
+                        />}
+                    </>}
 
                 </GoogleMap>
             </div>

@@ -58,3 +58,12 @@ export interface CompletedRoute {
     distance_covered: string;
     time_spent: string;
 }
+
+export interface point {
+    lat: number,
+    lng: number
+}
+export interface RoutePoints {
+    start: point,
+    end: point,
+}

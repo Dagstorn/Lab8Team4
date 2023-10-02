@@ -3,7 +3,7 @@ import useAuth from "@/shared/hooks/useAuth";
 import { Button } from "@/shared/shad-ui/ui/button";
 import { Separator } from "@/shared/shad-ui/ui/separator";
 import { useToast } from "@/shared/shad-ui/ui/use-toast";
-import { CompletedRoute, Task } from "@/shared/types/types";
+import { CompletedRoute, RoutePoints, Task } from "@/shared/types/types";
 import { formatDistance, formatTimeRange, getHoursAndMinutes } from "@/shared/utils/utils";
 import { Spinner } from "@nextui-org/react";
 import { useEffect, useState } from "react";
@@ -12,6 +12,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/shared/shad-ui/ui/alert";
 import { AlertTriangle, Info } from "lucide-react";
 import { Progress } from "@nextui-org/react";
 import { useJsApiLoader } from "@react-google-maps/api";
+import RouteMap from "../components/RouteMap";
 
 const ViewTaskPage = () => {
     const taskId = useParams().taskId;
@@ -32,6 +33,7 @@ const ViewTaskPage = () => {
     const [progressIntervalId, setProgressIntervalId] = useState<any | null>(null);
 
     const [completedRoute, setCompletedRoute] = useState<CompletedRoute>();
+    const [points, setPoints] = useState<RoutePoints>();
 
 
     const checkProgressInterval = (responseData: any) => {
@@ -57,6 +59,10 @@ const ViewTaskPage = () => {
             })
             // set data to response result
             setTask(responseData)
+            setPoints({
+                start: JSON.parse(responseData.from_point),
+                end: JSON.parse(responseData.to_point),
+            })
             if (progressIntervalId) {
                 clearInterval(progressIntervalId);
             }
@@ -243,6 +249,7 @@ const ViewTaskPage = () => {
 
         return null;
     }
+
     if (completedRoute) {
         return <div className="flex flex-col">
             {!loading && task && <h1 className="text-xl font-bold mb-2">Task on {formatTimeRange(task.time_from, task.time_to)} </h1>}
@@ -263,6 +270,9 @@ const ViewTaskPage = () => {
             {loading && <div className="flex justify-center mt-4">
                 <Spinner></Spinner>
             </div>}
+            <div className="h-96 mt-2">
+                <RouteMap routePoints={points} />
+            </div>
             {error ? <span>{error}</span> : null}
             {getControls()}
 

@@ -48,22 +48,18 @@ export function Sidebar({ className }: SidebarProps) {
                     Personla Page
                 </h2>
                 <div className="space-y-1">
-                    {
-                        sidebarNavItems.map((item) => (
-                            <NavLink key={item.href} to={item.href}>
-                                {({ isActive }) => (
-                                    <Button
-                                        variant={isActive ? "secondary" : "ghost"}
-                                        className="w-full justify-start">
-                                        {item.icon}
-                                        {item.title}
-                                    </Button>
-                                )}
-
-                            </NavLink>
-                        ))
-                    }
-
+                    {sidebarNavItems.map((item) => (
+                        <NavLink key={item.href} to={item.href}>
+                            {({ isActive }) => (
+                                <Button
+                                    variant={isActive ? "secondary" : "ghost"}
+                                    className="w-full justify-start">
+                                    {item.icon}
+                                    {item.title}
+                                </Button>
+                            )}
+                        </NavLink>
+                    ))}
                 </div>
             </div>
         </div>

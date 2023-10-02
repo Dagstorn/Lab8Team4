@@ -2,13 +2,14 @@ import { useHttp } from '@/shared/hooks/http-hook';
 import useAuth from '@/shared/hooks/useAuth';
 import { Separator } from '@/shared/shad-ui/ui/separator'
 import { useToast } from '@/shared/shad-ui/ui/use-toast';
-import { CompletedRoute } from '@/shared/types/types';
+import { CompletedRoute, RoutePoints, point } from '@/shared/types/types';
 import { Spinner } from 'flowbite-react';
 import { useEffect, useState } from 'react';
 import RouteMap from '../components/RouteMap';
 import { Button } from '@/shared/shad-ui/ui/button';
-import { formatTimeRange } from '@/shared/utils/utils';
-
+import { formatDistance, formatTimeRange } from '@/shared/utils/utils';
+import { ScrollArea } from "@/shared/shad-ui/ui/scroll-area";
+import { ScrollShadow } from "@nextui-org/react";
 const RoutesHistory = () => {
     const auth = useAuth();
 
@@ -16,6 +17,8 @@ const RoutesHistory = () => {
     const [routes, setRoutes] = useState<CompletedRoute[]>([]);
     const { loading, error, sendRequest, clearError } = useHttp();
     const { toast } = useToast();
+
+    const [points, setPoints] = useState<RoutePoints>();
 
     // when conponent mounts - meaning when it is created we get data
     useEffect(() => {
@@ -41,14 +44,17 @@ const RoutesHistory = () => {
         }
         getData();
     }, []);
-    function formatDistance(distance: string) {
-        const meters = parseInt(distance);
-        if (meters >= 1000) {
-            return `${meters / 1000} km`;
-        } else {
-            return `${meters} m`;
-        }
+
+    const renderRoute = (point1: point, point2: point) => {
+        console.log("selected")
+        console.log(point2.lat)
+
+        setPoints({
+            start: point1,
+            end: point2,
+        })
     }
+
     return (
         <div className='h-full grid grid-rows-[auto,1fr]'>
             <div>
@@ -61,20 +67,24 @@ const RoutesHistory = () => {
             </div>
 
             {!loading && <div className="mt-2 grid grid-cols-4 gap-2">
-                <div className='bg-gray-200 col-span-1'>
-                    {routes.map((route) => (
-                        <Button variant="ghost" className='w-full rounded-none'>
-                            {formatTimeRange(route.time_from, route.time_to)}<br />
-                            {formatDistance(route.distance_covered)}
-                        </Button>
-                    ))}
+                <div className="col-span-1">
+                    <ScrollShadow className="w-full h-[78vh] grid gap-2">
+                        {routes.map((route) => (
+                            <div
+                                onClick={() => renderRoute(JSON.parse(route.from_point), JSON.parse(route.to_point))}
+                                className="bg-gray-100 hover:bg-gray-200 cursor-pointer px-2 w-full rounded-none text-left justify-start">
+                                {formatTimeRange(route.time_from, route.time_to)}<br />
+                                {formatDistance(route.distance_covered)}
+                            </div>
+                        ))}
+                    </ScrollShadow>
                 </div>
-                <div className='bg-gray-200 col-span-3'>
-                    <RouteMap />
+                <div className='bg-gray-200 col-span-3 h-[78vh]'>
+                    <RouteMap routePoints={points} />
                 </div>
             </div>}
 
-        </div>
+        </div >
     )
 }
 
