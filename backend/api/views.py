@@ -6,9 +6,9 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError
 from rest_framework import status
-from .serializers import DriverSerializer, VehicleSerializer, AppointmentSerializer, TaskSerializer, CompletedRouteSerializer
-from accounts.models import Driver
-from vehicles.models import Vehicle
+from .serializers import DriverSerializer, VehicleSerializer, AppointmentSerializer, TaskSerializer, CompletedRouteSerializer, FuelingSerializer, MaintenanceSerializer, FuelingProofSerializer
+from accounts.models import Driver, FuelingPerson, MaintenancePerson
+from vehicles.models import Vehicle, FuelingProof
 from tasks.models import Appointment, Task, CompletedRoutes
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from password_generator import PasswordGenerator
@@ -64,8 +64,6 @@ def addDriver(request):
             email=email, 
             password=password
         )
-
-
         new_driver = Driver.objects.create(
             user = user,
             goverment_id = request.data.get('govermentId'),
@@ -77,13 +75,76 @@ def addDriver(request):
             phone = request.data.get('phone'),
             email = request.data.get('email'),
             license_code = request.data.get('license'),
-            password = pwgen.generate(),
+            password = password,
         )
     except:
         raise ValidationError("Wrong data format or missing data", code=status.HTTP_400_BAD_REQUEST)
 
     serializer = DriverSerializer(new_driver, many=False)
     return Response(serializer.data)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def addFueling(request):
+    if getRole(request.user) != 'admin':
+        raise ValidationError("You don't have correct role to make an API call", code=status.HTTP_400_BAD_REQUEST)
+    
+    # try:
+    pwgen = PasswordGenerator()
+    password = pwgen.generate()
+    email = request.data.get('email')
+    user = User.objects.create_user(
+        username=email, 
+        email=email, 
+        password=password
+    )
+    new_obj = FuelingPerson.objects.create(
+        user = user,
+        name = request.data.get('firstname'),
+        surname = request.data.get('lastname'),
+        middle_name = request.data.get('middlename'),
+        phone = request.data.get('phone'),
+        email = request.data.get('email'),
+        password = password,
+    )
+    # except:
+    #     raise ValidationError("Wrong data format or missing data", code=status.HTTP_400_BAD_REQUEST)
+
+    serializer = FuelingSerializer(new_obj, many=False)
+    return Response(serializer.data)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def addMaintenance(request):
+    if getRole(request.user) != 'admin':
+        raise ValidationError("You don't have correct role to make an API call", code=status.HTTP_400_BAD_REQUEST)
+    
+    try:
+        pwgen = PasswordGenerator()
+        password = pwgen.generate()
+        email = request.data.get('email')
+        user = User.objects.create_user(
+            username=email, 
+            email=email, 
+            password=password
+        )
+        new_obj = MaintenancePerson.objects.create(
+            user = user,
+            name = request.data.get('firstname'),
+            surname = request.data.get('lastname'),
+            middle_name = request.data.get('middlename'),
+            phone = request.data.get('phone'),
+            email = request.data.get('email'),
+            password = password
+        )
+    except:
+        raise ValidationError("Wrong data format or missing data", code=status.HTTP_400_BAD_REQUEST)
+
+    serializer = MaintenanceSerializer(new_obj, many=False)
+    return Response(serializer.data)
+
+
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -95,13 +156,45 @@ def getDrivers(request):
     return Response(serializer.data)
 
 
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def getFueling(request):
+    if getRole(request.user) != 'admin':
+        raise ValidationError("You don't have correct role to make an API call", code=status.HTTP_400_BAD_REQUEST)
+    
+    staff = FuelingPerson.objects.all()
+    serializer = FuelingSerializer(staff, many=True)
+    return Response(serializer.data)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def getMaintenance(request):
+    if getRole(request.user) != 'admin':
+        raise ValidationError("You don't have correct role to make an API call", code=status.HTTP_400_BAD_REQUEST)
+    staff = MaintenancePerson.objects.all()
+    serializer = MaintenanceSerializer(staff, many=True)
+    return Response(serializer.data)
+
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def getVehicles(request):
-    if getRole(request.user) != 'admin':
+    if getRole(request.user) == 'driver': # prohibited only for driver
         raise ValidationError("You don't have correct role to make an API call", code=status.HTTP_400_BAD_REQUEST)
     vehicles = Vehicle.objects.all()
     serializer = VehicleSerializer(vehicles, many=True)
+    return Response(serializer.data)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def getVehicle(request, vid):
+    try:
+        vehicle = Vehicle.objects.get(id=vid)
+    except:
+        raise ValidationError("Wrong vehicle id", code=status.HTTP_400_BAD_REQUEST)
+
+    serializer = VehicleSerializer(vehicle, many=False)
     return Response(serializer.data)
 
 
@@ -264,7 +357,7 @@ def getTask(request, tid):
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
-def updateTaskStatus(request, tid):
+def updateTask(request, tid):
     if getRole(request.user) != 'driver':
         raise ValidationError("You don't have correct role to make an API call", code=status.HTTP_400_BAD_REQUEST)
     
@@ -340,4 +433,49 @@ def completeTask(request, tid):
         raise ValidationError("Wrong data format or missing data", code=status.HTTP_400_BAD_REQUEST)
     
     serializer = CompletedRouteSerializer(comp_route, many=False)
+    return Response(serializer.data)
+
+
+
+# Fueling
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def getFuelingReports(request):
+    if getRole(request.user) != 'fueling':
+        raise ValidationError("You don't have correct role to make an API call", code=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        reports = request.user.fueling_acc.fueling_proofs.all()
+    except:
+        raise ValidationError("Wrong data format or missing data", code=status.HTTP_400_BAD_REQUEST)
+    
+    serializer = FuelingProofSerializer(reports, many=True)
+    return Response(serializer.data)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def addFuelingReport(request):
+    if getRole(request.user) != 'fueling':
+        raise ValidationError("You don't have correct role to make an API call", code=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        veh_id = request.data.get('car')
+        vehicle = Vehicle.objects.get(id=veh_id)
+        upload_time = datetime.strptime(request.data.get('datetime'), "%Y-%m-%dT%H:%M")
+        new_obj = FuelingProof.objects.create(
+            vehicle=vehicle,
+            fueling_person=request.user.fueling_acc,
+            image_before=request.FILES.get('image_before'),
+            image_after=request.FILES.get('image_after'),
+            date=timezone.make_aware(upload_time, timezone.get_current_timezone()),
+            type = request.data.get('fuelType'),
+            amount = request.data.get('amount'),
+            cost = request.data.get('cost'),
+        )
+
+    except:
+        raise ValidationError("Wrong data format or missing data", code=status.HTTP_400_BAD_REQUEST)
+    
+    serializer = FuelingProofSerializer(new_obj, many=False)
     return Response(serializer.data)

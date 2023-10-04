@@ -29,10 +29,22 @@ class Driver(models.Model):
 
 class FuelingPerson(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, null=True, related_name="fueling_acc")
-    approved = models.BooleanField(default=False)
+    name = models.CharField(max_length=100)
+    surname = models.CharField(max_length=100)
+    middle_name = models.CharField(max_length=100, null=True, blank=True)
+    phone = models.CharField(max_length=100)
+    email = models.EmailField(max_length=100)
+    password = models.CharField(max_length=100,null=True, blank=True)
+
 
 class MaintenancePerson(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, null=True, related_name="maintenance_acc")
-    approved = models.BooleanField(default=False)
+    name = models.CharField(max_length=100)
+    surname = models.CharField(max_length=100)
+    middle_name = models.CharField(max_length=100, null=True, blank=True)
+    phone = models.CharField(max_length=100)
+    email = models.EmailField(max_length=100)
+    password = models.CharField(max_length=100,null=True, blank=True)
+
 
 

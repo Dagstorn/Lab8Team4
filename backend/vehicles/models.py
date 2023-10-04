@@ -1,5 +1,5 @@
 from django.db import models
-from accounts.models import Driver
+from accounts.models import FuelingPerson
 from tasks.models import Task
 
 class Vehicle(models.Model):
@@ -27,17 +27,16 @@ class Vehicle(models.Model):
         return not Task.objects.filter(car=self).exists()
     
 
-class FuelingInfo(models.Model):
-    vehicle = models.OneToOneField(Vehicle, on_delete=models.CASCADE, null=True)
-    fuelType = models.CharField(max_length=100)
 
-class FuelingRecord(models.Model):
-    vehicle = models.OneToOneField(Vehicle, on_delete=models.CASCADE, null=True)
-    driver_photo = models.ImageField(verbose_name="Mileage photo", upload_to ='fueling_records/')
-    mileage_photo = models.ImageField(verbose_name="Driver photo", upload_to ='fueling_records/')
+class FuelingProof(models.Model):
+    vehicle = models.ForeignKey(Vehicle, on_delete=models.CASCADE, null=True, related_name="fueling_proofs")
+    fueling_person = models.ForeignKey(FuelingPerson, on_delete=models.SET(0), related_name="fueling_proofs")
     image_before = models.ImageField(verbose_name="image before fueling", upload_to ='fueling_records/')
     image_after = models.ImageField(verbose_name="image after fueling", upload_to ='fueling_records/')
     date = models.DateTimeField(auto_now_add=True)
+    type = models.CharField(max_length=100)
+    amount = models.CharField(max_length=100)
+    cost = models.CharField(max_length=100)
 
 
 class MaintenanceJob(models.Model):
