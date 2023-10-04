@@ -3,13 +3,11 @@ import useAuth from '@/shared/hooks/useAuth';
 import { Separator } from '@/shared/shad-ui/ui/separator'
 import { useToast } from '@/shared/shad-ui/ui/use-toast';
 import { CompletedRoute, RoutePoints, point } from '@/shared/types/types';
-import { Spinner } from 'flowbite-react';
 import { useEffect, useState } from 'react';
 import RouteMap from '../components/RouteMap';
-import { Button } from '@/shared/shad-ui/ui/button';
+
 import { formatDistance, formatTimeRange } from '@/shared/utils/utils';
-import { ScrollArea } from "@/shared/shad-ui/ui/scroll-area";
-import { ScrollShadow } from "@nextui-org/react";
+import { ScrollShadow, Spinner } from "@nextui-org/react";
 const RoutesHistory = () => {
     const auth = useAuth();
 

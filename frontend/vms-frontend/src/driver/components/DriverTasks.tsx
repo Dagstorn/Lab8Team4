@@ -23,7 +23,7 @@ const DriverTasks = () => {
             // try and catch to catch errors if any
             try {
                 // get data with custom Hook
-                const responseData = await sendRequest('/api/driver_tasks/', 'get', {
+                const responseData = await sendRequest('/api/driver/tasks/', 'get', {
                     Authorization: `Bearer ${auth.tokens.access}`
                 })
                 // set data to response result

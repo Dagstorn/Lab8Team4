@@ -54,7 +54,7 @@ const ViewTaskPage = () => {
         // try and catch to catch errors if any
         try {
             // get data with custom Hook
-            const responseData = await sendRequest(`/api/task/${taskId}/`, 'get', {
+            const responseData = await sendRequest(`/api/tasks/${taskId}/`, 'get', {
                 Authorization: `Bearer ${auth.tokens.access}`
             })
             // set data to response result
@@ -127,7 +127,7 @@ const ViewTaskPage = () => {
                 console.log(now)
                 console.log(timeStarted)
                 // get data with custom Hook
-                await sendRequest(`/api/task/${taskId}/update_status/`, 'post', {
+                await sendRequest(`/api/tasks/${taskId}/update/`, 'post', {
                     Authorization: `Bearer ${auth.tokens.access}`
                 }, { status: "In progress", timeStarted: timeStarted })
                 // set data to response result
@@ -171,7 +171,7 @@ const ViewTaskPage = () => {
                 const distance_covered = await calculateDistance(JSON.parse(task.from_point), JSON.parse(task.to_point))
 
                 // get data with custom Hook
-                const completedRouteData = await sendRequest(`/api/complete_task/${task.id}/`, 'post', {
+                const completedRouteData = await sendRequest(`/api/tasks/${task.id}/complete/`, 'post', {
                     Authorization: `Bearer ${auth.tokens.access}`
                 }, { time_spent: time_spent, distance_covered: distance_covered, timeEnded: timeEnded })
 

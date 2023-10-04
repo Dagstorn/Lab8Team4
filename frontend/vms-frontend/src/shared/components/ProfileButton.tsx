@@ -16,7 +16,18 @@ const ProfileButton = () => {
   const auth = useAuth();
 
   const navigate = useNavigate();
-
+  const getPersonalPageLink = (role: stirng) => {
+    if (role === 'driver') {
+      return <Link to="/driver/personal_page/">Personal page</Link>
+    } else if (role === 'fueling') {
+      return < Link to="/fueling/" > Personal page</Link >
+    } else if (role === 'maintenance') {
+      return < Link to="/maintenance/" > Personal page</Link >
+    } else if (role === 'admin') {
+      return < Link to="/admin/" > Admin page</Link >
+    }
+    return "";
+  }
   return (
     <DropdownMenu>
       <DropdownMenuTrigger className="outline-none">
@@ -29,9 +40,9 @@ const ProfileButton = () => {
           <span className="mr-2">Role</span> <Badge variant="secondary">{auth.role}</Badge>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        {auth.role == 'driver' && <DropdownMenuItem className="cursor-pointer">
-          <Link to="/driver/personal_page/">Personal page</Link>
-        </DropdownMenuItem>}
+        <DropdownMenuItem className="cursor-pointer">
+          {getPersonalPageLink(auth.role)}
+        </DropdownMenuItem>
 
 
         <DropdownMenuSeparator />

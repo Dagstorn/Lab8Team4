@@ -2,12 +2,22 @@ import { Sidebar } from "@/shared/components/SideBar";
 import { Outlet } from "react-router-dom";
 import { Toaster } from "@/shared/shad-ui/ui/toaster";
 
-const AdminLayout = () => {
+interface SidebarItem {
+  title: string,
+  href: string,
+  icon: JSX.Element
+}
+
+interface LayoutProps {
+  links: SidebarItem[]
+}
+
+const AdminLayout: React.FC<LayoutProps> = ({ links }) => {
 
   return (
     <div className="flex flex-col flex-grow space-y-10 ">
       <div className="flex h-full">
-        <Sidebar className="hidden md:block w-64"></Sidebar>
+        <Sidebar links={links} className="hidden md:block w-64"></Sidebar>
         <div className="grow px-8 pb-8 py-8 lg:border-l h-full">
           <Outlet />
           <Toaster />

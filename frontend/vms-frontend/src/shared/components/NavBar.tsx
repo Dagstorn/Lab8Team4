@@ -13,20 +13,18 @@ let routes = [
   },
   {
     href: "/",
+    label: "Services",
+  },
+  {
+    href: "/",
     label: "Contacts",
   },
   {
     href: "/",
     label: "Staff",
   },
-  {
-    href: "/",
-    label: "Vehicles",
-  },
-  {
-    href: "/appointments/add",
-    label: "Make an appointment",
-  },
+
+
 ];
 function NavBar() {
   const auth = useContext(AuthContext);
@@ -34,59 +32,51 @@ function NavBar() {
     <div className="sm:flex sm:justify-between px-3 border-b">
       <Container>
         <div className="relative px-0 sm:px-6 lg:px-3 flex h-14 items-center justify-between w-full">
-          <div className="flex items-center">
-            <Sheet>
-              <SheetTrigger>
-                <Menu className="h-6 md:hidden w-6" />
-              </SheetTrigger>
-              <SheetContent side="left" className="w-[300px] sm:w-[400px]">
-                <nav className="flex flex-col gap-4">
-                  {routes.map((route, i) => (
-                    <Button variant="ghost" key={i}>
-                      {route.label}
-                    </Button>
-                  ))}
-                </nav>
-              </SheetContent>
-            </Sheet>
-            <h1 className="text-xl font-bold">
-              <Link to="/">VMS</Link>
-            </h1>
+          <div className="flex">
+            <div className="flex items-center mr-12">
+              <Sheet>
+                <SheetTrigger>
+                  <Menu className="h-6 md:hidden w-6" />
+                </SheetTrigger>
+                <SheetContent side="left" className="w-[300px] sm:w-[400px]">
+                  <nav className="flex flex-col gap-4">
+                    {routes.map((route, i) => (
+                      <Button variant="ghost" key={i}>
+                        {route.label}
+                      </Button>
+                    ))}
+                  </nav>
+                </SheetContent>
+              </Sheet>
+              <h1 className="text-xl font-bold">
+                <Link to="/">VMS</Link>
+              </h1>
+            </div>
+            <nav className="flex items-center space-x-4 lg:space-x-6 hidden md:block">
+              {routes.map((route, i) => (
+                <Link to={route.href} key={i}>
+                  <Button variant="ghost" >
+                    {route.label}
+                  </Button>
+                </Link>
+              ))}
+
+
+              {auth.isLoggedIn && auth.role == "driver" && <Link to="/appointments/add">
+                <Button variant="ghost" >
+                  Make an appointment
+                </Button>
+              </Link>
+              }
+              {auth.isLoggedIn && auth.role == "admin" && <Link to="/admin">
+                <Button variant="ghost" >
+                  Admin dashboard
+                </Button>
+              </Link>
+              }
+            </nav>
           </div>
-          <nav className="mx-6 flex items-center space-x-4 lg:space-x-6 hidden md:block">
-            <Link to="/">
-              <Button variant="ghost" >
-                About Us
-              </Button>
-            </Link>
-            <Link to="/">
-              <Button variant="ghost" >
-                Contacts
-              </Button>
-            </Link>
-            <Link to="/">
-              <Button variant="ghost" >
-                Staff
-              </Button>
-            </Link>
-            <Link to="/">
-              <Button variant="ghost" >
-                Vehicles
-              </Button>
-            </Link>
-            {auth.isLoggedIn && auth.role == "driver" && <Link to="/appointments/add">
-              <Button variant="ghost" >
-                Make an appointment
-              </Button>
-            </Link>
-            }
-            {auth.isLoggedIn && auth.role == "admin" && <Link to="/admin">
-              <Button variant="ghost" >
-                Admin dashboard
-              </Button>
-            </Link>
-            }
-          </nav>
+
           {auth.isLoggedIn ?
             <ProfileButton /> :
             <Link to="login">

@@ -41,7 +41,7 @@ const DriverTaskDetail = ({ task }: Props) => {
                                 <Button color="danger" variant="ghost" onClick={onClose}>
                                     Close
                                 </Button>
-                                <Link to={`/driver/task/${task.id}/`}>
+                                <Link to={`/driver/tasks/${task.id}/`}>
                                     <Button color="primary" onClick={onClose}>
                                         Open
                                     </Button>

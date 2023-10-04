@@ -86,6 +86,10 @@ const LoginPage = () => {
                     navigate('/admin');
                 } else if (decoded_data.role == 'driver') {
                     navigate('/driver/personal_page');
+                } else if (decoded_data.role == 'fueling') {
+                    navigate('/fueling');
+                } else if (decoded_data.role == 'maintenance') {
+                    navigate('/maintenance');
                 } else {
                     navigate('/');
                 }

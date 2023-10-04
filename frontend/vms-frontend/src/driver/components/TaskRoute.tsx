@@ -1,26 +1,10 @@
 import { Task } from "@/shared/types/types";
-import { Timeline, Flowbite, CustomFlowbiteTheme } from 'flowbite-react';
+
 import { useEffect, useState } from "react";
 import { useJsApiLoader } from "@react-google-maps/api";
-import { Spinner } from "@nextui-org/react";
-import { Skeleton } from "@/shared/shad-ui/ui/skeleton";
-const customTheme: CustomFlowbiteTheme = {
-    timeline: {
-        item: {
-            point: {
-                marker: {
-                    base: {
-                        vertical: "absolute -left-1.5 mt-1.5 h-3 w-3 rounded-full border-2 border-gray bg-blue-400"
-                    },
-                }
-            },
-            content: {
-                title: "text-xl-3 font-bold text-blue-500"
-            },
-        },
 
-    }
-};
+import { Skeleton } from "@/shared/shad-ui/ui/skeleton";
+
 
 interface Props {
     task: Task
@@ -58,26 +42,9 @@ const TaskRoute = ({ task }: Props) => {
         }
     })
     if (!loading1 && !loading2) {
-        return <Flowbite theme={{ theme: customTheme }}>
-            <Timeline className="mb-0 mt-1 ml-1 text-base">
-                <Timeline.Item className="mb-0">
-                    <Timeline.Point />
-                    <Timeline.Content>
-                        <Timeline.Title className="text-base">
-                            {addressFrom}
-                        </Timeline.Title>
-                    </Timeline.Content>
-                </Timeline.Item>
-                <Timeline.Item className="mb-0">
-                    <Timeline.Point />
-                    <Timeline.Content>
-                        <Timeline.Title className="text-base">
-                            {addressTo}
-                        </Timeline.Title>
-                    </Timeline.Content>
-                </Timeline.Item>
-            </Timeline>
-        </Flowbite>
+        return <>
+            {addressFrom}<br />
+            {addressTo}</>
     } else {
         return <div className="flex items-center space-x-4">
             <Skeleton className="h-20 w-2 rounded-full" />

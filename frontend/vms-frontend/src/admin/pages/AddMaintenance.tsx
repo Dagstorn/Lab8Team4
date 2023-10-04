@@ -25,33 +25,20 @@ const formSchema = z.object({
         message: "Lastname is required",
     }),
     middlename: z.string(),
-    govermentId: z.string().refine((val) => (val.length <= 12 && val.length >= 12), {
-        message: "Goverment ID should contain 12 digits",
-    }),
-    address: z.string().nonempty({
-        message: "Address is required",
-    }),
     phone: z.string().refine((val) => validator.isMobilePhone(val, 'kk-KZ'), {
         message: "Enter correct phone number",
     }),
     email: z.string().refine((val) => validator.isEmail(val), {
         message: "Enter correct email",
     }),
-    department: z.string().nonempty({
-        message: "Department is required",
-    }),
-    license: z.string().refine((val) => (val.length <= 6 && val.length >= 6), {
-        message: "License code should contain 6 digits",
-    }),
 })
 
-import { Separator } from "@/shared/shad-ui/ui/separator";
 import { useNavigate } from "react-router-dom";
 import { useHttp } from "@/shared/hooks/http-hook";
 import useAuth from "@/shared/hooks/useAuth";
 import { Loader2 } from "lucide-react";
 
-const DriverDetailPage = () => {
+const AddMaintenance = () => {
     const auth = useAuth();
     const navigate = useNavigate();
     const { loading, error, sendRequest, clearError } = useHttp();
@@ -62,12 +49,8 @@ const DriverDetailPage = () => {
             firstname: "",
             lastname: "",
             middlename: "",
-            govermentId: "",
-            address: "",
             phone: "",
             email: "",
-            department: "",
-            license: "",
         },
     })
     async function onSubmit(values: z.infer<typeof formSchema>) {
@@ -76,14 +59,15 @@ const DriverDetailPage = () => {
         clearError();
         try {
             // send task data to backend
-            await sendRequest('/api/drivers/add/', 'post', {
+            await sendRequest('/api/maintenance/add/', 'post', {
                 Authorization: `Bearer ${auth.tokens.access}`
             }, values)
-            navigate("/admin/drivers/");
+            navigate("/admin/staff");
             toast({
-                title: "Driver was added successfully!",
+                title: "Staff memmber was added successfully!",
             })
         } catch (err: any) {
+            console.log(err)
             // if any erors
             // show error toast message
             toast({
@@ -94,8 +78,7 @@ const DriverDetailPage = () => {
     }
     return (
         <>
-            <h1 className="text-2xl font-bold mb-4 text-center">Add driver</h1>
-            <Separator />
+            <h1 className="text-2xl font-bold mb-4 text-center">Add Maintenance Person</h1>
             {error ? <div className="flex justify-center">
                 <span className="text-red-500 justify-self-center">{error}</span>
             </div> : null}
@@ -141,32 +124,8 @@ const DriverDetailPage = () => {
                                 </FormItem>
                             )}
                         />
-                        <FormField
-                            control={form.control}
-                            name="govermentId"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Goverment ID</FormLabel>
-                                    <FormControl>
-                                        <Input {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="address"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Address</FormLabel>
-                                    <FormControl>
-                                        <Input {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
+
+
                         <FormField
                             control={form.control}
                             name="phone"
@@ -193,32 +152,8 @@ const DriverDetailPage = () => {
                                 </FormItem>
                             )}
                         />
-                        <FormField
-                            control={form.control}
-                            name="department"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Department</FormLabel>
-                                    <FormControl>
-                                        <Input {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="license"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Driver License code</FormLabel>
-                                    <FormControl>
-                                        <Input {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
+
+
                     </div>
                     {loading ?
                         <Button disabled className="mt-4 sm:w-full md:w-full lg:w-1/2 ">
@@ -235,4 +170,4 @@ const DriverDetailPage = () => {
     );
 };
 
-export default DriverDetailPage;
+export default AddMaintenance;

@@ -21,7 +21,6 @@ export interface Vehicle {
     license_plat: string,
     capacity: number,
     mileage: number
-    driver: Driver
 }
 export interface Appointment {
     id: number;
@@ -66,4 +65,35 @@ export interface point {
 export interface RoutePoints {
     start: point,
     end: point,
+}
+
+export interface FuelingPerson {
+    id: number;
+    name: String;
+    surname: String;
+    middle_name: String;
+    phone: String;
+    email: String;
+    password: String;
+}
+
+export interface MaintenancePerson {
+    id: number;
+    name: String;
+    surname: String;
+    middle_name: String;
+    phone: String;
+    email: String;
+    password: String;
+}
+
+export interface FuelingReport {
+    id: number;
+    vehicle: Vehicle;
+    image_before: string;
+    image_after: string;
+    date: string;
+    type: string;
+    amount: string;
+    cost: string;
 }

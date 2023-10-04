@@ -113,10 +113,10 @@ const AppointmentDetailPage = () => {
 
         try {
             // send task data to backend
-            await sendRequest('/api/tasks/create/', 'post', {
+            await sendRequest('/api/tasks/add/', 'post', {
                 Authorization: `Bearer ${auth.tokens.access}`
             }, values)
-            await sendRequest(`/api/tasks/deleteappointment/${appointment.id}/`, 'get', {
+            await sendRequest(`/api/tasks/${appointment.id}/deleteappointment/`, 'get', {
                 Authorization: `Bearer ${auth.tokens.access}`
             })
 
@@ -136,7 +136,7 @@ const AppointmentDetailPage = () => {
     }
 
     return (
-        <div className="aa h-full flex flex-col">
+        <div className="h-full flex flex-col">
             <div className="">
                 <h1 className="text-2xl font-bold mb-2">Create task based on appointment</h1>
                 <Separator />

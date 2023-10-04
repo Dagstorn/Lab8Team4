@@ -9,48 +9,21 @@ import {
     FileText,
 } from "lucide-react";
 import { NavLink } from "react-router-dom";
-interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> { }
+interface SidebarItem {
+    title: string,
+    href: string,
+    icon: JSX.Element
+}
+
+interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {
+    links: SidebarItem[]
+}
 
 
-const sidebarNavItems = [
-    {
-        title: "Main Dashboard",
-        href: "/admin/",
-        icon: <LayoutDashboard className="mr-2 h-4 w-4" />,
-    },
-    {
-        title: "Drivers List",
-        href: "/admin/drivers",
-        icon: <Users2 className="mr-2 h-4 w-4" />,
-    },
-    {
-        title: "Appointments",
-        href: "/admin/appointments",
-        icon: <AlarmClock className="mr-2 h-4 w-4" />,
-    },
-    {
-        title: "Driver Tasks & Jobs",
-        href: "/admin/tasks",
-        icon: <ListOrdered className="mr-2 h-4 w-4" />,
-    },
-    {
-        title: "Staff List",
-        href: "/admin/staff",
-        icon: <Users2 className="mr-2 h-4 w-4" />,
-    },
-    {
-        title: "Vehicles List",
-        href: "/admin/vehicles",
-        icon: <CarFront className="mr-2 h-4 w-4" />,
-    },
-    {
-        title: "Reports",
-        href: "/admin/reports",
-        icon: <FileText className="mr-2 h-4 w-4" />,
-    },
-]
 
-export function Sidebar({ className }: SidebarProps) {
+
+
+export function Sidebar({ className, links }: SidebarProps) {
     return (
         <div className={cn("pb-12", className)}>
             <div className="space-y-4 py-4">
@@ -60,7 +33,7 @@ export function Sidebar({ className }: SidebarProps) {
                     </h2>
                     <div className="space-y-1">
                         {
-                            sidebarNavItems.map((item) => (
+                            links.map((item) => (
                                 <NavLink key={item.href} to={item.href}>
                                     {({ isActive }) => (
                                         <Button

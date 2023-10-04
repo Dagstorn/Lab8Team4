@@ -6,29 +6,10 @@ import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure
 import { Chip } from "@nextui-org/react";
 import { useJsApiLoader } from "@react-google-maps/api";
 import { useEffect, useState } from "react";
-import { Timeline, Flowbite } from 'flowbite-react';
-import type { CustomFlowbiteTheme } from 'flowbite-react';
+
 interface Props {
     task: Task
 }
-
-const customTheme: CustomFlowbiteTheme = {
-    timeline: {
-        item: {
-            point: {
-                marker: {
-                    base: {
-                        vertical: "absolute -left-1.5 mt-1.5 h-3 w-3 rounded-full border-2 border-gray bg-blue-400"
-                    },
-                }
-            },
-            content: {
-                title: "text-xl-3 font-bold text-blue-500"
-            },
-        },
-
-    }
-};
 
 const TaskDetails = ({ task }: Props) => {
     // modal window for task details
@@ -90,26 +71,9 @@ const TaskDetails = ({ task }: Props) => {
                                     <span><b>Vehicle: </b>{`${task.car.make} ${task.car.model} ${task.car.year}`}</span>
                                     <span><b>Description: </b>{task.description}</span>
                                     <span ><b>Route: </b></span>
-                                    <Flowbite theme={{ theme: customTheme }}>
-                                        <Timeline className="mb-0 mt-1 ml-1 text-base">
-                                            <Timeline.Item className="mb-0">
-                                                <Timeline.Point />
-                                                <Timeline.Content>
-                                                    <Timeline.Title className="text-base">
-                                                        {fromPoint}
-                                                    </Timeline.Title>
-                                                </Timeline.Content>
-                                            </Timeline.Item>
-                                            <Timeline.Item className="mb-0">
-                                                <Timeline.Point />
-                                                <Timeline.Content>
-                                                    <Timeline.Title className="text-base">
-                                                        {toPoint}
-                                                    </Timeline.Title>
-                                                </Timeline.Content>
-                                            </Timeline.Item>
-                                        </Timeline>
-                                    </Flowbite>
+                                    {fromPoint}<br />
+                                    {toPoint}
+
                                 </div>
                             </ModalBody>
                             <ModalFooter>

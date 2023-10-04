@@ -31,11 +31,21 @@ import RoutesHistory from "./driver/pages/RoutesHistory.tsx";
 import Appointments from "./driver/pages/Appointments.tsx";
 import Report from "./driver/pages/Report.tsx";
 import DriverTasksPage from "./driver/pages/DriverTasksPage.tsx";
+import AddFueling from "./admin/pages/AddFueling.tsx";
+import AddMaintenance from "./admin/pages/AddMaintenance.tsx";
 interface tokenInt {
   refresh: string,
   access: string,
 }
-
+import { sidebarNavItems as adminLinks } from "@/admin/components/adminLinks.tsx"
+import { sidebarNavItems as fuelingLinks } from "@/staff/components/fuelingLinks.tsx"
+import { sidebarNavItems as maintenanceLinks } from "@/staff/components/maintenanceLinks.tsx"
+import FuelingPersonalPage from "./staff/pages/fueling/FuelingPersonalPage.tsx";
+import MaintenancePersonalPage from "./staff/pages/maintenance/MaintenancePersonalPage.tsx";
+import FuelingVehiclesList from "./staff/pages/fueling/FuelingVehiclesList.tsx";
+import MaintenanceVehiclesList from "./staff/pages/maintenance/MaintenanceVehiclesList.tsx";
+import AddFuelingReport from "./staff/pages/fueling/AddFuelingReport.tsx";
+import FuelingReports from "./staff/pages/fueling/FuelingReports.tsx";
 function App() {
   // global state holders for currently logged in user
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -157,7 +167,7 @@ function App() {
               <Route path="driver" element={<PersonalPageLayout />} >
                 <Route path="personal_page" element={<PersonalPage />} />
                 <Route path="tasks" element={<DriverTasksPage />} />
-                <Route path="task/:taskId/" element={<ViewTaskPage />} />
+                <Route path="tasks/:taskId/" element={<ViewTaskPage />} />
                 <Route path="routes_history" element={<RoutesHistory />} />
                 <Route path="appointments" element={<Appointments />} />
                 <Route path="report" element={<Report />} />
@@ -167,7 +177,7 @@ function App() {
           </Route>
 
           <Route element={<RequireAuth allowedRole={"admin"} />}>
-            <Route path="admin" element={<AdminLayout />}>
+            <Route path="admin" element={<AdminLayout links={adminLinks} />}>
               <Route path="" element={<MainDashboard />} />
 
               <Route path="drivers" element={<DriversListPage />} />
@@ -178,7 +188,28 @@ function App() {
               <Route path="tasks" element={<TasksPage />} />
               <Route path="tasks/add" element={<AddTaskPage />} />
               <Route path="staff" element={<StaffListPage />} />
+              <Route path="staff/add/fueling" element={<AddFueling />} />
+              <Route path="staff/add/maintenance" element={<AddMaintenance />} />
               <Route path="vehicles" element={<VehiclesListPage />} />
+            </Route>
+          </Route>
+
+          <Route element={<RequireAuth allowedRole={"fueling"} />}>
+            <Route path="fueling" element={<AdminLayout links={fuelingLinks} />}>
+              <Route path="" element={<FuelingPersonalPage />} />
+              <Route path="vehicles" element={<FuelingVehiclesList />} />
+              <Route path="vehicles/:vid/add_fueling_report" element={<AddFuelingReport />} />
+              <Route path="reports" element={<FuelingReports />} />
+            </Route>
+          </Route>
+
+          <Route element={<RequireAuth allowedRole={"maintenance"} />}>
+            <Route path="maintenance" element={<AdminLayout links={maintenanceLinks} />}>
+              <Route path="" element={<MaintenancePersonalPage />} />
+              <Route path="vehicles" element={<MaintenanceVehiclesList />} />
+              <Route path="vehicles/:vid/schedule_job" element={<VehiclesListPage />} />
+              <Route path="vehicles/:vid/report_job" element={<VehiclesListPage />} />
+              <Route path="reports" element={<DriversListPage />} />
             </Route>
           </Route>
 

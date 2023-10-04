@@ -92,7 +92,7 @@ const AddTaskPage = () => {
 
         try {
             // send task data to backend
-            await sendRequest('/api/tasks/create/', 'post', {
+            await sendRequest('/api/tasks/add/', 'post', {
                 Authorization: `Bearer ${auth.tokens.access}`
             }, values)
             reset();
