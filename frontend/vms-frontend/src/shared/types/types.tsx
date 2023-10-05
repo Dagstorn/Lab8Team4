@@ -97,3 +97,12 @@ export interface FuelingReport {
     amount: string;
     cost: string;
 }
+
+export interface MaintenanceJob {
+    id: number;
+    vehicle: Vehicle;
+    maintenance_person: MaintenancePerson;
+    description: string;
+    status: string;
+    date: string;
+}

@@ -4,6 +4,7 @@ import { Button } from "@/shared/shad-ui/ui/button";
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@nextui-org/react";
 import { Separator } from "@/shared/shad-ui/ui/separator";
 import { Link } from "react-router-dom";
+import { getVehicleInfo } from "@/shared/utils/utils";
 
 interface Props {
     vehicle: Vehicle
@@ -42,28 +43,7 @@ const VehicleDetails = ({ vehicle }: Props) => {
                                 <Separator />
                             </ModalHeader>
                             <ModalBody>
-                                <div className="flex flex-col text-base">
-                                    <div className="flex">
-                                        <span className="w-2/6 font-bold mr-2">Year:</span>
-                                        <span>{vehicle.year}</span>
-                                    </div>
-                                    <div className="flex">
-                                        <span className="w-2/6 font-bold mr-2">Body type:</span>
-                                        <span>{vehicle.type}</span>
-                                    </div>
-                                    <div className="flex">
-                                        <span className="w-2/6 font-bold mr-2">Sitting Capacity:</span>
-                                        <span>{vehicle.capacity}</span>
-                                    </div>
-                                    <div className="flex">
-                                        <span className="w-2/6 font-bold mr-2">Mileage:</span>
-                                        <span>{vehicle.mileage}</span>
-                                    </div>
-                                    <div className="flex">
-                                        <span className="w-2/6 font-bold mr-2">License plate:</span>
-                                        <span>{vehicle.license_plat}</span>
-                                    </div>
-                                </div>
+                                {getVehicleInfo(vehicle)}
                             </ModalBody>
                             <ModalFooter>
                                 <Button color="danger" variant="ghost" onClick={onClose}>

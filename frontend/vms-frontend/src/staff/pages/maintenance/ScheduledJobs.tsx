@@ -1,4 +1,3 @@
-import { Button } from "@/shared/shad-ui/ui/button";
 import {
     Table,
     TableBody,
@@ -7,21 +6,20 @@ import {
     TableRow,
 } from "@/shared/shad-ui/ui/table";
 import { Separator } from "@/shared/shad-ui/ui/separator";
-import { Vehicle } from "@/shared/types/types";
+import { MaintenanceJob } from "@/shared/types/types";
 
 import { Spinner } from "@nextui-org/react";
-import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import useAuth from "@/shared/hooks/useAuth";
 import { useHttp } from "@/shared/hooks/http-hook";
 import { useToast } from "@/shared/shad-ui/ui/use-toast";
-import VehicleDetails from "@/staff/components/fueling/VehicleDetails";
+import JobDetails from "@/staff/components/maintenance/JobDetails";
 
-const FuelingVehiclesList = () => {
+const ScheduledJobs = () => {
     const auth = useAuth();
 
     // state which stores drivers list
-    const [vehicles, setVehicles] = useState<Vehicle[]>([]);
+    const [jobs, setJobs] = useState<MaintenanceJob[]>([]);
     const { loading, error, sendRequest, clearError } = useHttp();
     const { toast } = useToast();
 
@@ -35,11 +33,11 @@ const FuelingVehiclesList = () => {
             // try and catch to catch errors if any
             try {
                 // get data with custom Hook
-                const responseData = await sendRequest('/api/vehicles', 'get', {
+                const responseData = await sendRequest('/api/maintenance/jobs', 'get', {
                     Authorization: `Bearer ${auth.tokens.access}`
                 })
                 // set data to response result
-                setVehicles(responseData)
+                setJobs(responseData)
             } catch (err: any) {
                 // show error toast message
                 toast({
@@ -56,8 +54,7 @@ const FuelingVehiclesList = () => {
     return (
         <>
             <div className="flex justify-between">
-                <h1 className="text-2xl font-bold mb-4">Vehicles list</h1>
-
+                <h1 className="text-2xl font-bold mb-4">Scheduled Jobs list</h1>
             </div>
 
             <Separator />
@@ -67,17 +64,16 @@ const FuelingVehiclesList = () => {
             <Table>
                 <TableHeader>
                     <TableRow>
-                        <TableHead>Driver</TableHead>
-                        <TableHead>Body type</TableHead>
-                        <TableHead>Year</TableHead>
-                        <TableHead>License plate number</TableHead>
+                        <TableHead>Vehicle</TableHead>
+                        <TableHead>Date</TableHead>
+                        <TableHead>Description</TableHead>
                         <TableHead className="text-right">Action</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
                     {
-                        vehicles.map((vehicle) => {
-                            return <VehicleDetails vehicle={vehicle} />
+                        jobs.map((job) => {
+                            return <JobDetails job={job} />
                         })
                     }
 
@@ -88,4 +84,4 @@ const FuelingVehiclesList = () => {
     );
 };
 
-export default FuelingVehiclesList;
+export default ScheduledJobs;

@@ -9,12 +9,12 @@ export const sidebarNavItems = [
 
     {
         title: "Vehicles list",
-        href: "/admin/tasks",
+        href: "/maintenance/vehicles",
         icon: <CarFront className="mr-2 h-4 w-4" />,
     },
     {
         title: "Scheduled jobs",
-        href: "/admin/staff",
+        href: "/maintenance/jobs",
         icon: <AlarmClock className="mr-2 h-4 w-4" />,
     },
     {

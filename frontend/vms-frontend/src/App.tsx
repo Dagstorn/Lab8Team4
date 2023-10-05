@@ -46,6 +46,8 @@ import FuelingVehiclesList from "./staff/pages/fueling/FuelingVehiclesList.tsx";
 import MaintenanceVehiclesList from "./staff/pages/maintenance/MaintenanceVehiclesList.tsx";
 import AddFuelingReport from "./staff/pages/fueling/AddFuelingReport.tsx";
 import FuelingReports from "./staff/pages/fueling/FuelingReports.tsx";
+import ScheduledJobs from "./staff/pages/maintenance/ScheduledJobs.tsx";
+import VehicleReport from "./admin/pages/VehicleReport.tsx";
 function App() {
   // global state holders for currently logged in user
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -191,6 +193,7 @@ function App() {
               <Route path="staff/add/fueling" element={<AddFueling />} />
               <Route path="staff/add/maintenance" element={<AddMaintenance />} />
               <Route path="vehicles" element={<VehiclesListPage />} />
+              <Route path="vehicles/:vid/report" element={<VehicleReport />} />
             </Route>
           </Route>
 
@@ -207,9 +210,7 @@ function App() {
             <Route path="maintenance" element={<AdminLayout links={maintenanceLinks} />}>
               <Route path="" element={<MaintenancePersonalPage />} />
               <Route path="vehicles" element={<MaintenanceVehiclesList />} />
-              <Route path="vehicles/:vid/schedule_job" element={<VehiclesListPage />} />
-              <Route path="vehicles/:vid/report_job" element={<VehiclesListPage />} />
-              <Route path="reports" element={<DriversListPage />} />
+              <Route path="jobs" element={<ScheduledJobs />} />
             </Route>
           </Route>
 

@@ -1,3 +1,5 @@
+import { Vehicle } from "../types/types";
+
 export const formatTimeRange = (startISO: string, endISO: string) => {
     const startDate = new Date(startISO);
     const endDate = new Date(endISO);
@@ -94,4 +96,29 @@ export const formatSingleDateTime = (dateTimeString: string) => {
     const minutes = String(date.getMinutes()).padStart(2, '0');
 
     return `${year}${month} ${day}, ${hours}:${minutes}`;
+}
+
+export const getVehicleInfo = (vehicle: Vehicle) => {
+    return <div className="flex flex-col text-base">
+        <div className="flex">
+            <span className="w-2/6 font-bold mr-2">Year:</span>
+            <span>{vehicle.year}</span>
+        </div>
+        <div className="flex">
+            <span className="w-2/6 font-bold mr-2">Body type:</span>
+            <span>{vehicle.type}</span>
+        </div>
+        <div className="flex">
+            <span className="w-2/6 font-bold mr-2">Sitting Capacity:</span>
+            <span>{vehicle.capacity}</span>
+        </div>
+        <div className="flex">
+            <span className="w-2/6 font-bold mr-2">Mileage:</span>
+            <span>{formatDistance(vehicle.mileage.toString())}</span>
+        </div>
+        <div className="flex">
+            <span className="w-2/6 font-bold mr-2">License plate:</span>
+            <span>{vehicle.license_plat}</span>
+        </div>
+    </div>
 }

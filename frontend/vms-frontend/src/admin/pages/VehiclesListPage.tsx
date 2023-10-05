@@ -16,6 +16,7 @@ import { useEffect, useState } from "react";
 import useAuth from "@/shared/hooks/useAuth";
 import { useHttp } from "@/shared/hooks/http-hook";
 import { useToast } from "@/shared/shad-ui/ui/use-toast";
+import { formatDistance } from "@/shared/utils/utils";
 
 const VehiclesListPage = () => {
     const auth = useAuth();
@@ -67,9 +68,10 @@ const VehiclesListPage = () => {
             <Table>
                 <TableHeader>
                     <TableRow>
-                        <TableHead>Driver</TableHead>
+                        <TableHead>Make & Model</TableHead>
                         <TableHead>Body type</TableHead>
                         <TableHead>Year</TableHead>
+                        <TableHead>Mileage</TableHead>
                         <TableHead>License plate number</TableHead>
                         <TableHead className="text-right">Action</TableHead>
                     </TableRow>
@@ -90,10 +92,11 @@ const VehiclesListPage = () => {
 
                                 </TableCell>
                                 <TableCell>{vehicle.year}</TableCell>
+                                <TableCell>{formatDistance(vehicle.mileage.toString())}</TableCell>
                                 <TableCell>{vehicle.license_plat}</TableCell>
 
                                 <TableCell className="text-right">
-                                    <Link to={`/admin/vehicles/${vehicle.id}/detail`}><Button variant="outline">View details</Button></Link>
+                                    <Link to={`/admin/vehicles/${vehicle.id}/report`}><Button variant="outline">View details</Button></Link>
                                 </TableCell>
                             </TableRow>
                         })
