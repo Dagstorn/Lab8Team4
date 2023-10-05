@@ -1,18 +1,21 @@
-from datetime import datetime
-from django.shortcuts import get_object_or_404
-from django.utils import timezone
 import pytz
+from datetime import datetime
+from django.utils import timezone
+from django.contrib.auth.models import User
+from password_generator import PasswordGenerator
+
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError
 from rest_framework import status
-from .serializers import DriverSerializer, VehicleSerializer, AppointmentSerializer, TaskSerializer, CompletedRouteSerializer, FuelingSerializer, MaintenanceSerializer, FuelingProofSerializer
+
+from .serializers import DriverSerializer, VehicleSerializer, AppointmentSerializer, TaskSerializer, CompletedRouteSerializer, FuelingSerializer, MaintenanceSerializer, FuelingProofSerializer, MaintenanceJobSerializer
+
 from accounts.models import Driver, FuelingPerson, MaintenancePerson
-from vehicles.models import Vehicle, FuelingProof
+from vehicles.models import Vehicle, FuelingProof, MaintenanceJob, MaintenanceRecord
 from tasks.models import Appointment, Task, CompletedRoutes
-from rest_framework.permissions import IsAuthenticated, IsAdminUser
-from password_generator import PasswordGenerator
-from django.contrib.auth.models import User
+
 
 
 def do_time_windows_overlap(time_start1, time_end1, time_start2, time_end2):
@@ -195,6 +198,18 @@ def getVehicle(request, vid):
         raise ValidationError("Wrong vehicle id", code=status.HTTP_400_BAD_REQUEST)
 
     serializer = VehicleSerializer(vehicle, many=False)
+    return Response(serializer.data)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def getVehicleFuelingReports(request, vid):
+    try:
+        vehicle = Vehicle.objects.get(id=vid)
+        reports = FuelingProof.objects.filter(vehicle=vehicle)
+    except:
+        raise ValidationError("Wrong vehicle id", code=status.HTTP_400_BAD_REQUEST)
+
+    serializer = FuelingProofSerializer(reports, many=True)
     return Response(serializer.data)
 
 
@@ -416,9 +431,13 @@ def completeTask(request, tid):
         time_spent = request.data.get('time_spent')
         timeEnded = request.data.get('timeEnded')
         task.time_to = timeEnded
-        task.save()
 
         distance_covered = request.data.get('distance_covered')
+        vehicle = task.car
+        vehicle.mileage = vehicle.mileage + distance_covered
+        vehicle.save()
+        task.save()
+
         comp_route = CompletedRoutes.objects.create(
             driver = request.user.driver_acc,
             from_point = task.from_point,
@@ -478,4 +497,44 @@ def addFuelingReport(request):
         raise ValidationError("Wrong data format or missing data", code=status.HTTP_400_BAD_REQUEST)
     
     serializer = FuelingProofSerializer(new_obj, many=False)
+    return Response(serializer.data)
+
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def getMaintenanceJobs(request):
+    if getRole(request.user) != 'maintenance':
+        raise ValidationError("You don't have correct role to make an API call", code=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        jobs = MaintenanceJob.objects.filter(maintenance_person=request.user.maintenance_acc)
+    except:
+        raise ValidationError("Wrong data format or missing data", code=status.HTTP_400_BAD_REQUEST)
+    
+    serializer = MaintenanceJobSerializer(jobs, many=True)
+    return Response(serializer.data)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def addMaintenanceJob(request):
+    if getRole(request.user) != 'maintenance':
+        raise ValidationError("You don't have correct role to make an API call", code=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        veh_id = request.data.get('vehicle')
+        vehicle = Vehicle.objects.get(id=veh_id)
+        schedule_time = datetime.strptime(request.data.get('datetime'), "%Y-%m-%dT%H:%M")
+
+        new_obj = MaintenanceJob.objects.create(
+            vehicle=vehicle,
+            description = request.data.get('description'),
+            maintenance_person=request.user.maintenance_acc,
+            date=timezone.make_aware(schedule_time, timezone.get_current_timezone()),
+        )
+
+    except:
+        raise ValidationError("Wrong data format or missing data", code=status.HTTP_400_BAD_REQUEST)
+    
+    serializer = MaintenanceJobSerializer(new_obj, many=False)
     return Response(serializer.data)

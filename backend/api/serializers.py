@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from accounts.models import Driver, FuelingPerson, MaintenancePerson
-from vehicles.models import Vehicle, FuelingProof
+from vehicles.models import Vehicle, FuelingProof, MaintenanceJob
 from tasks.models import Appointment, Task, CompletedRoutes
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
@@ -67,6 +67,13 @@ class FuelingProofSerializer(serializers.ModelSerializer):
         model = FuelingProof
         fields = '__all__'
 
+class MaintenanceJobSerializer(serializers.ModelSerializer):
+    vehicle = VehicleSerializer(many=False)
+    maintenance_person = MaintenanceSerializer(many=False)
+
+    class Meta:
+        model = MaintenanceJob
+        fields = '__all__'
 
 # Tasks Serializers
 class AppointmentSerializer(serializers.ModelSerializer):

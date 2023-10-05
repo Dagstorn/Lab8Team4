@@ -19,6 +19,7 @@ urlpatterns = [
     
     path('vehicles/', views.getVehicles),
     path('vehicles/<str:vid>/', views.getVehicle),
+    path('vehicles/<str:vid>/fueling/', views.getVehicleFuelingReports),
     path('appointments/', views.getAppointments),
     path('appointments/add/', views.makeAppointment),
     path('appointments/<str:aid>/', views.getAppointment),
@@ -46,5 +47,9 @@ urlpatterns = [
     # fueling
     path('fueling/reports/', views.getFuelingReports),
     path('fueling/reports/add/', views.addFuelingReport),
+
+    # maintenance
+    path('maintenance/jobs/', views.getMaintenanceJobs),
+    path('maintenance/jobs/add/', views.addMaintenanceJob),
 
 ]
