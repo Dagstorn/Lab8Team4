@@ -6,6 +6,7 @@ from password_generator import PasswordGenerator
 
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.decorators import api_view, permission_classes
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError
 from rest_framework import status
@@ -181,13 +182,15 @@ def getMaintenance(request):
     return Response(serializer.data)
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
 def getVehicles(request):
+    paginator = PageNumberPagination()
+    paginator.page_size = 5
     if getRole(request.user) == 'driver': # prohibited only for driver
         raise ValidationError("You don't have correct role to make an API call", code=status.HTTP_400_BAD_REQUEST)
     vehicles = Vehicle.objects.all()
-    serializer = VehicleSerializer(vehicles, many=True)
-    return Response(serializer.data)
+    result_page = paginator.paginate_queryset(vehicles, request)
+    serializer = VehicleSerializer(result_page, many=True)
+    return paginator.get_paginated_response(serializer.data)
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -348,6 +351,7 @@ def getDriver(request):
     driver = request.user.driver_acc
     serializer = DriverSerializer(driver, many=False)
     return Response(serializer.data)
+
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def getTasks(request):
