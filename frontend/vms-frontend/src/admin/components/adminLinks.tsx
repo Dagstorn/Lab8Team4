@@ -38,7 +38,7 @@ export const sidebarNavItems = [
     },
     {
         title: "Auction Vehicles",
-        href: "/admin/vehicles",
+        href: "/admin/auction/",
         icon: <CarFront className="mr-2 h-4 w-4" />,
     },
 ]

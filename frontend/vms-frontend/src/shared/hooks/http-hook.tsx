@@ -12,6 +12,7 @@ export const useHttp = () => {
         setLoading(true);
 
         try {
+
             const response = await axios({
                 method: method.toLowerCase(),
                 url: url,
@@ -26,25 +27,28 @@ export const useHttp = () => {
             return response.data;
         } catch (err: any) {
             setLoading(false);
-            if (err.response) {
-                // we got response but its status is not 200
-                let errMes = "";
-                if (err?.response?.status == 401) {
-                    errMes = "Wrong credentials. Try again!";
-                } else if (err?.response?.status == 400) {
-                    console.log(err)
-                    errMes = "Unauthorized access!";
-
-                } else {
-                    errMes = "Something went wrong. Try again!";
-                }
-                setError(errMes)
-                throw new Error(errMes);
+            if (err.code === 'ERR_CANCELED') {
+                throw err;
             } else {
-                // we did not get response at all
-                setError(err.message)
-                throw new Error(err);
+                if (err.response) {
+                    // we got response but its status is not 200
+                    let errMes = "";
+                    if (err?.response?.status == 401) {
+                        errMes = "Wrong credentials. Try again!";
+                    } else if (err?.response?.status == 400) {
+                        console.log(err)
+                        errMes = "Unauthorized access!";
+
+                    } else {
+                        errMes = "Something went wrong. Try again!";
+                    }
+                } else {
+                    // we did not get response at all
+                    setError(err.message)
+                    throw new Error(err);
+                }
             }
+
         }
     }, []);
 

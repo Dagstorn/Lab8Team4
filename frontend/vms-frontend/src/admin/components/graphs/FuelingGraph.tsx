@@ -1,12 +1,14 @@
 import { useHttp } from "@/shared/hooks/http-hook";
 import useAuth from "@/shared/hooks/useAuth";
+import { Button } from "@/shared/shad-ui/ui/button";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/shared/shad-ui/ui/select";
 import { useToast } from "@/shared/shad-ui/ui/use-toast";
-import { FuelingReport, Vehicle } from "@/shared/types/types";
+import { FuelingReport } from "@/shared/types/types";
 import { Spinner } from "@nextui-org/react";
-import { useEffect, useState } from "react";
+import axios from "axios";
+import { useEffect, useRef, useState } from "react";
 import { Bar, BarChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-
+import html2canvas from 'html2canvas';
 // defining type of Props that this component accepts
 interface Props {
     vehicleId: number
@@ -27,6 +29,8 @@ const FuelingGraph = ({ vehicleId }: Props) => {
     // library to show toast messagess
     const { toast } = useToast();
 
+
+
     // retrieve data from api
     const getData = async () => {
         // clear error at start to get rid of any not actual previous errors
@@ -42,12 +46,13 @@ const FuelingGraph = ({ vehicleId }: Props) => {
             // draw graph with current year
             drawFuelingGraph(fuelingReportsData, new Date().getFullYear());
         } catch (err: any) {
-            console.log(err)
-            // show error toast message
-            toast({
-                title: err.message,
-                variant: "destructive",
-            })
+            if (!axios.isCancel(err)) {
+                // show error toast message
+                toast({
+                    title: err.message + "23e24324" + axios.isCancel(err),
+                    variant: "destructive",
+                })
+            }
         }
     }
 
@@ -90,7 +95,6 @@ const FuelingGraph = ({ vehicleId }: Props) => {
                 return null;
             }
         }).filter((item) => item !== null); // remove null values
-        console.log(rawData)
         // combine data from same mongth into one
         // before we could have had: [{'oct': 35, 'sep': 20, 'oct': 10}]
         // and we want to joint the data for october and other same month to properly represnet on a graph
@@ -122,6 +126,7 @@ const FuelingGraph = ({ vehicleId }: Props) => {
         if (vehicleId) {
             getData();
         }
+
     }, [vehicleId]);
 
     return (
@@ -140,12 +145,17 @@ const FuelingGraph = ({ vehicleId }: Props) => {
                         </SelectGroup>
                     </SelectContent>
                 </Select>
+
             </div>
             {error ? <div className="flex justify-center">
                 <span className="text-red-500 justify-self-center">{error}</span>
             </div> : null}
             {loading ? <Spinner /> : <ResponsiveContainer width="100%" height="80%">
-                <BarChart width={500} height={300} barSize={20} margin={{ top: 15, right: 50, bottom: 5, left: 0 }}
+                <BarChart
+                    width={500}
+                    height={300}
+                    barSize={20}
+                    margin={{ top: 15, right: 50, bottom: 5, left: 0 }}
                     data={fuelingReportsGraphData}
                 >
                     <XAxis dataKey="date" />

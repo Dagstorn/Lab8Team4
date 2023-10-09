@@ -106,3 +106,11 @@ export interface MaintenanceJob {
     status: string;
     date: string;
 }
+
+
+export interface PaginatorObj {
+    count: number;
+    page_size: number;
+    next: string | null;
+    previous: string | null;
+}
