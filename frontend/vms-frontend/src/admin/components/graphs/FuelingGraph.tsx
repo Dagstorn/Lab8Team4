@@ -1,24 +1,20 @@
 import { useHttp } from "@/shared/hooks/http-hook";
 import useAuth from "@/shared/hooks/useAuth";
-import { Button } from "@/shared/shad-ui/ui/button";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/shared/shad-ui/ui/select";
 import { useToast } from "@/shared/shad-ui/ui/use-toast";
 import { FuelingReport } from "@/shared/types/types";
 import { Spinner } from "@nextui-org/react";
 import axios from "axios";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { Bar, BarChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import html2canvas from 'html2canvas';
-// defining type of Props that this component accepts
-interface Props {
-    vehicleId: number
-}
+
 // defining type of each element in data array for representing a graph
 interface fuelingGraphDataElement {
     date: string;
     amount: number;
 }
-const FuelingGraph = ({ vehicleId }: Props) => {
+
+const FuelingGraph = ({ vehicleId }: { vehicleId: number }) => {
     // get auth context to access currently logged in user data
     const auth = useAuth();
     // states to store data 
@@ -28,7 +24,6 @@ const FuelingGraph = ({ vehicleId }: Props) => {
     const { loading, error, sendRequest, clearError } = useHttp();
     // library to show toast messagess
     const { toast } = useToast();
-
 
 
     // retrieve data from api
@@ -126,7 +121,6 @@ const FuelingGraph = ({ vehicleId }: Props) => {
         if (vehicleId) {
             getData();
         }
-
     }, [vehicleId]);
 
     return (

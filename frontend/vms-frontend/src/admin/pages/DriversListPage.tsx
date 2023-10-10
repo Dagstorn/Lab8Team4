@@ -15,8 +15,7 @@ import useAuth from "@/shared/hooks/useAuth";
 import { Spinner } from "@nextui-org/react";
 import { useHttp } from "@/shared/hooks/http-hook";
 import { useToast } from "@/shared/shad-ui/ui/use-toast";
-
-
+import DriverDetailRow from "../components/DriverDetailRow";
 const DriversListPage = () => {
   const auth = useAuth();
 
@@ -51,6 +50,11 @@ const DriversListPage = () => {
     getData();
   }, []);
 
+  const removeDriverFromList = (driverId: number) => {
+    const updatedDrivers = drivers.filter(driver => driver.id !== driverId);
+    setDrivers(updatedDrivers);
+  }
+
   return (
     <>
       <div className="flex justify-between">
@@ -74,18 +78,7 @@ const DriversListPage = () => {
 
         <TableBody>
           {
-            drivers.map((driver) => {
-              return <TableRow key={driver.id}>
-                <TableCell className="font-medium">
-                  {driver.name} {driver.middle_name} {driver.surname}
-                </TableCell>
-                <TableCell>{driver.phone}</TableCell>
-                <TableCell>{driver.email}</TableCell>
-                <TableCell className="text-right">
-                  <Link to={`/admin/drivers/${driver.id}/detail`}><Button variant="outline">View details</Button></Link>
-                </TableCell>
-              </TableRow>
-            })
+            drivers.map((driver) => <DriverDetailRow driver={driver} removeDriverFromList={removeDriverFromList} />)
           }
 
         </TableBody>

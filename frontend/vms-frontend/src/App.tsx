@@ -48,6 +48,7 @@ import AddFuelingReport from "./staff/pages/fueling/AddFuelingReport.tsx";
 import FuelingReports from "./staff/pages/fueling/FuelingReports.tsx";
 import ScheduledJobs from "./staff/pages/maintenance/ScheduledJobs.tsx";
 import VehicleReport from "./admin/pages/VehicleReport.tsx";
+import EditDriverPage from "./admin/pages/EditDriverPage.tsx";
 function App() {
   // global state holders for currently logged in user
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -184,6 +185,7 @@ function App() {
 
               <Route path="drivers" element={<DriversListPage />} />
               <Route path="drivers/add" element={<AddDriverPage />} />
+              <Route path="drivers/:driverID/edit" element={<EditDriverPage />} />
               <Route path="drivers/:driverID/detail" element={<DriverDetailPage />} />
               <Route path="appointments" element={<AppointmentsPage />} />
               <Route path="appointments/:appointmentId" element={<AppointmentDetailPage />} />

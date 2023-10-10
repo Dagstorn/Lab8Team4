@@ -107,7 +107,7 @@ const VehiclesListPage = () => {
         ));
 
         return (
-            <div className="flex justify-center items-center gap-2">
+            <div className="flex justify-center items-center gap-2 ">
                 {elementsArray}
             </div>
         );

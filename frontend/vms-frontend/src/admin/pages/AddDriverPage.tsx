@@ -76,7 +76,7 @@ const DriverDetailPage = () => {
         clearError();
         try {
             // send task data to backend
-            await sendRequest('/api/drivers/add/', 'post', {
+            await sendRequest('/api/drivers/', 'post', {
                 Authorization: `Bearer ${auth.tokens.access}`
             }, values)
             navigate("/admin/drivers/");
