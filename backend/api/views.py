@@ -44,48 +44,103 @@ def getRole(user):
         role = "maintenance"
     else:
         role = "default1"
-
     return role
 
 
 
 ## -- For API calls From Admin -- ##
 
-@api_view(['POST'])
+
+
+# Retrieve list of drivers or create new Driver object
+@api_view(['GET', 'POST'])
+# @permission_classes([IsAuthenticated])
+def drivers_list(request):
+    # check for user role
+    # if getRole(request.user) != 'admin':
+        # return Response({'message': "You don't have correct role to make an API call"}, status=status.HTTP_403_FORBIDDEN)
+    if request.method == 'GET':        
+        # get all drivers and return serialized data
+        drivers = Driver.objects.all()
+        serializer = DriverSerializer(drivers, many=True)
+        return Response(serializer.data)
+    elif request.method == 'POST':
+        try:
+            # initiate random strong password generator
+            pwgen = PasswordGenerator()
+            # get new random password
+            password = pwgen.generate()
+            # get email from POST data
+            email = request.data.get('email')
+            # create new User object with email and password
+            user = User.objects.create_user(username=email, email=email, password=password)
+            # create new Driver object using User object we just created and POST data
+            new_driver = Driver.objects.create(
+                user = user,
+                goverment_id = request.data.get('govermentId'),
+                department = request.data.get('department'),
+                name = request.data.get('firstname'),
+                surname = request.data.get('lastname'),
+                middle_name = request.data.get('middlename'),
+                address = request.data.get('address'),
+                phone = request.data.get('phone'),
+                email = request.data.get('email'),
+                license_code = request.data.get('license'),
+                password = password,
+            )
+        except:
+            return Response({'message': "Wrong data format or missing data"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        serializer = DriverSerializer(new_driver, many=False)
+        return Response(serializer.data)
+
+
+# Handle single driver methods
+# retrieve single driver data, update driver data, delete driver
+@api_view(['GET', 'PUT', 'PATCH', 'DELETE'])
 @permission_classes([IsAuthenticated])
-def addDriver(request):
+def driver_detail(request, pk):
+    # check for user role
     if getRole(request.user) != 'admin':
-        raise ValidationError("You don't have correct role to make an API call", code=status.HTTP_400_BAD_REQUEST)
+        return Response({'message': "You don't have correct role to make an API call"}, status=status.HTTP_403_FORBIDDEN)
     
     try:
-        pwgen = PasswordGenerator()
-        password = pwgen.generate()
+        # get driver by unique identifier
+        driver = Driver.objects.get(pk=pk)
+    except Exception as e:
+        # in case if there is no driver with such id, or any other unexpected eror
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-        email = request.data.get('email')
+    # process different methods
+    if request.method == 'GET':
+        # serialize driver data and convert it to appropriate format
+        serializer = DriverSerializer(driver, many=False)
+        return Response(serializer.data)
+    elif request.method in ['PUT', 'PATCH']:
+        if 'email' in request.data:
+            request.data.pop('email')
+        if 'user' in request.data:
+            request.data.pop('user')
+            
+        serializer = DriverSerializer(driver, data=request.data, partial=True)
+        print(request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        else:
+            return Response({'error': "Something went wrong!"}, status=status.HTTP_400_BAD_REQUEST)
+    elif request.method == 'DELETE':
+        driver.delete()
+        return Response({'message': 'Driver object deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
 
-        user = User.objects.create_user(
-            username=email, 
-            email=email, 
-            password=password
-        )
-        new_driver = Driver.objects.create(
-            user = user,
-            goverment_id = request.data.get('govermentId'),
-            department = request.data.get('department'),
-            name = request.data.get('firstname'),
-            surname = request.data.get('lastname'),
-            middle_name = request.data.get('middlename'),
-            address = request.data.get('address'),
-            phone = request.data.get('phone'),
-            email = request.data.get('email'),
-            license_code = request.data.get('license'),
-            password = password,
-        )
-    except:
-        raise ValidationError("Wrong data format or missing data", code=status.HTTP_400_BAD_REQUEST)
 
-    serializer = DriverSerializer(new_driver, many=False)
-    return Response(serializer.data)
+
+
+
+
+
+
+
 
 
 @api_view(['POST'])
@@ -150,14 +205,6 @@ def addMaintenance(request):
 
 
 
-@api_view(['GET'])
-@permission_classes([IsAuthenticated])
-def getDrivers(request):
-    if getRole(request.user) != 'admin':
-        raise ValidationError("You don't have correct role to make an API call", code=status.HTTP_400_BAD_REQUEST)
-    drivers = Driver.objects.all()
-    serializer = DriverSerializer(drivers, many=True)
-    return Response(serializer.data)
 
 
 

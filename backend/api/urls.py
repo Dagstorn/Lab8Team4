@@ -12,10 +12,12 @@ urlpatterns = [
     path('users/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('users/token/verify/', TokenVerifyView.as_view(), name='token_verify'),
 
-
     # from admin
-    path('drivers/', views.getDrivers),
-    path('drivers/add/', views.addDriver),
+
+    path('drivers/', views.drivers_list),
+    path('drivers/<str:pk>/', views.driver_detail),
+
+
     
     path('vehicles/', views.getVehicles),
     path('vehicles/<str:vid>/', views.getVehicle),
