@@ -1,4 +1,5 @@
 import pytz
+import calendar
 from datetime import datetime
 from django.utils import timezone
 from django.contrib.auth.models import User
@@ -14,8 +15,9 @@ from rest_framework import status
 from .serializers import DriverSerializer, VehicleSerializer, AppointmentSerializer, TaskSerializer, CompletedRouteSerializer, FuelingSerializer, MaintenanceSerializer, FuelingProofSerializer, MaintenanceJobSerializer
 
 from accounts.models import Driver, FuelingPerson, MaintenancePerson
-from vehicles.models import Vehicle, FuelingProof, MaintenanceJob, MaintenanceRecord
-from tasks.models import Appointment, Task, CompletedRoutes
+from vehicles.models import Vehicle, FuelingProof, MaintenanceJob, MaintenanceRecord, VehicleReport
+from tasks.models import Appointment, Task, CompletedRoute
+
 
 
 
@@ -132,6 +134,151 @@ def driver_detail(request, pk):
     elif request.method == 'DELETE':
         driver.delete()
         return Response({'message': 'Driver object deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
+
+
+
+def getFuelingData(vehicle):
+    report = dict()
+    # get all associated fueling reports
+    fueling_reports = vehicle.fueling_proofs.all().order_by('date')
+    # iterate through fueling reports and save relevant data for constructing graph such as date and fuel amount
+    # the goal is to construct object with keys as years and each will have list which contains objects in format of month and fuel amount
+    # example:
+    # {
+    #   2023: [ {'Oct': 50}, {'Sep': 95} ],
+    #   2022: [ {'Sep': 15}, {'Nov': 43} ]
+    # }
+    for fuel_rep in fueling_reports:
+        # append data under keys with months
+        if fuel_rep.date.year in report:
+            report[fuel_rep.date.year].append({'month': fuel_rep.date.strftime('%B'), 'amount': fuel_rep.amount})
+        else:
+            report[fuel_rep.date.year] = [{'month': fuel_rep.date.strftime('%B'), 'amount': fuel_rep.amount}]
+    
+    # iterate through all data and combine values for same keys
+    for year in report:
+        result = {}
+        for entry in report[year]:
+            month = entry["month"]
+            amount = entry["amount"]
+            
+            if month in result:
+                result[month] += amount
+            else:
+                result[month] = amount
+
+        combined_data = [{"month": month, "amount": result[month]} for month in result]
+        report[year] = combined_data
+
+    return report
+
+def getMaintenanceData(vehicle):
+    report = dict()
+    # get all associated maintenance records
+    maintenance_records = vehicle.maintenance_records.all().order_by('date')
+    for rec in maintenance_records:
+        # append data under keys with months
+        if rec.date.year in report:
+            report[rec.date.year].append({'month': rec.date.strftime('%B'), 'count': 1, 'cost': rec.cost})
+        else:
+            report[rec.date.year] = [{'month': rec.date.strftime('%B'), 'count': 1, 'cost': rec.cost}]
+    
+    # iterate through all data and combine values for same keys
+    for year in report:
+        result = {}
+        for entry in report[year]:
+            month = entry["month"]
+            count = entry["count"]
+            cost = entry["cost"]
+            
+            if month in result:
+                result[month]["count"] += count
+                result[month]["cost"] += cost
+            else:
+                result[month] = {"count": count, "cost": cost}
+
+        # Convert the result back to a list of dictionaries
+        combined_data = [{"month": month, "count": data["count"], "cost": data["cost"]} for month, data in result.items()]
+        report[year] = combined_data
+
+    # return data
+    return report
+            
+
+def getUsageData(vehicle):
+    report = dict()
+    # get all associated usage records
+    completed_routes = vehicle.completed_routes.all().order_by('time_from')
+    for record in completed_routes:
+        # append data under keys with months
+        if record.time_from.year in report:
+            report[record.time_from.year].append({'month': record.time_from.strftime('%B'), 'count': 1, 'distance': record.distance_covered})
+        else:
+            report[record.time_from.year] = [{'month': record.time_from.strftime('%B'), 'count': 1, 'distance': record.distance_covered}]
+    
+    # iterate through all data and combine values for same keys
+    for year in report:
+        result = {}
+        for entry in report[year]:
+            month = entry["month"]
+            count = entry["count"]
+            distance = entry["distance"]
+            
+            if month in result:
+                result[month]["count"] += count
+                result[month]["distance"] += distance
+            else:
+                result[month] = {"count": count, "distance": distance}
+
+        # Convert the result back to a list of dictionaries
+        combined_data = [{"month": month, "count": data["count"], "distance": data["distance"]} for month, data in result.items()]
+        report[year] = combined_data
+    # return data
+    return report
+
+
+@api_view(['GET'])
+# @permission_classes([IsAuthenticated])
+def getReportData(request, pk):
+    try:
+        # get vehicle by vehicle id from the url
+        vehicle = Vehicle.objects.get(pk=pk)
+        # create report dictionary to store all information
+        report = dict()
+        # get data
+        report['fueling'] = getFuelingData(vehicle=vehicle)
+        report['maintenance'] = getMaintenanceData(vehicle=vehicle)
+        report['usage'] = getUsageData(vehicle=vehicle)
+        # return data
+        return Response(report)
+    except:
+        return Response({'error': "Vehicle does not exist"}, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['POST'])
+def getReportDataSavePDF(request, pk):
+    try:
+        # get vehicle by vehicle id from the url
+        vehicle = Vehicle.objects.get(pk=pk)
+        # check if there is already reports on vehicle
+        if len(VehicleReport.objects.filter(vehicle=vehicle)) > 0:
+            # if vehicle has reports update the file and date
+            veh_reprot = vehicle.reports.all()[0]
+            veh_reprot.report_file = request.FILES.get('pdfFile')
+            veh_reprot.date = datetime.now().strftime('%Y-%m-%d')
+        else:
+            # otherwise create new report
+            VehicleReport.objects.create(
+                vehicle = vehicle,
+                report_file = request.FILES.get('pdfFile')
+            )
+
+        return Response({'status': 'ok'})
+    except:
+        return Response({'error': "Vehicle does not exist"}, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+
 
 
 
@@ -261,6 +408,8 @@ def getVehicleFuelingReports(request, vid):
 
     serializer = FuelingProofSerializer(reports, many=True)
     return Response(serializer.data)
+
+
 
 
 @api_view(['GET'])
@@ -462,7 +611,7 @@ def getRoutesHistory(request):
         raise ValidationError("You don't have correct role to make an API call", code=status.HTTP_400_BAD_REQUEST)
 
     try:
-        routes = CompletedRoutes.objects.filter(driver=request.user.driver_acc)
+        routes = CompletedRoute.objects.filter(driver=request.user.driver_acc)
     except:
         raise ValidationError("Wrong data format or missing data", code=status.HTTP_400_BAD_REQUEST)
     
@@ -489,7 +638,7 @@ def completeTask(request, tid):
         vehicle.save()
         task.save()
 
-        comp_route = CompletedRoutes.objects.create(
+        comp_route = CompletedRoute.objects.create(
             driver = request.user.driver_acc,
             from_point = task.from_point,
             to_point = task.to_point,

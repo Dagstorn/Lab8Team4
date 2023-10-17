@@ -22,6 +22,13 @@ urlpatterns = [
     path('vehicles/', views.getVehicles),
     path('vehicles/<str:vid>/', views.getVehicle),
     path('vehicles/<str:vid>/fueling/', views.getVehicleFuelingReports),
+    path('vehicles/<str:pk>/report_data/', views.getReportData),
+
+
+    path('vehicles/<str:pk>/report_data/savePDF', views.getReportDataSavePDF),
+
+
+
     path('appointments/', views.getAppointments),
     path('appointments/add/', views.makeAppointment),
     path('appointments/<str:aid>/', views.getAppointment),

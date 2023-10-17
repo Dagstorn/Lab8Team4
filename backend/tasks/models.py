@@ -43,13 +43,14 @@ class Task(models.Model):
         ordering = ['time_from']
 
 
-class CompletedRoutes(models.Model):
+class CompletedRoute(models.Model):
     driver = models.ForeignKey(Driver, related_name="routes", on_delete=models.CASCADE, null=True)
+    vehicle = models.ForeignKey('vehicles.Vehicle', on_delete=models.SET_NULL, related_name="completed_routes", null=True)
     from_point = models.JSONField(verbose_name="departure point")
     to_point = models.JSONField(verbose_name="arrival point")
     time_from = models.DateTimeField(auto_now_add=False, blank=True, null=True)
     time_to = models.DateTimeField(auto_now_add=False, blank=True, null=True)
-    distance_covered = models.CharField(default="")
+    distance_covered = models.FloatField()
     time_spent = models.CharField(default="")
 
     class Meta:
