@@ -127,11 +127,11 @@ const VehiclesListPage = () => {
             <Table>
                 <TableHeader>
                     <TableRow>
-                        <TableHead>Make & Model</TableHead>
-                        <TableHead>Body type</TableHead>
-                        <TableHead>Year</TableHead>
-                        <TableHead>Mileage</TableHead>
-                        <TableHead>License plate number</TableHead>
+                        <TableHead className="w-1/4">Make & Model</TableHead>
+                        <TableHead className="w-1/5">Body type</TableHead>
+                        <TableHead className="">Year</TableHead>
+                        <TableHead className="">Mileage</TableHead>
+                        <TableHead className="">License plate number</TableHead>
                         <TableHead className="text-right">Action</TableHead>
                     </TableRow>
                 </TableHeader>
