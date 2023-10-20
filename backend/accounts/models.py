@@ -48,3 +48,10 @@ class MaintenancePerson(models.Model):
 
 
 
+class DriverReport(models.Model):
+    driver = models.ForeignKey(Driver, on_delete=models.CASCADE, null=True, blank=True, related_name="reports")
+    report_file = models.FileField(upload_to='reports/vehicle/')
+    date = models.DateField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-date"]

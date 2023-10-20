@@ -18,7 +18,7 @@ class Appointment(models.Model):
         return f"{self.driver.name}'s appointment"
     
     class Meta:
-        ordering = ['time_from']
+        ordering = ['-time_from']
 
 
 class Task(models.Model):
@@ -30,8 +30,8 @@ class Task(models.Model):
     driver = models.ForeignKey(Driver, related_name="tasks", on_delete=models.CASCADE, null=True)
     car = models.ForeignKey('vehicles.Vehicle', on_delete=models.CASCADE, related_name="assigned_task", null=True)
     description = models.TextField(default='')
-    from_point = models.JSONField(verbose_name="departure point")
-    to_point = models.JSONField(verbose_name="arrival point")
+    from_point = models.CharField(verbose_name="departure point", max_length=200)
+    to_point = models.CharField(verbose_name="arrival point", max_length=200)
     time_from = models.DateTimeField(auto_now_add=False, blank=True, null=True)
     time_to = models.DateTimeField(auto_now_add=False, blank=True, null=True)
     status = models.CharField(max_length=20, choices=STATUS_TYPES, default="Assigned")
@@ -51,7 +51,7 @@ class CompletedRoute(models.Model):
     time_from = models.DateTimeField(auto_now_add=False, blank=True, null=True)
     time_to = models.DateTimeField(auto_now_add=False, blank=True, null=True)
     distance_covered = models.FloatField()
-    time_spent = models.CharField(default="")
+    time_spent = models.PositiveIntegerField(default=0)
 
     class Meta:
         ordering = ['-time_from']

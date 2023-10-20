@@ -12,14 +12,16 @@ urlpatterns = [
     path('users/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('users/token/verify/', TokenVerifyView.as_view(), name='token_verify'),
 
-    # from admin
-
+    # from 
     path('drivers/', views.drivers_list),
+    path('drivers/paginated/', views.getDriversPaginated),
     path('drivers/<str:pk>/', views.driver_detail),
-
+    path('drivers/<str:pk>/report_data/', views.getDriverReportData),
+    path('drivers/<str:pk>/report_data/savePDF', views.driverDataSavePDF),
 
     
     path('vehicles/', views.getVehicles),
+    path('vehicles/paginated/', views.getVehiclesPaginated),
     path('vehicles/<str:vid>/', views.getVehicle),
     path('vehicles/<str:vid>/fueling/', views.getVehicleFuelingReports),
     path('vehicles/<str:pk>/report_data/', views.getReportData),
@@ -29,7 +31,7 @@ urlpatterns = [
 
 
 
-    path('appointments/', views.getAppointments),
+    path('appointments/paginated/', views.getAppointments),
     path('appointments/add/', views.makeAppointment),
     path('appointments/<str:aid>/', views.getAppointment),
 
@@ -39,19 +41,24 @@ urlpatterns = [
     path('getstaff/maintenance/', views.getMaintenance),
 
 
-    # from driver
-    path('driver/', views.getDriver),
-    path('tasks/', views.getTasks),
-    path('tasks/add/', views.createTask),
-    path('tasks/<str:tid>/', views.getTask),
-    path('tasks/<str:tid>/update/', views.updateTask),
+
+    path('tasks/paginated/', views.getTasks),
     path('tasks/checktime/', views.getTimes),
+    path('tasks/add/', views.createTask),
+    path('tasks/<str:pk>/', views.task_detail),
+
+    path('tasks/<str:tid>/update/', views.updateTask),
+
     path('tasks/<str:aid>/deleteappointment/', views.deleteProcessedAppointment),
     
     path('driver/tasks/', views.getDriverTasks),
     path('routes_history/', views.getRoutesHistory),
     path('tasks/<str:tid>/complete/', views.completeTask),
 
+
+
+    # from driver
+    path('driver/', views.getDriver),
 
     # fueling
     path('fueling/reports/', views.getFuelingReports),

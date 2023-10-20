@@ -12,12 +12,13 @@ from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError
 from rest_framework import status
 
+from .decorators import user_type_required
+
 from .serializers import DriverSerializer, VehicleSerializer, AppointmentSerializer, TaskSerializer, CompletedRouteSerializer, FuelingSerializer, MaintenanceSerializer, FuelingProofSerializer, MaintenanceJobSerializer
 
-from accounts.models import Driver, FuelingPerson, MaintenancePerson
+from accounts.models import Driver, FuelingPerson, MaintenancePerson, DriverReport
 from vehicles.models import Vehicle, FuelingProof, MaintenanceJob, MaintenanceRecord, VehicleReport
 from tasks.models import Appointment, Task, CompletedRoute
-
 
 
 
@@ -35,20 +36,6 @@ def do_time_windows_overlap(time_start1, time_end1, time_start2, time_end2):
     else:
         return False
     
-def getRole(user):
-    if hasattr(user, 'admin_acc'):
-        role = "admin"
-    elif hasattr(user, 'driver_acc'):
-        role = "driver"
-    elif hasattr(user, 'fueling_acc'):
-        role = "fueling"
-    elif hasattr(user, 'maintenance_acc'):
-        role = "maintenance"
-    else:
-        role = "default1"
-    return role
-
-
 
 ## -- For API calls From Admin -- ##
 
@@ -56,14 +43,13 @@ def getRole(user):
 
 # Retrieve list of drivers or create new Driver object
 @api_view(['GET', 'POST'])
-# @permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated])
+@user_type_required(['admin'])
 def drivers_list(request):
-    # check for user role
-    # if getRole(request.user) != 'admin':
-        # return Response({'message': "You don't have correct role to make an API call"}, status=status.HTTP_403_FORBIDDEN)
-    if request.method == 'GET':        
-        # get all drivers and return serialized data
+    if request.method == 'GET':   
+        # get all drivers
         drivers = Driver.objects.all()
+        # serialze and return data
         serializer = DriverSerializer(drivers, many=True)
         return Response(serializer.data)
     elif request.method == 'POST':
@@ -96,16 +82,30 @@ def drivers_list(request):
         serializer = DriverSerializer(new_driver, many=False)
         return Response(serializer.data)
 
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+@user_type_required(['admin'])
+def getDriversPaginated(request):
+    # initialize paginator and get paginator instance
+    paginator = PageNumberPagination()
+    # set number of results returned per 1 request
+    paginator.page_size = 8
+    # get all drivers
+    drivers = Driver.objects.all()
+    # paginate drivers list
+    result_page = paginator.paginate_queryset(drivers, request)
+    # serialze and return data
+    serializer = DriverSerializer(result_page, many=True)
+    return paginator.get_paginated_response(serializer.data)     
+
+
 
 # Handle single driver methods
 # retrieve single driver data, update driver data, delete driver
 @api_view(['GET', 'PUT', 'PATCH', 'DELETE'])
 @permission_classes([IsAuthenticated])
+@user_type_required(['admin'])
 def driver_detail(request, pk):
-    # check for user role
-    if getRole(request.user) != 'admin':
-        return Response({'message': "You don't have correct role to make an API call"}, status=status.HTTP_403_FORBIDDEN)
-    
     try:
         # get driver by unique identifier
         driver = Driver.objects.get(pk=pk)
@@ -132,8 +132,98 @@ def driver_detail(request, pk):
         else:
             return Response({'error': "Something went wrong!"}, status=status.HTTP_400_BAD_REQUEST)
     elif request.method == 'DELETE':
+        user = driver.user
         driver.delete()
+        user.delete()
         return Response({'message': 'Driver object deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
+
+
+def getCompletedTaksData(driver):
+    report = dict()
+    # get all associated completed routes which represent completed tasks
+    routes = driver.routes.all().order_by('time_from')
+
+    for record in routes:
+        # make sure that there is an array to store value under each key
+        if not record.time_from.year in report:
+            report[record.time_from.year] = []
+
+        # stores values under year key
+        report[record.time_from.year].append({
+            'month': record.time_from.strftime('%B'), 
+            'count': 1, 
+            'distance': record.distance_covered,
+            'time_spent': record.time_spent,
+        })
+    
+    # iterate through all data and combine values for same keys
+    for year in report:
+        result = {}
+        for entry in report[year]:
+            month = entry["month"]
+            count = entry["count"]
+            distance = entry["distance"]
+            time_spent = entry["time_spent"]
+            
+            if month in result:
+                result[month]["count"] += count
+                result[month]["distance"] += distance
+                result[month]["time_spent"] += time_spent
+            else:
+                result[month] = {"count": count, "distance": distance, "time_spent": time_spent}
+
+        # Convert the result back to a list of dictionaries
+        combined_data = [{"month": month, "count": data["count"], "distance": data["distance"], "time_spent": data["time_spent"]} for month, data in result.items()]
+        report[year] = combined_data
+
+    return report
+
+
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+@user_type_required(['admin'])
+def getDriverReportData(request, pk):
+    try:
+        # get driver by driver id from the url
+        driver = Driver.objects.get(pk=pk)
+        # create report dictionary to store all information
+        report = dict()
+        # get data
+
+        report['completed_tasks'] = getCompletedTaksData(driver=driver)
+        
+        
+        # return data
+        return Response(report)
+    except:
+        return Response({'error': "Driver does not exist"}, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+@user_type_required(['admin'])
+def driverDataSavePDF(request, pk):
+    try:
+        # get driver by driver id from the url
+        driver = Driver.objects.get(pk=pk)
+        # check if there is already reports on driver
+        if len(DriverReport.objects.filter(driver=driver)) > 0:
+            # if vehicle has reports update the file and date
+            driver_reprot = driver.reports.all()[0]
+            driver_reprot.report_file = request.FILES.get('pdfFile')
+            driver_reprot.date = datetime.now().strftime('%Y-%m-%d')
+        else:
+            # otherwise create new report
+            DriverReport.objects.create(
+                driver = driver,
+                report_file = request.FILES.get('pdfFile')
+            )
+
+        return Response({'status': 'ok'})
+    except:
+        return Response({'error': "Driver does not exist"}, status=status.HTTP_400_BAD_REQUEST)
+
 
 
 
@@ -238,7 +328,8 @@ def getUsageData(vehicle):
 
 
 @api_view(['GET'])
-# @permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated])
+@user_type_required(['admin'])
 def getReportData(request, pk):
     try:
         # get vehicle by vehicle id from the url
@@ -255,6 +346,8 @@ def getReportData(request, pk):
         return Response({'error': "Vehicle does not exist"}, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['POST'])
+@permission_classes([IsAuthenticated])
+@user_type_required(['admin'])
 def getReportDataSavePDF(request, pk):
     try:
         # get vehicle by vehicle id from the url
@@ -292,10 +385,8 @@ def getReportDataSavePDF(request, pk):
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
+@user_type_required(['admin'])
 def addFueling(request):
-    if getRole(request.user) != 'admin':
-        raise ValidationError("You don't have correct role to make an API call", code=status.HTTP_400_BAD_REQUEST)
-    
     # try:
     pwgen = PasswordGenerator()
     password = pwgen.generate()
@@ -322,10 +413,8 @@ def addFueling(request):
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
+@user_type_required(['admin'])
 def addMaintenance(request):
-    if getRole(request.user) != 'admin':
-        raise ValidationError("You don't have correct role to make an API call", code=status.HTTP_400_BAD_REQUEST)
-    
     try:
         pwgen = PasswordGenerator()
         password = pwgen.generate()
@@ -357,10 +446,8 @@ def addMaintenance(request):
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
+@user_type_required(['admin'])
 def getFueling(request):
-    if getRole(request.user) != 'admin':
-        raise ValidationError("You don't have correct role to make an API call", code=status.HTTP_400_BAD_REQUEST)
-    
     staff = FuelingPerson.objects.all()
     serializer = FuelingSerializer(staff, many=True)
     return Response(serializer.data)
@@ -368,26 +455,37 @@ def getFueling(request):
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
+@user_type_required(['admin'])
 def getMaintenance(request):
-    if getRole(request.user) != 'admin':
-        raise ValidationError("You don't have correct role to make an API call", code=status.HTTP_400_BAD_REQUEST)
     staff = MaintenancePerson.objects.all()
     serializer = MaintenanceSerializer(staff, many=True)
     return Response(serializer.data)
 
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
+@user_type_required(['admin', 'fueling', 'maintenance'])
 def getVehicles(request):
+    vehicles = Vehicle.objects.all()
+    
+    serializer = VehicleSerializer(vehicles, many=True)
+    return Response(serializer.data)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+@user_type_required(['admin', 'fueling', 'maintenance'])
+def getVehiclesPaginated(request):
     paginator = PageNumberPagination()
     paginator.page_size = 5
-    if getRole(request.user) == 'driver': # prohibited only for driver
-        raise ValidationError("You don't have correct role to make an API call", code=status.HTTP_400_BAD_REQUEST)
+
     vehicles = Vehicle.objects.all()
     result_page = paginator.paginate_queryset(vehicles, request)
     serializer = VehicleSerializer(result_page, many=True)
     return paginator.get_paginated_response(serializer.data)
 
+
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
+@user_type_required(['admin', 'fueling', 'maintenance'])
 def getVehicle(request, vid):
     try:
         vehicle = Vehicle.objects.get(id=vid)
@@ -415,17 +513,19 @@ def getVehicleFuelingReports(request, vid):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def getAppointments(request):
+    paginator = PageNumberPagination()
+    paginator.page_size = 8
     appointments = Appointment.objects.all()
-    serializer = AppointmentSerializer(appointments, many=True)
-    return Response(serializer.data)
+    result_page = paginator.paginate_queryset(appointments, request)
+    serializer = AppointmentSerializer(result_page, many=True)
+    return paginator.get_paginated_response(serializer.data)
 
 
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
+@user_type_required(['admin'])
 def getAppointment(request, aid):
-    if getRole(request.user) != 'admin':
-        raise ValidationError("You don't have correct role to make an API call", code=status.HTTP_400_BAD_REQUEST)
     try:
         appointment = Appointment.objects.get(id=aid)
     except:
@@ -436,14 +536,12 @@ def getAppointment(request, aid):
 
 
 
-@api_view(['POST'])
-@permission_classes([IsAuthenticated])
+@api_view(['GET', 'POST'])
 def getTimes(request):
-    if getRole(request.user) != 'admin':
-        raise ValidationError("You don't have correct role to make an API call", code=status.HTTP_400_BAD_REQUEST)
     t1 = request.data.get('startTime')
     t2 = request.data.get('endTime')
-
+    print(t1)
+    print(t2)
     drivers = Driver.objects.all()
     res = []
     for d in drivers:
@@ -451,22 +549,14 @@ def getTimes(request):
             t3 = t.time_from.astimezone(pytz.timezone('Asia/Almaty')).replace(microsecond=0).strftime('%Y-%m-%dT%H:%M')
             t4 = t.time_to.astimezone(pytz.timezone('Asia/Almaty')).replace(microsecond=0).strftime('%Y-%m-%dT%H:%M')
             if do_time_windows_overlap(t1, t2, str(t3),str(t4)):
-                print("found one")
-                res.append({
-                    'driver': d.id,
-                    'car': t.car.id
-                })
-
+                res.append({'driver': d.id,'car': t.car.id})
     return Response(res)
 
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
+@user_type_required(['admin'])
 def createTask(request):
-    if getRole(request.user) != 'admin':
-        raise ValidationError("You don't have correct role to make an API call", code=status.HTTP_400_BAD_REQUEST)
-
-
     try:
         driver_id = request.data.get('driver')
         driver_obj = Driver.objects.get(id=driver_id)
@@ -496,9 +586,8 @@ def createTask(request):
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
+@user_type_required(['admin'])
 def deleteProcessedAppointment(request, aid):
-    if getRole(request.user) != 'admin':
-        raise ValidationError("You don't have correct role to make an API call", code=status.HTTP_400_BAD_REQUEST)
     try:
         appointment = Appointment.objects.get(id=aid)
         print(appointment)
@@ -517,10 +606,8 @@ def deleteProcessedAppointment(request, aid):
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
+@user_type_required(['driver'])
 def makeAppointment(request):
-    if getRole(request.user) != 'driver':
-        raise ValidationError("You don't have correct role to make an API call", code=status.HTTP_400_BAD_REQUEST)
-
     try:
         new_appointment = Appointment.objects.create(
             currentPosition = request.data.get('currentPosition'),
@@ -541,42 +628,77 @@ def makeAppointment(request):
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
+@user_type_required(['driver'])
 def getDriver(request):
-    if getRole(request.user) != 'driver':
-        raise ValidationError("You don't have correct role to make an API call", code=status.HTTP_400_BAD_REQUEST)
     driver = request.user.driver_acc
     serializer = DriverSerializer(driver, many=False)
     return Response(serializer.data)
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
 def getTasks(request):
-    if getRole(request.user) != 'admin':
-        raise ValidationError("You don't have correct role to make an API call", code=status.HTTP_400_BAD_REQUEST)
+    paginator = PageNumberPagination()
+    paginator.page_size = 8
     tasks = Task.objects.all()
-    serializer = TaskSerializer(tasks, many=True)
-    return Response(serializer.data)
+    result_page = paginator.paginate_queryset(tasks, request)
+    serializer = TaskSerializer(result_page, many=True)
+    return paginator.get_paginated_response(serializer.data)
 
-@api_view(['GET'])
+
+
+@api_view(['GET', 'PUT', 'PATCH', 'DELETE'])
 @permission_classes([IsAuthenticated])
-def getTask(request, tid):
-    if getRole(request.user) != 'driver':
-        raise ValidationError("You don't have correct role to make an API call", code=status.HTTP_400_BAD_REQUEST)
+@user_type_required(['driver', 'admin'])
+def task_detail(request, pk):
     try:
-        task = Task.objects.get(id=tid)
-    except:
-        raise ValidationError("Task does not exist", code=status.HTTP_400_BAD_REQUEST)
+        # get task by unique identifier
+        task = Task.objects.get(pk=pk)
+    except Exception as e:
+        # in case if there is no driver with such id, or any other unexpected eror
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-    serializer = TaskSerializer(task, many=False)
-    return Response(serializer.data)
+    # process different methods
+    if request.method == 'GET':
+        # serialize driver data and convert it to appropriate format
+        serializer = TaskSerializer(task, many=False)
+        return Response(serializer.data)
+    elif request.method in ['PUT', 'PATCH']: 
+        # since driver and vehicle/car are nested objects we need to process them separately, since it is not done by default
+        if 'driver' in request.data:
+            try:
+                # get driver by its id and remove driver data from request.data since we already processing it
+                driver = Driver.objects.get(id=request.data.pop('driver')) 
+                # manually update task driver field and save changes
+                task.driver = driver
+                task.save()
+            except:
+                return Response({'error': "Driver doesn't exist!"}, status=status.HTTP_400_BAD_REQUEST)
+
+        if 'car' in request.data:
+            try:
+                # get car by its id and remove car data from request.data since we already processing it
+                car = Vehicle.objects.get(id=request.data.pop('car')) 
+                # manually update task car field and save changes
+                task.car = car
+                task.save()
+            except:
+                return Response({'error': "Vehicle doesn't exist!"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # if there are changes to other simple fields, they will be handled automatically
+        serializer = TaskSerializer(task, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        else:
+            return Response({'error': "Wrong data format!"}, status=status.HTTP_400_BAD_REQUEST)
+    elif request.method == 'DELETE':
+        task.delete()
+        return Response({'message': 'Task deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
+
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
+@user_type_required(['driver'])
 def updateTask(request, tid):
-    if getRole(request.user) != 'driver':
-        raise ValidationError("You don't have correct role to make an API call", code=status.HTTP_400_BAD_REQUEST)
-    
-    
     try:
         task = Task.objects.get(id=tid)
         task.status = request.data.get('status')
@@ -591,10 +713,8 @@ def updateTask(request, tid):
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
+@user_type_required(['driver'])
 def getDriverTasks(request):
-    if getRole(request.user) != 'driver':
-        raise ValidationError("You don't have correct role to make an API call", code=status.HTTP_400_BAD_REQUEST)
-
     try:
         tasks = Task.objects.filter(driver=request.user.driver_acc, status="Assigned")
     except:
@@ -606,10 +726,8 @@ def getDriverTasks(request):
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
+@user_type_required(['driver'])
 def getRoutesHistory(request):
-    if getRole(request.user) != 'driver':
-        raise ValidationError("You don't have correct role to make an API call", code=status.HTTP_400_BAD_REQUEST)
-
     try:
         routes = CompletedRoute.objects.filter(driver=request.user.driver_acc)
     except:
@@ -621,10 +739,8 @@ def getRoutesHistory(request):
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
+@user_type_required(['driver'])
 def completeTask(request, tid):
-    if getRole(request.user) != 'driver':
-        raise ValidationError("You don't have correct role to make an API call", code=status.HTTP_400_BAD_REQUEST)
-
     try:
         task = Task.objects.get(id=tid)
         task.status = "Completed"
@@ -659,10 +775,8 @@ def completeTask(request, tid):
 # Fueling
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
+@user_type_required(['fueling'])
 def getFuelingReports(request):
-    if getRole(request.user) != 'fueling':
-        raise ValidationError("You don't have correct role to make an API call", code=status.HTTP_400_BAD_REQUEST)
-
     try:
         reports = request.user.fueling_acc.fueling_proofs.all()
     except:
@@ -674,10 +788,8 @@ def getFuelingReports(request):
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
+@user_type_required(['fueling'])
 def addFuelingReport(request):
-    if getRole(request.user) != 'fueling':
-        raise ValidationError("You don't have correct role to make an API call", code=status.HTTP_400_BAD_REQUEST)
-
     try:
         veh_id = request.data.get('car')
         vehicle = Vehicle.objects.get(id=veh_id)
@@ -703,10 +815,8 @@ def addFuelingReport(request):
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
+@user_type_required(['maintenance'])
 def getMaintenanceJobs(request):
-    if getRole(request.user) != 'maintenance':
-        raise ValidationError("You don't have correct role to make an API call", code=status.HTTP_400_BAD_REQUEST)
-
     try:
         jobs = MaintenanceJob.objects.filter(maintenance_person=request.user.maintenance_acc)
     except:
@@ -717,10 +827,8 @@ def getMaintenanceJobs(request):
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
+@user_type_required(['maintenance'])
 def addMaintenanceJob(request):
-    if getRole(request.user) != 'maintenance':
-        raise ValidationError("You don't have correct role to make an API call", code=status.HTTP_400_BAD_REQUEST)
-
     try:
         veh_id = request.data.get('vehicle')
         vehicle = Vehicle.objects.get(id=veh_id)

@@ -89,7 +89,6 @@ class TaskSerializer(serializers.ModelSerializer):
         model = Task
         fields = '__all__'
 
-
 class CompletedRouteSerializer(serializers.ModelSerializer):
     driver = DriverSerializer(many=False)
     class Meta:
