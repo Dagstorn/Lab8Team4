@@ -3,7 +3,7 @@ import axios from "axios";
 
 export const useHttp = () => {
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState<any>();
+    const [error, setError] = useState<any>(null);
     const activeHttpRequests = useRef<AbortController[]>([]);
 
     const sendRequest = useCallback(async (url: string, method: string = 'GET', headers: any = {}, postValues: any = null) => {
@@ -12,7 +12,6 @@ export const useHttp = () => {
         setLoading(true);
 
         try {
-
             const response = await axios({
                 method: method.toLowerCase(),
                 url: url,
@@ -23,14 +22,17 @@ export const useHttp = () => {
 
             setLoading(false);
             setError('');
-
             return response.data;
+
+
         } catch (err: any) {
             setLoading(false);
+
             if (err.code === 'ERR_CANCELED') {
                 throw err;
             } else {
                 if (err.response) {
+
                     // we got response but its status is not 200
                     let errMes = "";
                     if (err?.response?.status == 401) {
@@ -42,7 +44,11 @@ export const useHttp = () => {
                     } else {
                         errMes = "Something went wrong. Try again!";
                     }
+                    setError(errMes)
+                    throw new Error(errMes);
+
                 } else {
+
                     // we did not get response at all
                     setError(err.message)
                     throw new Error(err);

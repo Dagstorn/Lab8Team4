@@ -166,7 +166,7 @@ const ViewTaskPage = () => {
             try {
                 const now = new Date();
                 const startTime = new Date(Date.parse(task.time_from));
-                const time_spent: number = Math.abs(Math.floor((now.getTime() - startTime.getTime()) / 60000));
+                const time_spent: number = Math.abs(Math.floor((now.getTime() - startTime.getTime()) / (60 * 60 * 1000)));
                 const timeEnded = now.toISOString();
                 const distance_covered = await calculateDistance(JSON.parse(task.from_point), JSON.parse(task.to_point))
 

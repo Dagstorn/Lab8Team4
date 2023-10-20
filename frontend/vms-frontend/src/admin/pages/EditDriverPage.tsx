@@ -6,11 +6,12 @@ import { useToast } from "@/shared/shad-ui/ui/use-toast";
 import { Driver } from "@/shared/types/types";
 import { useEffect, useState } from "react";
 import { FieldValues, useForm } from "react-hook-form";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 const EditDriverPage = () => {
     const driverID = useParams().driverID;
     const auth = useAuth();
+    const navigate = useNavigate();
 
     const [driver, setDriver] = useState<Driver>();
     const { sendRequest, clearError } = useHttp();
@@ -52,15 +53,15 @@ const EditDriverPage = () => {
             clearError();
             try {
                 // send task data to backend
-                const updatedDriver = await sendRequest(`/api/drivers/${driverID}/`, 'patch', {
+                await sendRequest(`/api/drivers/${driverID}/`, 'patch', {
                     Authorization: `Bearer ${auth.tokens.access}`
                 }, values)
-                // navigate("/admin/drivers/");
                 toast({
-                    title: "Driver was added successfully!",
+                    title: "Changes saved!",
                 })
-                console.log(updatedDriver);
-                getDriver();
+                navigate(`/admin/drivers/${driverID}/detail`);
+
+                // getDriver();
             } catch (err: any) {
                 // if any erors
                 // show error toast message
@@ -180,6 +181,7 @@ const EditDriverPage = () => {
                 </div>
 
             </div>
+
 
         </div>
     )

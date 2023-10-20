@@ -75,6 +75,7 @@ const AppointmentDetailPage = () => {
                     startTime: formatDateTime(appointmentData.time_from),
                     endTime: formatDateTime(appointmentData.time_to)
                 })
+
                 setNotAvailableCars(new Set(notAvailable.map((obj: { driver: number, car: number }) => obj.car)))
                 setVehicles(vehiclesData);
                 // set data to response result

@@ -16,6 +16,7 @@ import { useHttp } from "@/shared/hooks/http-hook";
 import { DateTimeInput } from "@/shared/components/DateTimeInput"
 import { toast } from "@/shared/shad-ui/ui/use-toast";
 import { Spinner } from "@nextui-org/react";
+import { useNavigate } from "react-router-dom";
 const formSchema = z.object({
     currentPosition: z.string().nonempty({
         message: "This is required information",
@@ -36,6 +37,7 @@ const formSchema = z.object({
 
 const MakeAppointmentPage = () => {
     const auth = useAuth();
+    const navigate = useNavigate();
     const { loading, error, sendRequest, clearError } = useHttp();
 
     // let decoded_data: any = jwt_decode(auth.tokens.access);
@@ -48,22 +50,19 @@ const MakeAppointmentPage = () => {
             carPereferences: '',
             numberOfPeople: 1,
             additionalInfo: '',
-            startDate: new Date().toISOString().slice(0, 16),
-            endDate: new Date().toISOString().slice(0, 16),
         },
     })
+
     async function onSubmit(values: z.infer<typeof formSchema>) {
         clearError();
         try {
-            // get data with custom Hook
-            const driverData = await sendRequest('/api/driver', 'get', {
-                Authorization: `Bearer ${auth.tokens.access}`
-            })
-            // set data to response result
-            console.log(driverData)
-            const responseData = await sendRequest('/api/appointments/add/', 'post', {
+            await sendRequest('/api/appointments/add/', 'post', {
                 Authorization: `Bearer ${auth.tokens.access}`
             }, values)
+            toast({
+                title: "Appointment is submitted successfully!",
+            })
+            navigate('/driver/personal_page/')
         } catch (err: any) {
             // show error toast message
             toast({

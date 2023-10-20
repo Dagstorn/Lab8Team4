@@ -16,6 +16,8 @@ import { useEffect, useState } from "react";
 import { useHttp } from "@/shared/hooks/http-hook";
 import { useToast } from "@/shared/shad-ui/ui/use-toast";
 import { Skeleton } from "@/shared/shad-ui/ui/skeleton";
+import FadeTransition from "../components/FadeTransition";
+import { Spinner } from "@nextui-org/react";
 
 const StaffListPage = () => {
     const auth = useAuth();
@@ -61,7 +63,13 @@ const StaffListPage = () => {
     return (
         <>
             <div className="flex justify-between">
-                <h1 className="text-2xl font-bold mb-4">Staff list</h1>
+
+                <div className="flex gap-4">
+                    <h1 className="text-2xl font-bold mb-4">Staff list</h1>
+                    {loading && <div className="">
+                        <Spinner></Spinner>
+                    </div>}
+                </div>
                 <div >
                     <Link className="mr-2" to="/admin/staff/add/fueling">
                         <Button variant='secondary'><Fuel className="mr-1" /> Add fueling person</Button>
@@ -74,14 +82,9 @@ const StaffListPage = () => {
             </div>
             <Separator />
             {error ? <span>{error}</span> : null}
-            {loading && <div className="flex items-center w-full p-2">
-                <div className="w-full">
-                    <Skeleton className="h-4 w-full mb-2" />
-                    <Skeleton className="h-4 w-full mb-2" />
-                    <Skeleton className="h-4 w-1/2 mb-2" />
-                </div>
-            </div>}
-            {!loading && <>
+
+            <FadeTransition show={maintenanceStaff.length > 0}>
+
                 <Table>
                     <TableHeader>
                         <TableRow>
@@ -132,7 +135,7 @@ const StaffListPage = () => {
 
                     </TableBody> : <p className="ml-4 py-4 font-bold">No maintenance persons yet</p>}
                 </Table>
-            </>}
+            </FadeTransition>
         </>
     );
 };

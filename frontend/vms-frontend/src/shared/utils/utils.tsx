@@ -98,6 +98,7 @@ export const formatSingleDateTime = (dateTimeString: string) => {
     return `${year}${month} ${day}, ${hours}:${minutes}`;
 }
 
+
 export const getVehicleInfo = (vehicle: Vehicle) => {
     return <div className="flex flex-col text-base">
         <div className="flex">

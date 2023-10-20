@@ -3,7 +3,6 @@ import { TableCell, TableRow } from "@/shared/shad-ui/ui/table"
 import { Task } from "@/shared/types/types";
 import { formatTimeRange } from "@/shared/utils/utils";
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@nextui-org/react";
-import TaskRoute from "./TaskRoute";
 import { Link } from "react-router-dom";
 
 interface Props {
@@ -34,7 +33,8 @@ const DriverTaskDetail = ({ task }: Props) => {
                                     <span><b>Vehicle: </b>{`${task.car.make} ${task.car.model} ${task.car.year}`}</span>
                                     <span><b>Description: </b>{task.description}</span>
                                     <span ><b>Route: </b></span>
-                                    <TaskRoute task={task} />
+                                    {task.from_point}<br />
+                                    {task.to_point}
                                 </div>
                             </ModalBody>
                             <ModalFooter>

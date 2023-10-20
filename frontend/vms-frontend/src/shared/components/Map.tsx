@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Spinner } from "@nextui-org/react";
 import { useJsApiLoader, GoogleMap, Marker, Autocomplete, Polyline } from "@react-google-maps/api";
 import { getGeocode, getLatLng } from "use-places-autocomplete";
@@ -8,13 +8,13 @@ const center = { lat: 51.089888409978656, lng: 71.40146902770996 }
 interface MyMapProps {
     startPointCoordsRef: React.RefObject<HTMLInputElement>;
     endPointCoordsRef: React.RefObject<HTMLInputElement>;
+    initialStart?: string;
+    initialDestination?: string;
 }
 
-const Map: React.FC<MyMapProps> = ({ startPointCoordsRef, endPointCoordsRef }) => {
-    // set default start point in form - for form safety
-    if (startPointCoordsRef.current) {
-        startPointCoordsRef.current!.value = JSON.stringify(center);
-    }
+const Map: React.FC<MyMapProps> = ({ startPointCoordsRef, endPointCoordsRef, initialStart, initialDestination }) => {
+
+
 
     // use useJsApiLoader hook to use Google maps api
     const { isLoaded } = useJsApiLoader({
@@ -36,17 +36,27 @@ const Map: React.FC<MyMapProps> = ({ startPointCoordsRef, endPointCoordsRef }) =
 
     // when user selected first location with input with autocomplete
     const firstPointSelected = async () => {
-        // check if both inputs are filled
-        if (startPointRef.current?.value === '' || endPointRef.current?.value === '') {
+        if (startPointRef.current?.value === '') {
             return
         }
+        // set form data that will go to database
+        startPointCoordsRef.current!.value = startPointRef.current?.value || "";
+
+        // convert Adress from input to lat and lng and set marker to those coordinates
+        const result = await getGeocode({ address: startPointRef.current!.value })
+        const { lat, lng } = await getLatLng(result[0]);
+        startMarkerRef.current?.marker?.setPosition({ lat, lng });
+        console.log(mapRef.current)
+        console.log(startMarkerRef.current?.marker?.getPosition()?.lat())
+
+
         // initialize direction service
         const directionService = new google.maps.DirectionsService();
 
         // get route from direction service using start and end positions 
         const results = await directionService.route({
-            origin: startPointRef.current!.value,
-            destination: endPointRef.current!.value,
+            origin: { lat: startMarkerRef.current!.marker!.getPosition()!.lat(), lng: startMarkerRef.current!.marker!.getPosition()!.lng() },
+            destination: { lat: endMarkerRef.current!.marker!.getPosition()!.lat(), lng: endMarkerRef.current!.marker!.getPosition()!.lng() },
             travelMode: google.maps.TravelMode.DRIVING
         })
         // get route path coordinates and save them to display on page later
@@ -57,21 +67,18 @@ const Map: React.FC<MyMapProps> = ({ startPointCoordsRef, endPointCoordsRef }) =
         mapRef.current?.state.map?.panTo(results.routes[0].bounds.getCenter());
         mapRef.current?.state.map?.fitBounds(results.routes[0].bounds)
 
-        // convert Adress from input to lat and lng and set marker to those coordinates
-        const result = await getGeocode({ address: startPointRef.current!.value })
-        const { lat, lng } = await getLatLng(result[0]);
-        startMarkerRef.current?.marker?.setPosition({ lat, lng });
-        startPointCoordsRef.current!.value = JSON.stringify({ lat, lng });
 
     }
     // when user selected second location with input with autocomplete
     const secondPointSelected = async () => {
+        if (!startPointRef.current || !endPointRef.current) {
+            return
+        }
         if (startPointRef.current?.value === '' || endPointRef.current?.value === '') {
             return
         }
+        endPointCoordsRef.current!.value = endPointRef.current.value;
         const directionService = new google.maps.DirectionsService();
-
-
         const results = await directionService.route({
             origin: startPointRef.current!.value,
             destination: endPointRef.current!.value,
@@ -79,7 +86,6 @@ const Map: React.FC<MyMapProps> = ({ startPointCoordsRef, endPointCoordsRef }) =
         })
         const coords = results.routes[0].overview_path;
         setRouteCoords(coords);
-
         // center map on route center 
         mapRef.current?.state.map?.panTo(results.routes[0].bounds.getCenter());
         mapRef.current?.state.map?.fitBounds(results.routes[0].bounds)
@@ -87,8 +93,6 @@ const Map: React.FC<MyMapProps> = ({ startPointCoordsRef, endPointCoordsRef }) =
         const result = await getGeocode({ address: endPointRef.current!.value })
         const { lat, lng } = await getLatLng(result[0]);
         endMarkerRef.current?.marker?.setPosition({ lat, lng });
-        endPointCoordsRef.current!.value = JSON.stringify({ lat, lng });
-
     }
 
     // when user drags and drops start point marker
@@ -103,22 +107,7 @@ const Map: React.FC<MyMapProps> = ({ startPointCoordsRef, endPointCoordsRef }) =
         geocoder.geocode({ location: { lat: lat, lng: lng } })
             .then(async (response: any) => {
                 startPointRef.current!.value = response.results[0].formatted_address;
-
-                const directionService = new google.maps.DirectionsService();
-                const endMarkerPos: any = endMarkerRef.current!;
-
-                const results = await directionService.route({
-                    origin: { lat, lng },
-                    destination: { lat: endMarkerPos.marker.position.lat(), lng: endMarkerPos.marker.position.lng() },
-                    travelMode: google.maps.TravelMode.DRIVING,
-
-                })
-                const coords = results.routes[0].overview_path;
-                setRouteCoords(coords);
-                mapRef.current?.state.map?.panTo(results.routes[0].bounds.getCenter());
-                mapRef.current?.state.map?.fitBounds(results.routes[0].bounds)
-
-
+                firstPointSelected()
             })
     }
 
@@ -134,25 +123,27 @@ const Map: React.FC<MyMapProps> = ({ startPointCoordsRef, endPointCoordsRef }) =
         geocoder.geocode({ location: { lat: lat, lng: lng } })
             .then(async (response: any) => {
                 endPointRef.current!.value = response.results[0].formatted_address;
-
-                const directionService = new google.maps.DirectionsService();
-                const startMarkerPos: any = startMarkerRef.current!;
-
-                const results = await directionService.route({
-                    origin: { lat: startMarkerPos.marker.position.lat(), lng: startMarkerPos.marker.position.lng() },
-                    destination: { lat, lng },
-                    travelMode: google.maps.TravelMode.DRIVING,
-
-                })
-                console.log(results)
-                const coords = results.routes[0].overview_path;
-                setRouteCoords(coords);
-                mapRef.current?.state.map?.panTo(results.routes[0].bounds.getCenter());
-                mapRef.current?.state.map?.fitBounds(results.routes[0].bounds)
+                secondPointSelected()
             })
     }
 
 
+
+    useEffect(() => {
+        console.log("useEffect")
+        setTimeout(async () => {
+            if (initialStart && initialDestination) {
+                if (mapRef.current && startPointRef.current && endPointRef.current) {
+                    startPointRef.current.value = initialStart;
+                    endPointRef.current.value = initialDestination;
+                    await firstPointSelected()
+                    secondPointSelected()
+                }
+            }
+
+
+        }, 1000);
+    }, [])
 
     // if map is not loaded we display spinner to indicate loading
     if (!isLoaded) {
@@ -169,7 +160,6 @@ const Map: React.FC<MyMapProps> = ({ startPointCoordsRef, endPointCoordsRef }) =
                         <input ref={startPointRef}
                             className="custom-input"
                             onBlur={() => firstPointSelected()}
-                            defaultValue="Nazarbayev University, Qabanbay Batyr Avenue, Astana, Kazakhstan"
                         />
                     </Autocomplete>
                 </div>

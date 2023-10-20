@@ -34,7 +34,6 @@ const VehicleReport = () => {
     const { loading, error, sendRequest, clearError } = useHttp();
     // library to show toast messagess
     const { toast } = useToast();
-    // reference to page containing data
 
     // retrieve data from api
     const getData = async () => {
@@ -51,7 +50,6 @@ const VehicleReport = () => {
                     Authorization: `Bearer ${auth.tokens.access}`
                 })
             ]);
-
             // set data to response result
             setVehicle(vehicleData);
             let totalDist = 0;
@@ -62,23 +60,14 @@ const VehicleReport = () => {
                     distance: obj.distance / 1000
                 }))
                 reportData['usage'][year] = new_arr;
-
                 reportData['usage'][year].forEach((obj: any) => {
                     totalUsages += obj.count;
                     totalDist += obj.distance;
-
                 })
             })
             setNumberOfUsages(totalUsages);
             setTotalDistance(totalDist);
             setVehicleReportData(reportData);
-            console.log(reportData)
-            if (Object.keys(reportData['fueling']).length > 0) {
-                console.log(reportData['fueling'])
-
-            }
-
-
         } catch (err: any) {
             console.log(err)
             // show error toast message
@@ -152,8 +141,6 @@ const VehicleReport = () => {
                 variant: "destructive",
             })
         }
-        console.log("=--=-=--=-=-=-=-=");
-        console.log(bl);
         return pdfBlob;
     }
     return (

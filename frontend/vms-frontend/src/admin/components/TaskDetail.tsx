@@ -4,42 +4,20 @@ import { TableCell, TableRow } from "@/shared/shad-ui/ui/table";
 import { Button } from "@/shared/shad-ui/ui/button";
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@nextui-org/react";
 import { Chip } from "@nextui-org/react";
-import { useJsApiLoader } from "@react-google-maps/api";
-import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 
 interface Props {
-    task: Task
+    task: Task,
+    deleteTask: (task: Task) => void
 }
 
-const TaskDetails = ({ task }: Props) => {
+const TaskDetails = ({ task, deleteTask }: Props) => {
     // modal window for task details
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
-    const [fromPoint, setFromPoint] = useState("");
-    const [toPoint, setToPoint] = useState("");
-    // google maps api to translate location coordinates to actual location name
-    const { isLoaded } = useJsApiLoader({
-        googleMapsApiKey: import.meta.env.VITE_REACT_GOOGLE_MAPS_API!,
-        libraries: ['places', 'routes']
-    })
-    useEffect(() => {
-        const getRoute = () => {
-            const geocoder = new google.maps.Geocoder;
-            const point1 = JSON.parse(task.from_point);
-            const point2 = JSON.parse(task.to_point);
-            geocoder.geocode({ location: point1 })
-                .then(async (response: any) => {
 
-                    setFromPoint(response.results[0].formatted_address)
-                })
-            geocoder.geocode({ location: point2 })
-                .then(async (response: any) => {
-                    setToPoint(response.results[0].formatted_address)
-                })
-        }
-        if (isLoaded) {
-            getRoute();
-        }
-    })
+    // google maps api to translate location coordinates to actual location name
+
+
     const getStatus = () => {
         if (task.status === "Assigned") {
             return <Chip color="warning">{task.status}</Chip>
@@ -49,6 +27,10 @@ const TaskDetails = ({ task }: Props) => {
             return <Chip color="success">{task.status}</Chip>
         }
         return <Chip color="danger">No status?</Chip>
+    }
+    const processDeleteTask = () => {
+        deleteTask(task);
+
     }
     return (
         <TableRow key={task.id}>
@@ -71,24 +53,30 @@ const TaskDetails = ({ task }: Props) => {
                                     <span><b>Vehicle: </b>{`${task.car.make} ${task.car.model} ${task.car.year}`}</span>
                                     <span><b>Description: </b>{task.description}</span>
                                     <span ><b>Route: </b></span>
-                                    {fromPoint}<br />
-                                    {toPoint}
+                                    {task.from_point}<br />
+                                    {task.to_point}
 
                                 </div>
                             </ModalBody>
                             <ModalFooter>
-                                <Button color="danger" variant="ghost" onClick={onClose}>
-                                    Close
+                                <Button variant="destructive" onClick={() => {
+                                    onClose()
+                                    processDeleteTask()
+                                }}>
+                                    Delete
                                 </Button>
-                                <Button color="primary" onClick={onClose}>
-                                    Edit Task
-                                </Button>
+                                <Link to={`/admin/tasks/${task.id}/edit/`}>
+                                    <Button color="primary" onClick={onClose}>
+                                        Edit Task
+                                    </Button>
+                                </Link>
+
                             </ModalFooter>
                         </>
                     )}
                 </ModalContent>
             </Modal>
-        </TableRow>
+        </TableRow >
     )
 }
 
