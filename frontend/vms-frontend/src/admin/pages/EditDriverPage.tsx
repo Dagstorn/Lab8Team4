@@ -14,15 +14,15 @@ const EditDriverPage = () => {
     const navigate = useNavigate();
 
     const [driver, setDriver] = useState<Driver>();
-    const { sendRequest, clearError } = useHttp();
+    const { error, sendRequest, clearError } = useHttp();
     const { toast } = useToast();
     const { register, handleSubmit, formState: { errors }, setValue } = useForm();
     const getDriver = async () => {
         if (driverID) {
-            try {
-                const driverData = await sendRequest(`/api/drivers/${driverID}/`, 'get', {
-                    Authorization: `Bearer ${auth.tokens.access}`
-                })
+            const driverData = await sendRequest(`/api/drivers/${driverID}/`, 'get', {
+                Authorization: `Bearer ${auth.tokens.access}`
+            })
+            if (response) {
                 setDriver(driverData);
                 setValue('name', driverData.name);
                 setValue('surname', driverData.surname);
@@ -33,12 +33,6 @@ const EditDriverPage = () => {
                 setValue('email', driverData.email);
                 setValue('department', driverData.department);
                 setValue('license_code', driverData.license_code);
-            } catch (err: any) {
-                // show error toast message if any
-                toast({
-                    title: err.message,
-                    variant: "destructive",
-                })
             }
         }
     }
@@ -51,25 +45,15 @@ const EditDriverPage = () => {
         console.log(values)
         if (driverID) {
             clearError();
-            try {
-                // send task data to backend
-                await sendRequest(`/api/drivers/${driverID}/`, 'patch', {
-                    Authorization: `Bearer ${auth.tokens.access}`
-                }, values)
-                toast({
-                    title: "Changes saved!",
-                })
+            // send task data to backend
+            const response = await sendRequest(`/api/drivers/${driverID}/`, 'patch', {
+                Authorization: `Bearer ${auth.tokens.access}`
+            }, values)
+            if (response) {
+                toast({ title: "Changes saved!" })
                 navigate(`/admin/drivers/${driverID}/detail`);
-
-                // getDriver();
-            } catch (err: any) {
-                // if any erors
-                // show error toast message
-                toast({
-                    title: err.message,
-                    variant: "destructive",
-                })
             }
+
         }
     }
     return (

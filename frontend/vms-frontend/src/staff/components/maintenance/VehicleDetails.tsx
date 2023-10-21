@@ -32,25 +32,19 @@ const VehicleDetails = ({ vehicle }: Props) => {
             return
         }
         values.vehicle = vehicle.id;
-        console.log(values)
-        try {
-            // send task data to backend
-            await sendRequest('/api/maintenance/jobs/add/', 'post', {
-                Authorization: `Bearer ${auth.tokens.access}`
-            }, values)
+
+        // send task data to backend
+        const response = await sendRequest('/api/maintenance/jobs/add/', 'post', {
+            Authorization: `Bearer ${auth.tokens.access}`
+        }, values)
+        if (response) {
             reset();
             toast({
                 title: "Maintenance job was added successfully!",
             })
-            onClose();
-        } catch (err: any) {
-            // if any erors
-            // show error toast message
-            toast({
-                title: err.message,
-                variant: "destructive",
-            })
         }
+        onClose();
+
 
     }
 

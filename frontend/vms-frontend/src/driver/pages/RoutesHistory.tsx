@@ -24,21 +24,15 @@ const RoutesHistory = () => {
         clearError();
         // retrieve data from api
         const getData = async () => {
-            // try and catch to catch errors if any
-            try {
-                // get data with custom Hook
-                const responseData = await sendRequest('/api/routes_history', 'get', {
-                    Authorization: `Bearer ${auth.tokens.access}`
-                })
+            // get data with custom Hook
+            const responseData = await sendRequest('/api/routes_history', 'get', {
+                Authorization: `Bearer ${auth.tokens.access}`
+            })
+            if (response) {
                 // set data to response result
                 setRoutes(responseData)
-            } catch (err: any) {
-                // show error toast message
-                toast({
-                    title: err.message,
-                    variant: "destructive",
-                })
             }
+
         }
         getData();
     }, []);

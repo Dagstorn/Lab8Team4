@@ -61,11 +61,10 @@ const LoginPage = () => {
     // function which will handle submission of form
     async function onSubmit(values: z.infer<typeof formSchema>) {
         clearError();
-        // try and catch blocks to catch any errors from requests to api
-        try {
-            // make a authentication request to obtain JWT access token using custom Hook
-            const responseData = await sendRequest("/api/users/token/", "post", {}, values);
+        // make a authentication request to obtain JWT access token using custom Hook
+        const responseData = await sendRequest("/api/users/token/", "post", {}, values);
 
+        if (responseData) {
             // loading is done as we received data
             // decode jwt token
             let decoded_data: any = jwt_decode(responseData.access);
@@ -96,14 +95,7 @@ const LoginPage = () => {
             } else {
                 navigate(from);
             }
-
-        } catch (err: any) {
-            // process received errors
-            toast({
-                title: err.message,
-                variant: "destructive",
-            })
-        };
+        }
     }
 
     // display user login form

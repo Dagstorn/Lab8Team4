@@ -55,25 +55,16 @@ const AddMaintenance = () => {
     })
     async function onSubmit(values: z.infer<typeof formSchema>) {
         console.log(values)
-
         clearError();
-        try {
-            // send task data to backend
-            await sendRequest('/api/maintenance/add/', 'post', {
-                Authorization: `Bearer ${auth.tokens.access}`
-            }, values)
-            navigate("/admin/staff");
+        // send task data to backend
+        const response = await sendRequest('/api/maintenance/add/', 'post', {
+            Authorization: `Bearer ${auth.tokens.access}`
+        }, values)
+        if (response) {
             toast({
                 title: "Staff memmber was added successfully!",
             })
-        } catch (err: any) {
-            console.log(err)
-            // if any erors
-            // show error toast message
-            toast({
-                title: err.message,
-                variant: "destructive",
-            })
+            navigate("/admin/staff");
         }
     }
     return (

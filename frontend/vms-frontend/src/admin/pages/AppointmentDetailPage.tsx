@@ -57,35 +57,29 @@ const AppointmentDetailPage = () => {
         clearError();
         // retrieve data from api
         const getData = async () => {
-            // try and catch to catch errors if any
-            try {
-                // get data with custom Hook
-                const appointmentData = await sendRequest(`/api/appointments/${appointmentId}/`, 'get', {
+            // get data with custom Hook
+            const [appointmentData, vehiclesData] = await Promise.all([
+                sendRequest(`/api/appointments/${appointmentId}/`, 'get', {
+                    Authorization: `Bearer ${auth.tokens.access}`
+                }),
+                sendRequest('/api/vehicles', 'get', {
                     Authorization: `Bearer ${auth.tokens.access}`
                 })
-                setAppointment(appointmentData)
+            ]);
 
-                const vehiclesData = await sendRequest('/api/vehicles', 'get', {
-                    Authorization: `Bearer ${auth.tokens.access}`
-                })
-
+            if (appointmentData && vehiclesData) {
                 const notAvailable = await sendRequest('/api/tasks/checktime/', 'post', {
                     Authorization: `Bearer ${auth.tokens.access}`
                 }, {
                     startTime: formatDateTime(appointmentData.time_from),
                     endTime: formatDateTime(appointmentData.time_to)
                 })
-
-                setNotAvailableCars(new Set(notAvailable.map((obj: { driver: number, car: number }) => obj.car)))
-                setVehicles(vehiclesData);
-                // set data to response result
-            } catch (err: any) {
-                console.log(err)
-                // show error toast message
-                toast({
-                    title: err.message,
-                    variant: "destructive",
-                })
+                if (notAvailable) {
+                    // set data to response result
+                    setAppointment(appointmentData)
+                    setNotAvailableCars(new Set(notAvailable.map((obj: { driver: number, car: number }) => obj.car)))
+                    setVehicles(vehiclesData);
+                }
             }
         }
         getData();
@@ -109,30 +103,22 @@ const AppointmentDetailPage = () => {
         values.startDate = formatDateTime(appointment.time_from);
         values.endDate = formatDateTime(appointment.time_to);
         values.description = appointment.description;
-        console.log(values)
 
-
-        try {
-            // send task data to backend
-            await sendRequest('/api/tasks/add/', 'post', {
+        // send task data to backend
+        await Promise.all([
+            sendRequest('/api/tasks/add/', 'post', {
                 Authorization: `Bearer ${auth.tokens.access}`
-            }, values)
-            await sendRequest(`/api/tasks/${appointment.id}/deleteappointment/`, 'get', {
+            }, values),
+            sendRequest(`/api/tasks/${appointment.id}/deleteappointment/`, 'get', {
                 Authorization: `Bearer ${auth.tokens.access}`
             })
-
+        ])
+        if (response) {
             reset();
-            navigate("/admin/appointments");
             toast({
                 title: "Task added successfully!",
             })
-        } catch (err: any) {
-            // if any erors
-            // show error toast message
-            toast({
-                title: err.message,
-                variant: "destructive",
-            })
+            navigate("/admin/appointments");
         }
     }
 

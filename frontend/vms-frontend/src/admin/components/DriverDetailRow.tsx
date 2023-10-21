@@ -10,7 +10,7 @@ import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from "@nextui-o
 
 const DriverDetailRow = ({ driver, removeDriverFromList }: { driver: Driver, removeDriverFromList: (driverId: number) => void }) => {
     const auth = useAuth(); // currently logged in user daat
-    const { sendRequest, clearError } = useHttp(); // custom HTTP hook to call APIs
+    const { error, sendRequest, clearError } = useHttp(); // custom HTTP hook to call APIs
     const { toast } = useToast(); // toast messages library
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
@@ -18,22 +18,17 @@ const DriverDetailRow = ({ driver, removeDriverFromList }: { driver: Driver, rem
         if (driver) {
             // clear previous errors if any
             clearError();
-            // close dialog window
-            try {
-                // delete the user through api endpoitn
-                await sendRequest(`/api/drivers/${driver.id}/`, 'delete', {
-                    Authorization: `Bearer ${auth.tokens.access}`
-                })
+
+            // delete the user through api endpoitn
+            const response = await sendRequest(`/api/drivers/${driver.id}/`, 'delete', {
+                Authorization: `Bearer ${auth.tokens.access}`
+            })
+            if (response) {
                 // delete the user from current state, because even if it is deleted from database, it can still be on the page, if page is not refreshed, therefore we manually remove it from page
                 removeDriverFromList(driver.id);
                 toast({ title: "Driver deleted successfully" })
-            } catch (err: any) {
-                // show error toast message if any
-                toast({
-                    title: err.message,
-                    variant: "destructive",
-                })
             }
+
         }
     }
 

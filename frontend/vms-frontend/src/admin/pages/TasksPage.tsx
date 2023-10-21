@@ -28,12 +28,11 @@ const TasksPage = () => {
     const { toast } = useToast();
     // function to retrieve data from api
     const getData = async (page: number) => {
-        // try and catch to catch errors if any
-        try {
-            // get data with custom Hook
-            const responseData = await sendRequest(`/api/tasks/paginated/?page=${page}`, 'get', {
-                Authorization: `Bearer ${auth.tokens.access}`
-            })
+        // get data with custom Hook
+        const responseData = await sendRequest(`/api/tasks/paginated/?page=${page}`, 'get', {
+            Authorization: `Bearer ${auth.tokens.access}`
+        })
+        if (response) {
             // set data to response result
             setTasks(responseData.results)
             if (paginationObj) {
@@ -52,13 +51,8 @@ const TasksPage = () => {
                     previous: responseData.previous
                 })
             }
-        } catch (err: any) {
-            // show error toast message
-            toast({
-                title: err.message,
-                variant: "destructive",
-            })
         }
+
     }
     // when conponent mounts - meaning when it is created we get data
     useEffect(() => {
@@ -70,20 +64,13 @@ const TasksPage = () => {
     const deleteTask = async (task: Task) => {
         if (tasks) {
             const updatedList = tasks.filter((item: Task) => item.id !== task.id);
-
-            try {
-                // get data with custom Hook
-                await sendRequest(`/api/tasks/${task.id}`, 'delete', {
-                    Authorization: `Bearer ${auth.tokens.access}`
-                })
+            // send data with custom Hook
+            const response = await sendRequest(`/api/tasks/${task.id}`, 'delete', {
+                Authorization: `Bearer ${auth.tokens.access}`
+            })
+            if (response) {
                 toast({ title: "Tasks deleted successfully!" })
                 setTasks(updatedList);
-            } catch (err: any) {
-                // show error toast message
-                toast({
-                    title: err.message,
-                    variant: "destructive",
-                })
             }
         }
     }
@@ -103,7 +90,7 @@ const TasksPage = () => {
                 </Link>
             </div>
             <Separator />
-
+            {error ? <div className="text-red-400 mt-4 ">Error: {error}</div> : null}
             <FadeTransition show={tasks.length > 0}>
 
                 <Table>
@@ -127,7 +114,6 @@ const TasksPage = () => {
                 {paginationObj && <Paginator getData={getData} paginatorData={paginationObj} />}
             </FadeTransition>
 
-            {error ? <span>{error}</span> : null}
         </>
     );
 };

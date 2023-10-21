@@ -18,22 +18,16 @@ const DriverDetailPage = () => {
     const { targetRef } = usePDF({ filename: 'page.pdf' });
 
     const [driver, setDriver] = useState<Driver>();
-    const { loading, sendRequest } = useHttp();
+    const { error, loading, sendRequest } = useHttp();
     const { toast } = useToast();
 
     const getDriver = async () => {
         if (driverID) {
-            try {
-                const driverData = await sendRequest(`/api/drivers/${driverID}/`, 'get', {
-                    Authorization: `Bearer ${auth.tokens.access}`
-                })
+            const driverData = await sendRequest(`/api/drivers/${driverID}/`, 'get', {
+                Authorization: `Bearer ${auth.tokens.access}`
+            })
+            if (response) {
                 setDriver(driverData);
-            } catch (err: any) {
-                // show error toast message if any
-                toast({
-                    title: err.message,
-                    variant: "destructive",
-                })
             }
         }
     }
@@ -57,19 +51,14 @@ const DriverDetailPage = () => {
         const formData = new FormData();
         formData.append('pdfFile', bl, `${getFileName(driver)}.pdf`);
 
-        try {
-            await sendRequest(`/api/drivers/${driver.id}/report_data/savePDF`, 'post', {
-                Authorization: `Bearer ${auth.tokens.access}`,
-                'Content-Type': 'multipart/form-data',
-            }, formData);
+        await sendRequest(`/api/drivers/${driver.id}/report_data/savePDF`, 'post', {
+            Authorization: `Bearer ${auth.tokens.access}`,
+            'Content-Type': 'multipart/form-data',
+        }, formData);
+        if (response) {
             toast({ title: `Report downloaded and saved ✓` })
-        } catch (err: any) {
-            // show error toast message
-            toast({
-                title: err.message,
-                variant: "destructive",
-            })
         }
+
         return pdfBlob;
     }
 

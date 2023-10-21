@@ -14,8 +14,6 @@ import { Link } from "react-router-dom";
 import useAuth from "@/shared/hooks/useAuth";
 import { useEffect, useState } from "react";
 import { useHttp } from "@/shared/hooks/http-hook";
-import { useToast } from "@/shared/shad-ui/ui/use-toast";
-import { Skeleton } from "@/shared/shad-ui/ui/skeleton";
 import FadeTransition from "../components/FadeTransition";
 import { Spinner } from "@nextui-org/react";
 
@@ -26,7 +24,6 @@ const StaffListPage = () => {
     const [fuelingStaff, setFuelingStaff] = useState<FuelingPerson[]>([]);
     const [maintenanceStaff, setMaintenanceStaff] = useState<MaintenancePerson[]>([]);
     const { loading, error, sendRequest, clearError } = useHttp();
-    const { toast } = useToast();
 
 
     // when conponent mounts - meaning when it is created we get data
@@ -35,25 +32,20 @@ const StaffListPage = () => {
         clearError();
         // retrieve data from api
         const getData = async () => {
-            // try and catch to catch errors if any
-            try {
-                // get data with custom Hook
-                const fuelingStaffData = await sendRequest('/api/getstaff/fueling', 'get', {
+            // get data with custom Hook
+            const [fuelingStaffData, maintenanceStaffData] = await Promise.all([
+                sendRequest('/api/getstaff/fueling', 'get', {
+                    Authorization: `Bearer ${auth.tokens.access}`
+                }),
+                sendRequest('/api/getstaff/maintenance', 'get', {
                     Authorization: `Bearer ${auth.tokens.access}`
                 })
-                const maintenanceStaffData = await sendRequest('/api/getstaff/maintenance', 'get', {
-                    Authorization: `Bearer ${auth.tokens.access}`
-                })
+            ]);
+            if (fuelingStaffData && maintenanceStaffData) {
                 // set data to response result
                 setFuelingStaff(fuelingStaffData)
                 console.log(maintenanceStaffData.length)
                 setMaintenanceStaff(maintenanceStaffData)
-            } catch (err: any) {
-                // show error toast message
-                toast({
-                    title: err.message,
-                    variant: "destructive",
-                })
             }
         }
         getData();
@@ -81,7 +73,7 @@ const StaffListPage = () => {
                 </div>
             </div>
             <Separator />
-            {error ? <span>{error}</span> : null}
+            {error ? <div className="text-red-400 mt-4 ">Error: {error}</div> : null}
 
             <FadeTransition show={maintenanceStaff.length > 0}>
 

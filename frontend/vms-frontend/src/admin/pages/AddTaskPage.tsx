@@ -32,35 +32,30 @@ const AddTaskPage = () => {
 
 
     const getData = async (startDateTime: string, endDateTime: string) => {
-        try {
-            // get drivers and vehicles with custom Hook
-            const driversData = await sendRequest('/api/drivers', 'get', {
+        // get drivers and vehicles with custom Hook
+        const [driversData, vehiclesData, notAvailable] = await Promise.all([
+            sendRequest('/api/drivers', 'get', {
                 Authorization: `Bearer ${auth.tokens.access}`
-            })
-            const vehiclesData = await sendRequest('/api/vehicles', 'get', {
+            }),
+            sendRequest('/api/vehicles', 'get', {
                 Authorization: `Bearer ${auth.tokens.access}`
-            })
-
-            // get list of drivers and vehicles that are not available at the selected time
-            // tasks/checktime/
-            const notAvailable = await sendRequest('/api/tasks/checktime/', 'post', {
+            }),
+            sendRequest('/api/tasks/checktime/', 'post', {
                 Authorization: `Bearer ${auth.tokens.access}`
             }, {
                 startTime: startDateTime,
                 endTime: endDateTime
             })
+        ]);
 
+        if (driversData && vehiclesData && notAvailable) {
+            // get list of drivers and vehicles that are not available at the selected time
             setBusyDrivers(new Set(notAvailable.map((obj: { driver: number, car: number }) => obj.driver)))
             setBusyCars(new Set(notAvailable.map((obj: { driver: number, car: number }) => obj.car)))
             setDrivers(driversData);
             setVehicles(vehiclesData);
-        } catch (err: any) {
-            // show error toast message
-            toast({
-                title: err?.message || "Something went wrong...",
-                variant: "destructive",
-            })
         }
+
     }
     const startDateHandler = (e: ChangeEvent<HTMLInputElement>) => {
         setError('startDate', { type: 'custom', message: '' });
@@ -90,24 +85,18 @@ const AddTaskPage = () => {
         values.from_point = startPointCoords.current!.value;
         values.to_point = endPointCoords.current!.value;
 
-        try {
-            // send task data to backend
-            await sendRequest('/api/tasks/add/', 'post', {
-                Authorization: `Bearer ${auth.tokens.access}`
-            }, values)
+        // send task data to backend
+        await sendRequest('/api/tasks/add/', 'post', {
+            Authorization: `Bearer ${auth.tokens.access}`
+        }, values)
+        if (response) {
             reset();
-            navigate("/admin/tasks");
             toast({
                 title: "Task added successfully!",
             })
-        } catch (err: any) {
-            // if any erors
-            // show error toast message
-            toast({
-                title: err.message,
-                variant: "destructive",
-            })
+            navigate("/admin/tasks");
         }
+
 
     }
 

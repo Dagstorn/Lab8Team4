@@ -7,7 +7,7 @@ import { CompletedRoute, RoutePoints, Task } from "@/shared/types/types";
 import { formatDistance, formatTimeRange, getHoursAndMinutes } from "@/shared/utils/utils";
 import { Spinner } from "@nextui-org/react";
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { Alert, AlertDescription, AlertTitle } from "@/shared/shad-ui/ui/alert";
 import { AlertTriangle, Info } from "lucide-react";
 import { Progress } from "@nextui-org/react";
@@ -21,6 +21,7 @@ const ViewTaskPage = () => {
     const auth = useAuth();
     const [task, setTask] = useState<Task>();
 
+    const navigate = useNavigate();
     const { isLoaded } = useJsApiLoader({
         googleMapsApiKey: import.meta.env.VITE_REACT_GOOGLE_MAPS_API!,
         libraries: ['places', 'routes']
@@ -51,12 +52,11 @@ const ViewTaskPage = () => {
     }
 
     const getData = async () => {
-        // try and catch to catch errors if any
-        try {
-            // get data with custom Hook
-            const responseData = await sendRequest(`/api/tasks/${taskId}/`, 'get', {
-                Authorization: `Bearer ${auth.tokens.access}`
-            })
+        // get data with custom Hook
+        const responseData = await sendRequest(`/api/tasks/${taskId}/`, 'get', {
+            Authorization: `Bearer ${auth.tokens.access}`
+        })
+        if (responseData) {
             // set data to response result
             setTask(responseData)
             setPoints({
@@ -68,12 +68,6 @@ const ViewTaskPage = () => {
             }
             const newIntervalId = setInterval(() => checkProgressInterval(responseData), 500);
             setProgressIntervalId(newIntervalId);
-        } catch (err: any) {
-            // show error toast message
-            toast({
-                title: err.message,
-                variant: "destructive",
-            })
         }
     }
     useEffect(() => {
@@ -121,26 +115,19 @@ const ViewTaskPage = () => {
 
     const processStart = async () => {
         if (task && checkStartTime(task.time_from)) {
-            try {
-                const now = new Date();
-                const timeStarted = toIsoString(now);
-                console.log(now)
-                console.log(timeStarted)
-                // get data with custom Hook
-                await sendRequest(`/api/tasks/${taskId}/update/`, 'post', {
-                    Authorization: `Bearer ${auth.tokens.access}`
-                }, { status: "In progress", timeStarted: timeStarted })
-                // set data to response result
-
-                getData();
-                setStarted(true);
-            } catch (err: any) {
-                // show error toast message
-                toast({
-                    title: err.message,
-                    variant: "destructive",
-                })
+            const now = new Date();
+            const timeStarted = toIsoString(now);
+            // get data with custom Hook
+            await sendRequest(`/api/tasks/${taskId}/update/`, 'post', {
+                Authorization: `Bearer ${auth.tokens.access}`
+            }, { status: "In progress", timeStarted: timeStarted })
+            if (error) {
+                toast({ title: "Failed to start the task. Try again!" })
+                navigate(`/driver/tasks/${taskId}/`)
             }
+            getData();
+            setStarted(true);
+
         }
     }
     type latlng = {
@@ -163,33 +150,27 @@ const ViewTaskPage = () => {
 
     const processComplete = async () => {
         if (task && checkStartTime(task.time_from)) {
-            try {
-                const now = new Date();
-                const startTime = new Date(Date.parse(task.time_from));
-                const time_spent: number = Math.abs(Math.floor((now.getTime() - startTime.getTime()) / (60 * 60 * 1000)));
-                const timeEnded = now.toISOString();
-                const distance_covered = await calculateDistance(JSON.parse(task.from_point), JSON.parse(task.to_point))
+            const now = new Date();
+            const startTime = new Date(Date.parse(task.time_from));
+            const time_spent: number = Math.abs(Math.floor((now.getTime() - startTime.getTime()) / (60 * 60 * 1000)));
+            const timeEnded = now.toISOString();
+            const distance_covered = await calculateDistance(JSON.parse(task.from_point), JSON.parse(task.to_point))
 
-                // get data with custom Hook
-                const completedRouteData = await sendRequest(`/api/tasks/${task.id}/complete/`, 'post', {
-                    Authorization: `Bearer ${auth.tokens.access}`
-                }, { time_spent: time_spent, distance_covered: distance_covered, timeEnded: timeEnded })
+            // get data with custom Hook
+            const completedRouteData = await sendRequest(`/api/tasks/${task.id}/complete/`, 'post', {
+                Authorization: `Bearer ${auth.tokens.access}`
+            }, { time_spent: time_spent, distance_covered: distance_covered, timeEnded: timeEnded })
 
+            if (response) {
                 // set data to response result
                 setCompletedRoute(completedRouteData);
-                // set data to response result
                 getData();
                 setStarted(true);
-
-            } catch (err: any) {
-                // show error toast message
-                toast({
-                    title: err.message,
-                    variant: "destructive",
-                })
+            } else {
+                toast({ title: "Failed to start the task. Try again!" })
+                navigate(`/driver/tasks/${taskId}/`)
             }
         }
-        // setCompleted(true);
     }
 
     const getControls = () => {

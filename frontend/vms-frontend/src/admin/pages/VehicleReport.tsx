@@ -39,17 +39,17 @@ const VehicleReport = () => {
     const getData = async () => {
         // clear error at start to get rid of any not actual previous errors
         clearError();
-        // try and catch to catch errors if any
-        try {
-            // get data with custom Hook
-            const [vehicleData, reportData] = await Promise.all([
-                sendRequest(`/api/vehicles/${vehicleId}/`, 'get', {
-                    Authorization: `Bearer ${auth.tokens.access}`
-                }),
-                sendRequest(`/api/vehicles/${vehicleId}/report_data`, 'get', {
-                    Authorization: `Bearer ${auth.tokens.access}`
-                })
-            ]);
+
+        // get data with custom Hook
+        const [vehicleData, reportData] = await Promise.all([
+            sendRequest(`/api/vehicles/${vehicleId}/`, 'get', {
+                Authorization: `Bearer ${auth.tokens.access}`
+            }),
+            sendRequest(`/api/vehicles/${vehicleId}/report_data`, 'get', {
+                Authorization: `Bearer ${auth.tokens.access}`
+            })
+        ]);
+        if (vehicleData && reportData) {
             // set data to response result
             setVehicle(vehicleData);
             let totalDist = 0;
@@ -68,14 +68,8 @@ const VehicleReport = () => {
             setNumberOfUsages(totalUsages);
             setTotalDistance(totalDist);
             setVehicleReportData(reportData);
-        } catch (err: any) {
-            console.log(err)
-            // show error toast message
-            toast({
-                title: err.message,
-                variant: "destructive",
-            })
         }
+
     }
 
 
@@ -124,22 +118,13 @@ const VehicleReport = () => {
         const bl = pdfBlob.output("blob")
         const formData = new FormData();
         formData.append('pdfFile', bl, 'my-document.pdf');
-        try {
-            console.log("firing api call =-==-=-=-=-=-=-");
 
-            const resp = await sendRequest(`/api/vehicles/${vehicleId}/report_data/savePDF`, 'post', {
-                Authorization: `Bearer ${auth.tokens.access}`,
-                'Content-Type': 'multipart/form-data',
-            }, formData);
-
-            console.log(resp);
-        } catch (err: any) {
-            console.log(err)
-            // show error toast message
-            toast({
-                title: err.message,
-                variant: "destructive",
-            })
+        await sendRequest(`/api/vehicles/${vehicleId}/report_data/savePDF`, 'post', {
+            Authorization: `Bearer ${auth.tokens.access}`,
+            'Content-Type': 'multipart/form-data',
+        }, formData);
+        if (error) {
+            toast({ title: "Report was not saved! Try again" })
         }
         return pdfBlob;
     }

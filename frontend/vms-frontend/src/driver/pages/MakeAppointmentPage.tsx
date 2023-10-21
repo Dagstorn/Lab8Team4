@@ -55,22 +55,19 @@ const MakeAppointmentPage = () => {
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
         clearError();
-        try {
-            await sendRequest('/api/appointments/add/', 'post', {
-                Authorization: `Bearer ${auth.tokens.access}`
-            }, values)
+        const response = await sendRequest('/api/appointments/add/', 'post', {
+            Authorization: `Bearer ${auth.tokens.access}`
+        }, values)
+        if (response) {
             toast({
                 title: "Appointment is submitted successfully!",
             })
             navigate('/driver/personal_page/')
-        } catch (err: any) {
-            // show error toast message
+        } else {
             toast({
-                title: err.message,
-                variant: "destructive",
+                title: "Appointment couldn't be submitted properly! Try again",
             })
         }
-        console.log(values)
     }
     return (
         <div className="aa h-full flex flex-col justify-center">

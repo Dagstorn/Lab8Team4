@@ -6,7 +6,6 @@ import { Separator } from "@/shared/shad-ui/ui/separator";
 import { useEffect, useState } from "react";
 import useAuth from "@/shared/hooks/useAuth";
 import { useHttp } from "@/shared/hooks/http-hook";
-import { useToast } from "@/shared/shad-ui/ui/use-toast";
 import { formatSingleDateTime } from "@/shared/utils/utils";
 
 interface Props {
@@ -18,7 +17,6 @@ const FuelingProofDetail = ({ fuelingReport }: Props) => {
     const auth = useAuth();
     const [vehicle, setVehicle] = useState<Vehicle>();
     const { loading, error, sendRequest, clearError } = useHttp();
-    const { toast } = useToast();
 
     // when conponent mounts - meaning when it is created we get data
     useEffect(() => {
@@ -26,23 +24,15 @@ const FuelingProofDetail = ({ fuelingReport }: Props) => {
         clearError();
         // retrieve data from api
         const getData = async () => {
-            // try and catch to catch errors if any
-            try {
-                console.log(fuelingReport)
-                // get data with custom Hook
-                const vehicleData = await sendRequest(`/api/vehicles/${fuelingReport.vehicle.id}/`, 'get', {
-                    Authorization: `Bearer ${auth.tokens.access}`
-                })
+            // get data with custom Hook
+            const vehicleData = await sendRequest(`/api/vehicles/${fuelingReport.vehicle.id}/`, 'get', {
+                Authorization: `Bearer ${auth.tokens.access}`
+            })
+            if (response) {
                 // set data to response result
                 setVehicle(vehicleData)
-            } catch (err: any) {
-                console.log(err)
-                // show error toast message
-                toast({
-                    title: err.message,
-                    variant: "destructive",
-                })
             }
+
         }
         getData();
     }, []);

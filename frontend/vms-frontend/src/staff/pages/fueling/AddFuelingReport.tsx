@@ -28,22 +28,15 @@ const DriverDetailPage = () => {
         clearError();
         // retrieve data from api
         const getData = async () => {
-            // try and catch to catch errors if any
-            try {
-                // get data with custom Hook
-                const vehicleData = await sendRequest(`/api/vehicles/${vehicleId}/`, 'get', {
-                    Authorization: `Bearer ${auth.tokens.access}`
-                })
+            // get data with custom Hook
+            const vehicleData = await sendRequest(`/api/vehicles/${vehicleId}/`, 'get', {
+                Authorization: `Bearer ${auth.tokens.access}`
+            })
+            if (vehicleData) {
                 // set data to response result
                 setVehicle(vehicleData)
-            } catch (err: any) {
-                console.log(err)
-                // show error toast message
-                toast({
-                    title: err.message,
-                    variant: "destructive",
-                })
             }
+
         }
         getData();
     }, []);
@@ -60,26 +53,20 @@ const DriverDetailPage = () => {
 
         values.image_before = values.photoBefore[0]
         values.image_after = values.photoAfter[0]
-        console.log(values)
-        try {
-            // send task data to backend
-            await sendRequest('/api/fueling/reports/add/', 'post', {
-                Authorization: `Bearer ${auth.tokens.access}`,
-                "Content-Type": "multipart/form-data"
-            }, values)
+
+        // send task data to backend
+        await sendRequest('/api/fueling/reports/add/', 'post', {
+            Authorization: `Bearer ${auth.tokens.access}`,
+            "Content-Type": "multipart/form-data"
+        }, values)
+        if (response) {
             reset();
             navigate("/fueling/reports/");
             toast({
                 title: "Fueling record was added successfully!",
             })
-        } catch (err: any) {
-            // if any erors
-            // show error toast message
-            toast({
-                title: err.message,
-                variant: "destructive",
-            })
         }
+
 
     }
     return (

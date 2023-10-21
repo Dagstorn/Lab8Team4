@@ -14,7 +14,6 @@ import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import useAuth from "@/shared/hooks/useAuth";
 import { useHttp } from "@/shared/hooks/http-hook";
-import { useToast } from "@/shared/shad-ui/ui/use-toast";
 import { formatDistance } from "@/shared/utils/utils";
 import { Spinner } from "@nextui-org/react";
 import Paginator from "../components/Paginator";
@@ -28,16 +27,16 @@ const VehiclesListPage = () => {
     const [vehicles, setVehicles] = useState<Vehicle[]>([]);
     const [paginationObj, setPaginationObj] = useState<PaginatorObj | null>(null);
     const { loading, error, sendRequest, clearError } = useHttp();
-    const { toast } = useToast();
 
     // retrieve data from api
     const getData = async (page: number) => {
-        // try and catch to catch errors if any
-        try {
-            // get data with custom Hook
-            const responseData = await sendRequest(`/api/vehicles/paginated/?page=${page}`, 'get', {
-                Authorization: `Bearer ${auth.tokens.access}`
-            })
+        // clear error at start to get rid of any not actual previous errors
+        clearError();
+        // get data with custom Hook
+        const responseData = await sendRequest(`/api/vehicles/paginated/?page=${page}`, 'get', {
+            Authorization: `Bearer ${auth.tokens.access}`
+        })
+        if (responseData) {
             // set data to response result
             if (paginationObj) {
                 const updatedObj = {
@@ -55,21 +54,13 @@ const VehiclesListPage = () => {
                     previous: responseData.previous
                 })
             }
-
             setVehicles(responseData.results)
-        } catch (err: any) {
-            // show error toast message
-            toast({
-                title: err.message,
-                variant: "destructive",
-            })
         }
+
     }
 
     // when conponent mounts - meaning when it is created we get data
     useEffect(() => {
-        // clear error at start to get rid of any not actual previous errors
-        clearError();
         getData(1);
     }, []);
 
@@ -87,6 +78,8 @@ const VehiclesListPage = () => {
             </div>
 
             <Separator />
+            {error ? <div className="text-red-400 mt-4 ">Error: {error}</div> : null}
+
             <FadeTransition show={vehicles.length > 0}>
                 <Table>
                     <TableHeader>

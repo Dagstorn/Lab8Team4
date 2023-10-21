@@ -32,21 +32,15 @@ const FuelingReports = () => {
         clearError();
         // retrieve data from api
         const getData = async () => {
-            // try and catch to catch errors if any
-            try {
-                // get data with custom Hook
-                const responseData = await sendRequest('/api/fueling/reports', 'get', {
-                    Authorization: `Bearer ${auth.tokens.access}`
-                })
+            // get data with custom Hook
+            const responseData = await sendRequest('/api/fueling/reports', 'get', {
+                Authorization: `Bearer ${auth.tokens.access}`
+            })
+            if (responseData) {
                 // set data to response result
                 setReports(responseData)
-            } catch (err: any) {
-                // show error toast message
-                toast({
-                    title: err.message,
-                    variant: "destructive",
-                })
             }
+
         }
         getData();
     }, []);

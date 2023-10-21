@@ -38,29 +38,17 @@ const EditTaskPage = () => {
 
     useEffect(() => {
         const getInitialData = async () => {
-            try {
-                const taskData = await sendRequest(`/api/tasks/${taskId}/`, 'get', {
-                    Authorization: `Bearer ${auth.tokens.access}`
-                })
+            const taskData = await sendRequest(`/api/tasks/${taskId}/`, 'get', {
+                Authorization: `Bearer ${auth.tokens.access}`
+            })
+            if (taskData) {
                 setTask(taskData);
-
-                console.log("<><><><><><><><>>");
-                console.log(taskData);
                 setValue('time_from', formatDateTime(taskData.time_from));
                 setValue('time_to', formatDateTime(taskData.time_to));
                 setValue('description', taskData.description);
-
                 getData(formatDateTime(taskData.time_from), formatDateTime(taskData.time_to), { driver: taskData.driver.id, vehicle: taskData.car.id })
-
-            } catch (err: any) {
-                // show error toast message
-                toast({
-                    title: err?.message || "Something went wrong...",
-                    variant: "destructive",
-                })
             }
         }
-
         if (taskId) {
             getInitialData();
         }
@@ -69,24 +57,25 @@ const EditTaskPage = () => {
 
 
     const getData = async (startDateTime: string, endDateTime: string, currentData: { driver: number, vehicle: number } | null) => {
-        try {
 
-            // get drivers and vehicles with custom Hook
-            const driversData = await sendRequest('/api/drivers', 'get', {
+        // get drivers and vehicles with custom Hook
+        const [driversData, vehiclesData, notAvailable] = await Promise.all([
+            sendRequest('/api/drivers', 'get', {
                 Authorization: `Bearer ${auth.tokens.access}`
-            })
-            const vehiclesData = await sendRequest('/api/vehicles', 'get', {
+            }),
+            sendRequest('/api/vehicles', 'get', {
                 Authorization: `Bearer ${auth.tokens.access}`
-            })
-
-            // get list of drivers and vehicles that are not available at the selected time
-            // tasks/checktime/
-            const notAvailable = await sendRequest('/api/tasks/checktime/', 'post', {
+            }),
+            sendRequest('/api/tasks/checktime/', 'post', {
                 Authorization: `Bearer ${auth.tokens.access}`
             }, {
                 startTime: startDateTime,
                 endTime: endDateTime
             })
+        ])
+
+        if (response) {
+            // get list of drivers and vehicles that are not available at the selected time
 
             if (currentData) {
                 setBusyDrivers(new Set(notAvailable.map((obj: { driver: number, car: number }) => {
@@ -110,13 +99,8 @@ const EditTaskPage = () => {
 
             setDrivers(driversData);
             setVehicles(vehiclesData);
-        } catch (err: any) {
-            // show error toast message
-            toast({
-                title: err?.message || "Something went wrong...",
-                variant: "destructive",
-            })
         }
+
     }
     const startDateHandler = (e: ChangeEvent<HTMLInputElement>) => {
         setError('startDate', { type: 'custom', message: '' });
@@ -155,23 +139,18 @@ const EditTaskPage = () => {
             values.car = task.car.id;
         }
 
-        try {
-            // send task data to backend
-            await sendRequest(`/api/tasks/${task.id}/`, 'patch', {
-                Authorization: `Bearer ${auth.tokens.access}`
-            }, values)
-            navigate("/admin/tasks");
+        // send task data to backend
+        const response = await sendRequest(`/api/tasks/${task.id}/`, 'patch', {
+            Authorization: `Bearer ${auth.tokens.access}`
+        }, values)
+        if (response) {
             toast({
                 title: "Changes are saved successfully!",
             })
-        } catch (err: any) {
-            // if any erors
-            // show error toast message
-            toast({
-                title: err.message,
-                variant: "destructive",
-            })
+            navigate("/admin/tasks");
+
         }
+
 
     }
 

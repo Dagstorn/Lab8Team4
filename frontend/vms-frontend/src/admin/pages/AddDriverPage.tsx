@@ -74,23 +74,15 @@ const DriverDetailPage = () => {
         console.log(values)
 
         clearError();
-        try {
-            // send task data to backend
-            await sendRequest('/api/drivers/', 'post', {
-                Authorization: `Bearer ${auth.tokens.access}`
-            }, values)
+        // send task data to backend
+        const response = await sendRequest('/api/drivers/', 'post', {
+            Authorization: `Bearer ${auth.tokens.access}`
+        }, values)
+        if (response) {
+            toast({ title: "Driver was added successfully!" })
             navigate("/admin/drivers/");
-            toast({
-                title: "Driver was added successfully!",
-            })
-        } catch (err: any) {
-            // if any erors
-            // show error toast message
-            toast({
-                title: err.message,
-                variant: "destructive",
-            })
         }
+
     }
     return (
         <>

@@ -14,7 +14,6 @@ import { useEffect, useState } from "react";
 import useAuth from "@/shared/hooks/useAuth";
 import { Spinner } from "@nextui-org/react";
 import { useHttp } from "@/shared/hooks/http-hook";
-import { useToast } from "@/shared/shad-ui/ui/use-toast";
 import DriverDetailRow from "../components/DriverDetailRow";
 import Paginator from "../components/Paginator";
 import FadeTransition from "../components/FadeTransition";
@@ -28,17 +27,14 @@ const DriversListPage = () => {
   const [paginationObj, setPaginationObj] = useState<PaginatorObj | null>(null);
   // custom http hook to make api calls
   const { loading, error, sendRequest, clearError } = useHttp();
-  // toast librar to show toast messages
-  const { toast } = useToast();
+
   // function to retrieve data from api
   const getData = async (page: number) => {
-    // try and catch to catch errors if any
-    try {
-      // get data from api with custom Hook
-      const responseData = await sendRequest(`/api/drivers/paginated/?page=${page}`, 'get', {
-        Authorization: `Bearer ${auth.tokens.access}`
-      })
-
+    // get data from api with custom Hook
+    const responseData = await sendRequest(`/api/drivers/paginated/?page=${page}`, 'get', {
+      Authorization: `Bearer ${auth.tokens.access}`
+    })
+    if (responseData) {
       // set data to response result
       setDrivers(responseData.results);
       if (paginationObj) {
@@ -57,10 +53,6 @@ const DriversListPage = () => {
           previous: responseData.previous
         })
       }
-    } catch (err: any) {
-      // show error toast message
-      console.log(err)
-      toast({ title: err.message, variant: "destructive" })
     }
   }
   // when conponent mounts - meaning when it is initialized we call get data function
@@ -81,17 +73,19 @@ const DriversListPage = () => {
 
   return (
     <>
-      <div className="flex justify-between">
-        <div className="flex gap-4">
-          <h1 className="text-2xl font-bold mb-4">Drivers list</h1>
+      <div className="flex justify-between mb-2">
+        <div className="flex gap-4 items-center">
+          <h1 className="text-2xl font-bold ">Drivers list</h1>
           {loading && <div className="">
             <Spinner></Spinner>
           </div>}
+
         </div>
 
         <Link to="/admin/drivers/add"><Button variant='default'>Add driver</Button></Link>
       </div>
       <Separator />
+      {error ? <div className="text-red-400 mt-4 mb-2">Error: {error}</div> : null}
 
       <FadeTransition show={drivers.length > 0}>
         <Table>
@@ -117,7 +111,7 @@ const DriversListPage = () => {
 
 
 
-      {error ? <span className="text-red-400">Error: {error}</span> : null}
+
     </>
   );
 };

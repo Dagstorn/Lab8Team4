@@ -1,7 +1,6 @@
 import { useHttp } from "@/shared/hooks/http-hook";
 import useAuth from "@/shared/hooks/useAuth";
 import { Table, TableBody } from "@/shared/shad-ui/ui/table";
-import { useToast } from "@/shared/shad-ui/ui/use-toast";
 import { Task } from "@/shared/types/types";
 import { useEffect, useState } from "react";
 import DriverTaskDetail from "./DriverTaskDetail";
@@ -13,28 +12,19 @@ const DriverTasks = () => {
     const [tasks, setTasks] = useState<Task[]>([]);
 
     const { loading, error, sendRequest, clearError } = useHttp();
-    const { toast } = useToast();
 
     useEffect(() => {
         // clear error at start to get rid of any not actual previous errors
         clearError();
         // retrieve data from api
         const getData = async () => {
-            // try and catch to catch errors if any
-            try {
-                // get data with custom Hook
-                const responseData = await sendRequest('/api/driver/tasks/', 'get', {
-                    Authorization: `Bearer ${auth.tokens.access}`
-                })
+            // get data with custom Hook
+            const responseData = await sendRequest('/api/driver/tasks/', 'get', {
+                Authorization: `Bearer ${auth.tokens.access}`
+            })
+            if (response) {
                 // set data to response result
                 setTasks(responseData)
-
-            } catch (err: any) {
-                // show error toast message
-                toast({
-                    title: err.message,
-                    variant: "destructive",
-                })
             }
         }
         getData();

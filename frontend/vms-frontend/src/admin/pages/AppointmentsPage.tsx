@@ -10,7 +10,6 @@ import { Appointment, PaginatorObj } from "@/shared/types/types";
 import useAuth from "@/shared/hooks/useAuth";
 import { useEffect, useState } from "react";
 import { useHttp } from "@/shared/hooks/http-hook";
-import { useToast } from "@/shared/shad-ui/ui/use-toast";
 import { Spinner } from "@nextui-org/react";
 import AppointmentDetails from '../components/AppointmentDetails';
 import FadeTransition from "../components/FadeTransition";
@@ -22,18 +21,16 @@ const DriversListPage = () => {
     // state which stores drivers list
     const [appointments, setAppointments] = useState<Appointment[]>([]);
     const { loading, error, sendRequest, clearError } = useHttp();
-    const { toast } = useToast();
     // paginator object stores data related to pagination like count, next page, prev page and page size
     const [paginationObj, setPaginationObj] = useState<PaginatorObj | null>(null);
 
     // function to retrieve data from api
     const getData = async (page: number) => {
-        // try and catch to catch errors if any
-        try {
-            // get data with custom Hook
-            const responseData = await sendRequest(`/api/appointments/paginated/?page=${page}`, 'get', {
-                Authorization: `Bearer ${auth.tokens.access}`
-            })
+        // get data with custom Hook
+        const responseData = await sendRequest(`/api/appointments/paginated/?page=${page}`, 'get', {
+            Authorization: `Bearer ${auth.tokens.access}`
+        })
+        if (responseData) {
             setAppointments(responseData.results)
             if (paginationObj) {
                 const updatedObj = {
@@ -51,12 +48,6 @@ const DriversListPage = () => {
                     previous: responseData.previous
                 })
             }
-        } catch (err: any) {
-            // show error toast message
-            toast({
-                title: err.message,
-                variant: "destructive",
-            })
         }
     }
 
@@ -68,7 +59,6 @@ const DriversListPage = () => {
         getData(1);
     }, []);
 
-
     return (
         <>
             <div className="flex gap-4">
@@ -78,6 +68,7 @@ const DriversListPage = () => {
                 </div>}
             </div>
             <Separator />
+            {error ? <div className="text-red-400 mt-4 mb-2">Error: {error}</div> : null}
             <FadeTransition show={appointments.length > 0}>
                 <Table>
                     <TableHeader>
@@ -100,7 +91,7 @@ const DriversListPage = () => {
 
             </FadeTransition>
 
-            {error ? <span>{error}</span> : null}
+
         </>
     );
 };
