@@ -14,7 +14,7 @@ class Vehicle(models.Model):
     model = models.CharField(max_length=100)
     type = models.CharField(max_length=20, choices=BODY_TYPES, default="Sedan")
     year = models.PositiveIntegerField()
-    license_plat = models.CharField(max_length=15, verbose_name="Licence plate")
+    license_plate = models.CharField(max_length=15, verbose_name="Licence plate")
     capacity = models.PositiveIntegerField(verbose_name="Sitting capacity")
     mileage = models.FloatField(verbose_name="Mileage in km", default=0)
     status = models.CharField(max_length=20, choices=STATUS_TYPES, default="active")
@@ -23,7 +23,7 @@ class Vehicle(models.Model):
         ordering = ["-type", "make", "model", "year"]
 
     def __str__(self):
-        return f'{self.model} {self.year} | {self.license_plat} | {self.type}'
+        return f'{self.model} {self.year} | {self.license_plate} | {self.type}'
     
     def is_available(self):
         return not Task.objects.filter(car=self).exists()

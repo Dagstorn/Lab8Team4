@@ -6,7 +6,7 @@ from .models import Vehicle
 class VehicleForm(ModelForm):
     class Meta:
         model = Vehicle
-        fields = ['make', 'model', 'type', 'year', 'license_plat', 'capacity']
+        fields = ['make', 'model', 'type', 'year', 'license_plate', 'capacity']
 
     def __init__(self, *args, **kwargs):
         super(VehicleForm, self).__init__(*args, **kwargs)

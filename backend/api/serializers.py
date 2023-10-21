@@ -58,7 +58,7 @@ class MaintenanceSerializer(serializers.ModelSerializer):
 class VehicleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Vehicle
-        fields = ['id', 'make', 'model', 'type', 'year', 'license_plat', 'capacity', 'mileage']
+        fields = ['id', 'make', 'model', 'type', 'year', 'license_plate', 'capacity', 'mileage']
 
 class FuelingProofSerializer(serializers.ModelSerializer):
     vehicle = VehicleSerializer(many=False)

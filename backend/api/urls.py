@@ -20,7 +20,7 @@ urlpatterns = [
     path('drivers/<str:pk>/report_data/savePDF', views.driverDataSavePDF),
 
     
-    path('vehicles/', views.getVehicles),
+    path('vehicles/', views.vehicles_list),
     path('vehicles/paginated/', views.getVehiclesPaginated),
     path('vehicles/<str:vid>/', views.getVehicle),
     path('vehicles/<str:vid>/fueling/', views.getVehicleFuelingReports),

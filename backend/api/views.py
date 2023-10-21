@@ -461,14 +461,33 @@ def getMaintenance(request):
     serializer = MaintenanceSerializer(staff, many=True)
     return Response(serializer.data)
 
-@api_view(['GET'])
+@api_view(['GET', 'POST'])
 @permission_classes([IsAuthenticated])
 @user_type_required(['admin', 'fueling', 'maintenance'])
-def getVehicles(request):
-    vehicles = Vehicle.objects.all()
-    
-    serializer = VehicleSerializer(vehicles, many=True)
-    return Response(serializer.data)
+def vehicles_list(request):
+    if request.method == 'GET':   
+        # get all vehicles
+        vehicles = Vehicle.objects.all()
+        # serialze and return data
+        serializer = VehicleSerializer(vehicles, many=True)
+        return Response(serializer.data)
+    elif request.method == 'POST':
+        try:
+            # create new Vehicles
+            new_veh = Vehicle.objects.create(
+                make = request.data.get('make'),
+                model = request.data.get('model'),
+                type = request.data.get('type'),
+                year = request.data.get('year'),
+                license_plate = request.data.get('license_plate'),
+                capacity = request.data.get('capacity'),
+                mileage = request.data.get('mileage')
+            )
+        except:
+            return Response({'message': "Wrong data format or missing data"}, status=status.HTTP_400_BAD_REQUEST)
+        serializer = VehicleSerializer(new_veh, many=False)
+        return Response(serializer.data)
+
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
