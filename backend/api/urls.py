@@ -19,13 +19,14 @@ urlpatterns = [
     path('drivers/<str:pk>/report_data/', views.getDriverReportData),
     path('drivers/<str:pk>/report_data/savePDF', views.driverDataSavePDF),
 
+
+    path('reports/', views.general_reports),
     
     path('vehicles/', views.vehicles_list),
     path('vehicles/paginated/', views.getVehiclesPaginated),
     path('vehicles/<str:vid>/', views.getVehicle),
     path('vehicles/<str:vid>/fueling/', views.getVehicleFuelingReports),
     path('vehicles/<str:pk>/report_data/', views.getReportData),
-
 
     path('vehicles/<str:pk>/report_data/savePDF', views.getReportDataSavePDF),
 
@@ -55,6 +56,9 @@ urlpatterns = [
     path('routes_history/', views.getRoutesHistory),
     path('tasks/<str:tid>/complete/', views.completeTask),
 
+
+    path('auction/', views.auction_vehicles),
+    # path('auction/<str:pk/', views.auction_vehicle_detail),
 
 
     # from driver

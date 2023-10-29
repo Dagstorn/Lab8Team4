@@ -23,7 +23,7 @@ class Vehicle(models.Model):
         ordering = ["-type", "make", "model", "year"]
 
     def __str__(self):
-        return f'{self.model} {self.year} | {self.license_plate} | {self.type}'
+        return f'{self.make} {self.model} {self.year} | {self.license_plate} | {self.type}'
     
     def is_available(self):
         return not Task.objects.filter(car=self).exists()
@@ -33,6 +33,7 @@ class Vehicle(models.Model):
 class FuelingProof(models.Model):
     vehicle = models.ForeignKey(Vehicle, on_delete=models.CASCADE, null=True, related_name="fueling_proofs")
     fueling_person = models.ForeignKey(FuelingPerson, on_delete=models.SET(0), related_name="fueling_proofs")
+    driver_photo = models.ImageField(verbose_name="photo of the Driver", upload_to ='fueling_records/')
     image_before = models.ImageField(verbose_name="image before fueling", upload_to ='fueling_records/')
     image_after = models.ImageField(verbose_name="image after fueling", upload_to ='fueling_records/')
     date = models.DateTimeField(auto_now_add=False)
@@ -40,7 +41,9 @@ class FuelingProof(models.Model):
     amount = models.FloatField()
     cost = models.PositiveIntegerField()
 
-
+    def __str__(self):
+        return f'FP on {self.vehicle.make} {self.vehicle.model} on {self.date}'
+    
 class MaintenanceJob(models.Model):
     STATUS_TYPES = (
         ("scheduled", "Scheduled"),
@@ -64,9 +67,28 @@ class MaintenanceRecord(models.Model):
 
 
 class AuctionVehicle(models.Model):
-    image = models.ImageField(upload_to ='auction_vehicles/')
-    status = models.CharField()
-    cost = models.CharField()
+    BODY_TYPES =(
+        ("Sedan", "Sedan"), ("SUV", "SUV"), ("Hatchback", "Hatchback"), ("Coupe", "Coupe"), ("Wagon", "Wagon"), ("Minivan", "Minivan"), ("Pickup Truck", "Pickup Truck"), ("Crossover", "Crossover"), ("Van", "Van"), ("Sports Car", "Sports Car")
+    )
+
+    make = models.CharField(max_length=100)
+    model = models.CharField(max_length=100)
+    type = models.CharField(max_length=20, choices=BODY_TYPES, default="Sedan")
+    year = models.PositiveIntegerField()
+    license_plate = models.CharField(max_length=15, verbose_name="Licence plate")
+    capacity = models.PositiveIntegerField(verbose_name="Sitting capacity", default=5)
+    mileage = models.FloatField(verbose_name="Mileage in km", default=0)
+    image = models.ImageField(upload_to ='auction_vehicles/', null=True, blank=True)
+    condition = models.TextField(default="")
+    additional_information = models.TextField(default="")
+
+    class Meta:
+        ordering = ["-type", "make", "model", "year"]
+
+    def __str__(self):
+        return f'{self.make} {self.model} {self.year} | {self.license_plate} | {self.type}'
+   
+
 
 class VehicleReport(models.Model):
     vehicle = models.ForeignKey(Vehicle, on_delete=models.CASCADE, null=True, blank=True, related_name="reports")

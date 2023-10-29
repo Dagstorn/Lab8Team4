@@ -4,7 +4,7 @@ from datetime import datetime
 from django.utils import timezone
 from django.contrib.auth.models import User
 from password_generator import PasswordGenerator
-
+import time
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.pagination import PageNumberPagination
@@ -14,10 +14,10 @@ from rest_framework import status
 
 from .decorators import user_type_required
 
-from .serializers import DriverSerializer, VehicleSerializer, AppointmentSerializer, TaskSerializer, CompletedRouteSerializer, FuelingSerializer, MaintenanceSerializer, FuelingProofSerializer, MaintenanceJobSerializer
+from .serializers import DriverSerializer, VehicleSerializer,AuctionVehicleSerializer, AppointmentSerializer, TaskSerializer, CompletedRouteSerializer, FuelingSerializer, MaintenanceSerializer, FuelingProofSerializer, MaintenanceJobSerializer
 
 from accounts.models import Driver, FuelingPerson, MaintenancePerson, DriverReport
-from vehicles.models import Vehicle, FuelingProof, MaintenanceJob, MaintenanceRecord, VehicleReport
+from vehicles.models import Vehicle, AuctionVehicle, FuelingProof, MaintenanceJob, MaintenanceRecord, VehicleReport
 from tasks.models import Appointment, Task, CompletedRoute
 
 
@@ -43,8 +43,8 @@ def do_time_windows_overlap(time_start1, time_end1, time_start2, time_end2):
 
 # Retrieve list of drivers or create new Driver object
 @api_view(['GET', 'POST'])
-@permission_classes([IsAuthenticated])
-@user_type_required(['admin'])
+# @permission_classes([IsAuthenticated])
+# @user_type_required(['admin'])
 def drivers_list(request):
     if request.method == 'GET':   
         # get all drivers
@@ -240,10 +240,10 @@ def getFuelingData(vehicle):
     # }
     for fuel_rep in fueling_reports:
         # append data under keys with months
-        if fuel_rep.date.year in report:
-            report[fuel_rep.date.year].append({'month': fuel_rep.date.strftime('%B'), 'amount': fuel_rep.amount})
-        else:
-            report[fuel_rep.date.year] = [{'month': fuel_rep.date.strftime('%B'), 'amount': fuel_rep.amount}]
+        if not fuel_rep.date.year in report:
+            report[fuel_rep.date.year] = []
+        
+        report[fuel_rep.date.year].append({'month': fuel_rep.date.strftime('%B'), 'amount': fuel_rep.amount, 'cost': fuel_rep.cost})
     
     # iterate through all data and combine values for same keys
     for year in report:
@@ -251,13 +251,16 @@ def getFuelingData(vehicle):
         for entry in report[year]:
             month = entry["month"]
             amount = entry["amount"]
+            cost = entry["cost"]
             
             if month in result:
-                result[month] += amount
+                result[month]["amount"] += amount
+                result[month]["cost"] += cost
             else:
-                result[month] = amount
+                result[month] = {"amount": amount, "cost": cost}
 
-        combined_data = [{"month": month, "amount": result[month]} for month in result]
+        combined_data = [{"month": month, "amount": data["amount"], "cost": data["cost"]} for month, data in result.items()]
+
         report[year] = combined_data
 
     return report
@@ -328,8 +331,8 @@ def getUsageData(vehicle):
 
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
-@user_type_required(['admin'])
+# @permission_classes([IsAuthenticated])
+# @user_type_required(['admin'])
 def getReportData(request, pk):
     try:
         # get vehicle by vehicle id from the url
@@ -371,11 +374,105 @@ def getReportDataSavePDF(request, pk):
 
 
 
+@api_view(['GET'])
+# @permission_classes([IsAuthenticated])
+# @user_type_required(['admin'])
+def general_reports(request):
+    try:
+        # create report dictionary to store all information
+        report = dict()
+
+        list_of_fueling_reports_by_vehicles = []
+        for vehicle in Vehicle.objects.all(): 
+            data = getFuelingData(vehicle=vehicle) 
+            if data:
+                list_of_fueling_reports_by_vehicles.append(data)
+
+        fueling_report = {}
+     
+        for item in list_of_fueling_reports_by_vehicles:
+            for year, values in item.items():
+                if year not in fueling_report:
+                    fueling_report[year] = []
+
+                for entry in values:
+                    existing_entry = next(
+                        (x for x in fueling_report[year] if x["month"] == entry["month"]), None
+                    )
+                    if existing_entry:
+                        existing_entry["amount"] += entry["amount"]
+                        existing_entry["cost"] += entry["cost"]
+                    else:
+                        fueling_report[year].append(entry)
+        
+        report['fueling'] = fueling_report
+
+        
+        list_of_maintenance_reports_by_vehicles = []
+        for vehicle in Vehicle.objects.all(): 
+            data = getMaintenanceData(vehicle=vehicle) 
+            if data:
+                list_of_maintenance_reports_by_vehicles.append(data)
+
+        maintenance_report = {}
+     
+        for item in list_of_maintenance_reports_by_vehicles:
+            for year, values in item.items():
+                if year not in maintenance_report:
+                    maintenance_report[year] = []
+
+                for entry in values:
+                    existing_entry = next(
+                        (x for x in maintenance_report[year] if x["month"] == entry["month"]), None
+                    )
+                    if existing_entry:
+                        existing_entry["count"] += entry["count"]
+                        existing_entry["cost"] += entry["cost"]
+                    else:
+                        maintenance_report[year].append(entry)
+        
+        report['maintenance'] = maintenance_report
+        # return data   
+        return Response(report)
+    except:
+        return Response({'error': "Something went wrong"}, status=status.HTTP_400_BAD_REQUEST)
 
 
 
 
 
+
+
+@api_view(['GET', 'POST'])
+# @permission_classes([IsAuthenticated])
+# @user_type_required(['admin'])
+def auction_vehicles(request):
+    if request.method == 'GET':   
+        a_vehicles = AuctionVehicle.objects.all()
+        # serialze and return data
+        serializer = AuctionVehicleSerializer(a_vehicles, many=True)
+        return Response(serializer.data)
+    elif request.method == 'POST':
+        print(request.FILES)
+        print(request.FILES.get('image'))
+        try:
+            new_obj = AuctionVehicle.objects.create(
+                make = request.data.get('make'),
+                model = request.data.get('model'),
+                type = request.data.get('type'),
+                year = request.data.get('year'),
+                license_plate = request.data.get('license_plate'),
+                capacity = request.data.get('capacity'),
+                mileage = request.data.get('mileage'),
+                image = request.FILES.get('image'),
+                condition = request.data.get('condition'),
+                additional_information = request.data.get('additional_information'),
+            )
+        except:
+            return Response({'message': "Wrong data format or missing data"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        serializer = AuctionVehicleSerializer(new_obj, many=False)
+        return Response(serializer.data)
 
 
 
