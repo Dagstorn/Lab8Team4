@@ -2,6 +2,11 @@ import { AlarmClock, CarFront, FileText, LayoutDashboard, ListOrdered, Users2 } 
 
 export const sidebarNavItems = [
     {
+        title: "Reports",
+        href: "/admin/reports",
+        icon: <FileText className="mr-2 h-4 w-4" />,
+    },
+    {
         title: "Main Dashboard",
         href: "/admin/",
         icon: <LayoutDashboard className="mr-2 h-4 w-4" />,
@@ -31,11 +36,7 @@ export const sidebarNavItems = [
         href: "/admin/vehicles",
         icon: <CarFront className="mr-2 h-4 w-4" />,
     },
-    {
-        title: "Reports",
-        href: "/admin/reports",
-        icon: <FileText className="mr-2 h-4 w-4" />,
-    },
+
     {
         title: "Auction Vehicles",
         href: "/admin/auction/",

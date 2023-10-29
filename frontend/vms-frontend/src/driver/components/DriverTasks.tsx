@@ -22,7 +22,7 @@ const DriverTasks = () => {
             const responseData = await sendRequest('/api/driver/tasks/', 'get', {
                 Authorization: `Bearer ${auth.tokens.access}`
             })
-            if (response) {
+            if (responseData) {
                 // set data to response result
                 setTasks(responseData)
             }

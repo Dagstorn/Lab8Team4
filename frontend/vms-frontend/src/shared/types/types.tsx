@@ -18,9 +18,22 @@ export interface Vehicle {
     model: string,
     type: string,
     year: number,
-    license_plat: string,
+    license_plate: string,
     capacity: number,
     mileage: number
+}
+export interface AuctionVehicle {
+    id: number;
+    make: string,
+    model: string,
+    type: string,
+    year: number,
+    license_plate: string,
+    capacity: number,
+    mileage: number,
+    image: string,
+    condition: string,
+    additional_indormation: string,
 }
 export interface Appointment {
     id: number;

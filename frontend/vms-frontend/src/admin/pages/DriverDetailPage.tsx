@@ -26,7 +26,7 @@ const DriverDetailPage = () => {
             const driverData = await sendRequest(`/api/drivers/${driverID}/`, 'get', {
                 Authorization: `Bearer ${auth.tokens.access}`
             })
-            if (response) {
+            if (driverData) {
                 setDriver(driverData);
             }
         }
@@ -51,7 +51,7 @@ const DriverDetailPage = () => {
         const formData = new FormData();
         formData.append('pdfFile', bl, `${getFileName(driver)}.pdf`);
 
-        await sendRequest(`/api/drivers/${driver.id}/report_data/savePDF`, 'post', {
+        const response = await sendRequest(`/api/drivers/${driver.id}/report_data/savePDF`, 'post', {
             Authorization: `Bearer ${auth.tokens.access}`,
             'Content-Type': 'multipart/form-data',
         }, formData);

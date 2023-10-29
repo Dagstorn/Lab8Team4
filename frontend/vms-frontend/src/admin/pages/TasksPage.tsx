@@ -32,7 +32,7 @@ const TasksPage = () => {
         const responseData = await sendRequest(`/api/tasks/paginated/?page=${page}`, 'get', {
             Authorization: `Bearer ${auth.tokens.access}`
         })
-        if (response) {
+        if (responseData) {
             // set data to response result
             setTasks(responseData.results)
             if (paginationObj) {

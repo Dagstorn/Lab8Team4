@@ -73,8 +73,6 @@ const VehicleReport = () => {
     }
 
 
-
-
     // call getData when vehicleId from url changes to always have accurate data
     useEffect(() => {
         if (vehicleId) {
@@ -180,6 +178,7 @@ const VehicleReport = () => {
 
                         </div>
                         <ResponsiveContainer width="100%" height="80%">
+
                             <BarChart
                                 width={500}
                                 height={300}
@@ -188,21 +187,24 @@ const VehicleReport = () => {
                                 data={vehicleReportData['fueling'][fuelingYearFilter]}
                             >
                                 <XAxis dataKey="month" />
-                                <YAxis label={{ value: 'Fuel amount in liters', angle: -90, position: 'insideLeft', dy: 30 }} />
+                                <YAxis label={{ value: 'Fuel cost in KZT', angle: -90, position: 'insideLeft', dx: -15, dy: 30 }} />
                                 <Tooltip content={(tooltipPayload) => {
                                     if (tooltipPayload.active && tooltipPayload.payload && tooltipPayload.payload.length) {
                                         return (
+
                                             <div className="custom-tooltip border bg-white p-4">
                                                 <p className="label">
-                                                    <span className='text-blue-500'>{`Fuel amount in ${tooltipPayload.label}`}</span> : {tooltipPayload.payload[0].value} liters</p>
-
+                                                    <span className='text-blue-500'>{`Cost in ${tooltipPayload.label}`}</span> : {tooltipPayload.payload[0].value} KZT</p>
+                                                <p className="label">Fuel amount in {`${tooltipPayload.label} : ${tooltipPayload.payload[1].value} liters`}</p>
                                             </div>
                                         );
                                     }
 
                                     return null;
                                 }} />
-                                <Bar dataKey="amount" fill="#8884d8" width={1} />
+                                <Bar dataKey="cost" fill="#8884d8" width={1} />
+                                <Bar dataKey="amount" fill="none" width={2} />
+
                             </BarChart>
                         </ResponsiveContainer>
 
@@ -329,7 +331,7 @@ const VehicleReport = () => {
 
 
             </div>}
-        </div>
+        </div >
 
     )
 }

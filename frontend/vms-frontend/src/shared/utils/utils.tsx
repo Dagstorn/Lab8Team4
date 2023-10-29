@@ -119,7 +119,7 @@ export const getVehicleInfo = (vehicle: Vehicle) => {
         </div>
         <div className="flex">
             <span className="w-2/6 font-bold mr-2">License plate:</span>
-            <span>{vehicle.license_plat}</span>
+            <span>{vehicle.license_plate}</span>
         </div>
     </div>
 }

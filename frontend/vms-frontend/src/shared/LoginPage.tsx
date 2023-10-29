@@ -35,6 +35,7 @@ const LoginPage = () => {
     // will be launched when LoginPage components is initialized
     useEffect(() => {
         // if user is logged in we redirect user back where he/she came from or to home page
+
         if (auth.isLoggedIn) {
             navigate(location.state?.from?.pathname || "/");
         }

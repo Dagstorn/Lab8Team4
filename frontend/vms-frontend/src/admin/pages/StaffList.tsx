@@ -44,7 +44,6 @@ const StaffListPage = () => {
             if (fuelingStaffData && maintenanceStaffData) {
                 // set data to response result
                 setFuelingStaff(fuelingStaffData)
-                console.log(maintenanceStaffData.length)
                 setMaintenanceStaff(maintenanceStaffData)
             }
         }
@@ -77,7 +76,7 @@ const StaffListPage = () => {
 
             <FadeTransition show={maintenanceStaff.length > 0}>
 
-                <Table>
+                {fuelingStaff.length > 0 ? <Table>
                     <TableHeader>
                         <TableRow>
                             <TableHead>Fueling Person</TableHead>
@@ -86,7 +85,7 @@ const StaffListPage = () => {
                             <TableHead className="text-right">Action</TableHead>
                         </TableRow>
                     </TableHeader>
-                    {fuelingStaff.length > 0 ? <TableBody>
+                    <TableBody>
                         {
                             fuelingStaff.map((employee) => {
                                 return <TableRow key={employee.id}>
@@ -99,10 +98,9 @@ const StaffListPage = () => {
                                 </TableRow>
                             })
                         }
-
-                    </TableBody> : <p className="ml-4 py-4 font-bold">No fueling persons yet</p>}
-                </Table>
-                <Table className="mt-12">
+                    </TableBody>
+                </Table> : <span className="ml-4 py-4 font-bold">No fueling persons yet</span>}
+                {maintenanceStaff.length > 0 ? <Table className="mt-12">
                     <TableHeader>
                         <TableRow>
                             <TableHead>Maintenance Person</TableHead>
@@ -111,7 +109,7 @@ const StaffListPage = () => {
                             <TableHead className="text-right">Action</TableHead>
                         </TableRow>
                     </TableHeader>
-                    {maintenanceStaff.length > 0 ? <TableBody>
+                    <TableBody>
                         {
                             maintenanceStaff.map((employee) => {
                                 return <TableRow key={employee.id}>
@@ -125,8 +123,8 @@ const StaffListPage = () => {
                             })
                         }
 
-                    </TableBody> : <p className="ml-4 py-4 font-bold">No maintenance persons yet</p>}
-                </Table>
+                    </TableBody>
+                </Table> : <span className="ml-4 py-4 font-bold">No maintenance persons yet</span>}
             </FadeTransition>
         </>
     );

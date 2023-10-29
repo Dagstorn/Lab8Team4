@@ -22,7 +22,7 @@ const EditDriverPage = () => {
             const driverData = await sendRequest(`/api/drivers/${driverID}/`, 'get', {
                 Authorization: `Bearer ${auth.tokens.access}`
             })
-            if (response) {
+            if (driverData) {
                 setDriver(driverData);
                 setValue('name', driverData.name);
                 setValue('surname', driverData.surname);

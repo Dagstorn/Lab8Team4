@@ -1,5 +1,5 @@
 import "./App.css";
-import { Routes, Route, useNavigate } from "react-router-dom";
+import { Routes, Route, useNavigate, Navigate } from "react-router-dom";
 import DriversListPage from "./admin/pages/DriversListPage";
 import Homepage from "./Homepage";
 import NavBar from "./shared/components/NavBar";
@@ -51,6 +51,10 @@ import VehicleReport from "./admin/pages/VehicleReport.tsx";
 import EditDriverPage from "./admin/pages/EditDriverPage.tsx";
 import EditTaskPage from "./admin/pages/EditTaskPage.tsx";
 import VehiclesAddPage from "./admin/pages/VehiclesAddPage.tsx";
+import Reports from "./admin/pages/Reports.tsx";
+import Auction from "./admin/pages/Auction.tsx";
+import AddAuctionVeh from "./admin/pages/AddAuctionVeh.tsx";
+
 function App() {
   // global state holders for currently logged in user
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -183,7 +187,7 @@ function App() {
 
           <Route element={<RequireAuth allowedRole={"admin"} />}>
             <Route path="admin" element={<AdminLayout links={adminLinks} />}>
-              <Route path="" element={<MainDashboard />} />
+              <Route path="" element={<Navigate to="reports" replace />} />
 
               <Route path="drivers" element={<DriversListPage />} />
               <Route path="drivers/add" element={<AddDriverPage />} />
@@ -200,6 +204,10 @@ function App() {
               <Route path="vehicles" element={<VehiclesListPage />} />
               <Route path="vehicles/add" element={<VehiclesAddPage />} />
               <Route path="vehicles/:vid/report" element={<VehicleReport />} />
+              <Route path="reports" element={<Reports />} />
+              <Route path="auction" element={<Auction />} />
+              <Route path="auction/add" element={<AddAuctionVeh />} />
+
             </Route>
           </Route>
 

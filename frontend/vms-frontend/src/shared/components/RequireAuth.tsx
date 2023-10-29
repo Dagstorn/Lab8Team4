@@ -5,6 +5,8 @@ const RequireAuth = ({ allowedRole }: { allowedRole: String }) => {
     const auth = useAuth();
     const location = useLocation();
 
+
+
     return (
         auth?.role == allowedRole
             ? <Outlet />
@@ -15,3 +17,5 @@ const RequireAuth = ({ allowedRole }: { allowedRole: String }) => {
 }
 
 export default RequireAuth
+
+

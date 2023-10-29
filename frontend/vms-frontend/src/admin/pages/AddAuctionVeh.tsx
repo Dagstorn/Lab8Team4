@@ -20,7 +20,7 @@ const BODY_TYPES = [
     { "value": "Crossover" },
     { "value": "Sports Car" }
 ]
-const VehiclesAddPage = () => {
+const AddAuctionVeh = () => {
     const auth = useAuth();
     const navigate = useNavigate();
 
@@ -31,29 +31,28 @@ const VehiclesAddPage = () => {
     const { toast } = useToast();
 
 
-
-
-
-
     async function onSubmit(values: FieldValues) {
 
         clearError();
+        values.image = values.image[0]
         console.log(values)
+
         // send task data to backend
-        const response = await sendRequest('/api/vehicles/', 'post', {
+        const response = await sendRequest('/api/auction/', 'post', {
             Authorization: `Bearer ${auth.tokens.access}`,
             "Content-Type": "multipart/form-data"
         }, values)
         if (response) {
             reset();
             toast({
-                title: "Fueling record was added successfully!",
+                title: "Auction Vehicle was added successfully!",
             })
+            navigate('/admin/auction/');
         }
     }
     return (
         <>
-            <h1 className="text-2xl font-bold mb-4">Add Vehicle</h1>
+            <h1 className="text-2xl font-bold mb-4">Add Auction Vehicle</h1>
             <Separator />
             <form className="" onSubmit={handleSubmit(onSubmit)}>
                 <div className="mt-2">
@@ -75,7 +74,7 @@ const VehiclesAddPage = () => {
                                         type="text" required
                                         className="custom-input"
                                     />
-                                    {errors.description && <p className="text-red-500">{`${errors.description.message}`}</p>}
+                                    {errors.make && <p className="text-red-500">{`${errors.make.message}`}</p>}
                                 </div>
                                 <div className="mb-4">
                                     <label htmlFor="">Model</label>
@@ -85,7 +84,7 @@ const VehiclesAddPage = () => {
                                         type="text" required
                                         className="custom-input"
                                     />
-                                    {errors.description && <p className="text-red-500">{`${errors.description.message}`}</p>}
+                                    {errors.model && <p className="text-red-500">{`${errors.model.message}`}</p>}
                                 </div>
                             </div>
 
@@ -105,7 +104,7 @@ const VehiclesAddPage = () => {
                                     ))}
                                 </Select>
 
-                                {errors.description && <p className="text-red-500">{`${errors.description.message}`}</p>}
+                                {errors.type && <p className="text-red-500">{`${errors.type.message}`}</p>}
                             </div>
                             <div className="mb-4">
                                 <label htmlFor="">Year</label>
@@ -115,7 +114,7 @@ const VehiclesAddPage = () => {
                                     type="number" required
                                     className="custom-input"
                                 />
-                                {errors.description && <p className="text-red-500">{`${errors.description.message}`}</p>}
+                                {errors.year && <p className="text-red-500">{`${errors.year.message}`}</p>}
                             </div>
                             <div className="mb-4">
                                 <label htmlFor="">Sitting capacity</label>
@@ -125,7 +124,7 @@ const VehiclesAddPage = () => {
                                     type="number" required
                                     className="custom-input"
                                 />
-                                {errors.description && <p className="text-red-500">{`${errors.description.message}`}</p>}
+                                {errors.capacity && <p className="text-red-500">{`${errors.capacity.message}`}</p>}
                             </div>
                             <div className="mb-4">
                                 <label htmlFor="">Plate number</label>
@@ -135,7 +134,7 @@ const VehiclesAddPage = () => {
                                     type="text" required
                                     className="custom-input"
                                 />
-                                {errors.description && <p className="text-red-500">{`${errors.description.message}`}</p>}
+                                {errors.license_plate && <p className="text-red-500">{`${errors.license_plate.message}`}</p>}
                             </div>
                             <div className="mb-4">
                                 <label htmlFor="">Mileage</label>
@@ -145,7 +144,40 @@ const VehiclesAddPage = () => {
                                     type="text" required
                                     className="custom-input"
                                 />
-                                {errors.description && <p className="text-red-500">{`${errors.description.message}`}</p>}
+                                {errors.mileage && <p className="text-red-500">{`${errors.mileage.message}`}</p>}
+                            </div>
+                            <div className="mb-4">
+                                <label htmlFor="">Upload a photo</label>
+                                <input {...register("image", {
+                                    required: "Add file"
+                                })}
+                                    type="file" required
+                                    className="custom-input"
+                                />
+
+                                {errors.image && <p className="text-red-500">{`${errors.image.message}`}</p>}
+                            </div>
+                            <div className="mb-4">
+                                <label htmlFor="">Condition</label>
+                                <input {...register("condition", {
+                                    required: "Required"
+                                })}
+                                    type="text" required
+                                    className="custom-input"
+                                />
+                                {errors.condition && <p className="text-red-500">{`${errors.condition.message}`}</p>}
+                            </div>
+
+
+                            <div className="mb-4">
+                                <label htmlFor="">Additional information</label>
+                                <input {...register("additional_information", {
+                                    required: "Required"
+                                })}
+                                    type="text" required
+                                    className="custom-input"
+                                />
+                                {errors.additional_information && <p className="text-red-500">{`${errors.additional_information.message}`}</p>}
                             </div>
 
 
@@ -164,4 +196,4 @@ const VehiclesAddPage = () => {
     );
 };
 
-export default VehiclesAddPage;
+export default AddAuctionVeh;
