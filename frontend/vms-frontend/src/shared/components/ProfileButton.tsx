@@ -16,7 +16,7 @@ const ProfileButton = () => {
   const auth = useAuth();
 
   const navigate = useNavigate();
-  const getPersonalPageLink = (role: stirng) => {
+  const getPersonalPageLink = (role: string) => {
     if (role === 'driver') {
       return <Link to="/driver/personal_page/">Personal page</Link>
     } else if (role === 'fueling') {

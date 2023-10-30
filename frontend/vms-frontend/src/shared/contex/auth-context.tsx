@@ -4,7 +4,7 @@ interface tokenInt {
     refresh: string,
     access: string,
 }
-
+// defining auth context for storing data of logged in user on the scope of the whole app and providing functions to login and logout
 export const AuthContext = createContext({
     isLoggedIn: false,
     role: "default",

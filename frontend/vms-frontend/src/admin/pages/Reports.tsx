@@ -7,23 +7,23 @@ import { useEffect, useState } from "react";
 import { Bar, BarChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { usePDF } from 'react-to-pdf';
 import generatePDF, { Margin } from 'react-to-pdf';
-import { Vehicle } from "@/shared/types/types";
 import { Button } from "@/shared/shad-ui/ui/button";
 import { Download } from "lucide-react";
 
 const Reports = () => {
     // get auth context to access currently logged in user data
     const auth = useAuth();
+    // state to store report object we get from backend
     const [reportData, setReportData] = useState<any>();
+    // initialize reference using usePDF to generate pdf file on specific component 
     const { targetRef } = usePDF({ filename: 'page.pdf' });
-
+    // states to store filters
     const [fuelingYearFilter, setFuelingYearFilter] = useState<number>(new Date().getFullYear());
     const [maintenanceYearFilter, setMaintenanceYearFilter] = useState<number>(new Date().getFullYear());
     // custom hook to make API calls
-    const { loading, error, sendRequest, clearError } = useHttp();
+    const { error, sendRequest, clearError } = useHttp();
     // library to show toast messagess
     const { toast } = useToast();
-
 
     // retrieve data from api
     const getData = async () => {
@@ -46,6 +46,8 @@ const Reports = () => {
     useEffect(() => {
         getData();
     }, []);
+
+    // function to generate items for select component
     const getYearSelectItems = (data: any) => {
         const sortedKeys = Object.keys(data).sort((a: string, b: string) => parseInt(b) - parseInt(a)); // Sort the keys in ascending order
 
@@ -54,6 +56,7 @@ const Reports = () => {
         ));
         return yearSelectItems;
     }
+    // function to create PDF filename based on current date
     const getFileName = () => {
         const date = new Date();
         const day = String(date.getDate()).padStart(2, '0');
@@ -63,10 +66,9 @@ const Reports = () => {
 
         return `Report_on_${formattedDate}.pdf`;
     }
+    // function to generate pdf
     const constructPDF = async () => {
         const pdfBlob = await generatePDF(targetRef, { filename: getFileName(), page: { margin: Margin.LARGE } })
-        const bl = pdfBlob.output("blob")
-
 
         if (error) {
             toast({ title: "Report was not saved! Try again" })

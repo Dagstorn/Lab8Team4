@@ -21,7 +21,6 @@ export const useHttp = () => {
                 headers: headers,
                 data: postValues || {}
             });
-
             setLoading(false);
             setError('');
             return response.data;

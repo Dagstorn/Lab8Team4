@@ -3,18 +3,20 @@ import useAuth from "@/shared/hooks/useAuth";
 import { Separator } from "@/shared/shad-ui/ui/separator"
 import { AuctionVehicle } from "@/shared/types/types";
 import { useEffect, useState } from "react";
-import AuctionVehicleCard from "../components/AuctionVehicleCard";
-import FadeTransition from "../components/FadeTransition";
+import AuctionVehicleCard from "../../components/AuctionVehicleCard";
+import FadeTransition from "../../components/FadeTransition";
 import { Button } from "@/shared/shad-ui/ui/button";
 import { Link } from "react-router-dom";
-import { Plus, PlusCircle } from "lucide-react";
+import { Plus } from "lucide-react";
 
 const Auction = () => {
+    // get auth context to have access to currently logged in user data
     const auth = useAuth();
-    const { loading, error, sendRequest, clearError } = useHttp();
-
+    // custom HTTP hook to make  API calls
+    const { sendRequest } = useHttp();
+    // state to store auction vehicles list
     const [vehicles, setVehicles] = useState<AuctionVehicle[]>([]);
-
+    // fetch data on page load
     useEffect(() => {
         const getData = async () => {
             const response = await sendRequest(`/api/auction/`, 'get', {

@@ -1,17 +1,16 @@
 import "./App.css";
 import { Routes, Route, useNavigate, Navigate } from "react-router-dom";
-import DriversListPage from "./admin/pages/DriversListPage";
+import DriversListPage from "./admin/pages/drivers/DriversListPage.tsx";
 import Homepage from "./Homepage";
 import NavBar from "./shared/components/NavBar";
-import MainDashboard from "./admin/pages/MainDashboard";
 import AdminLayout from "./admin/AdminLayout";
-import DriverDetailPage from "./admin/pages/DriverDetailPage";
-import AppointmentsPage from "./admin/pages/AppointmentsPage";
-import AddDriverPage from "./admin/pages/AddDriverPage";
-import TasksPage from "./admin/pages/TasksPage";
-import AppointmentDetailPage from "./admin/pages/AppointmentDetailPage";
-import StaffListPage from "./admin/pages/StaffList";
-import VehiclesListPage from "./admin/pages/VehiclesListPage";
+import DriverDetailPage from "./admin/pages/drivers/DriverDetailPage.tsx";
+import AppointmentsPage from "./admin/pages/tasks/AppointmentsPage.tsx";
+import AddDriverPage from "./admin/pages/drivers/AddDriverPage.tsx";
+import TasksPage from "./admin/pages/tasks/TasksPage.tsx";
+import AppointmentDetailPage from "./admin/pages/tasks/AppointmentDetailPage.tsx";
+import StaffListPage from "./admin/pages/staff/StaffList.tsx";
+import VehiclesListPage from "./admin/pages/vehicles/VehiclesListPage.tsx";
 import MakeAppointmentPage from "./driver/pages/MakeAppointmentPage";
 import MainLayout from "./shared/MainLayout";
 import LoginPage from "./shared/LoginPage";
@@ -21,9 +20,9 @@ import NotFoundPage from "./shared/components/NotFoundPage.tsx";
 
 import RequireAuth from "./shared/components/RequireAuth.tsx";
 import jwt_decode from "jwt-decode";
-import axios from "./shared/hooks/axios";
+import axios from 'axios';
 // import { useToast } from "./shared/shad-ui/ui/use-toast.ts";
-import AddTaskPage from "./admin/pages/AddTaskPage.tsx";
+import AddTaskPage from "./admin/pages/tasks/AddTaskPage.tsx";
 import PersonalPage from "./driver/pages/PersonalPage.tsx";
 import PersonalPageLayout from "./driver/PersonalPageLayout.tsx";
 import ViewTaskPage from "./driver/pages/ViewTaskPage.tsx";
@@ -31,8 +30,8 @@ import RoutesHistory from "./driver/pages/RoutesHistory.tsx";
 import Appointments from "./driver/pages/Appointments.tsx";
 import Report from "./driver/pages/Report.tsx";
 import DriverTasksPage from "./driver/pages/DriverTasksPage.tsx";
-import AddFueling from "./admin/pages/AddFueling.tsx";
-import AddMaintenance from "./admin/pages/AddMaintenance.tsx";
+import AddFueling from "./admin/pages/staff/AddFueling.tsx";
+import AddMaintenance from "./admin/pages/staff/AddMaintenance.tsx";
 interface tokenInt {
   refresh: string,
   access: string,
@@ -47,13 +46,18 @@ import MaintenanceVehiclesList from "./staff/pages/maintenance/MaintenanceVehicl
 import AddFuelingReport from "./staff/pages/fueling/AddFuelingReport.tsx";
 import FuelingReports from "./staff/pages/fueling/FuelingReports.tsx";
 import ScheduledJobs from "./staff/pages/maintenance/ScheduledJobs.tsx";
-import VehicleReport from "./admin/pages/VehicleReport.tsx";
-import EditDriverPage from "./admin/pages/EditDriverPage.tsx";
-import EditTaskPage from "./admin/pages/EditTaskPage.tsx";
-import VehiclesAddPage from "./admin/pages/VehiclesAddPage.tsx";
+import VehicleReport from "./admin/pages/vehicles/VehicleReport.tsx";
+import EditDriverPage from "./admin/pages/drivers/EditDriverPage.tsx";
+import EditTaskPage from "./admin/pages/tasks/EditTaskPage.tsx";
+import VehiclesAddPage from "./admin/pages/vehicles/VehiclesAddPage.tsx";
 import Reports from "./admin/pages/Reports.tsx";
-import Auction from "./admin/pages/Auction.tsx";
-import AddAuctionVeh from "./admin/pages/AddAuctionVeh.tsx";
+import Auction from "./admin/pages/vehicles/Auction.tsx";
+import AddAuctionVeh from "./admin/pages/vehicles/AddAuctionVeh.tsx";
+import EditFuelingPage from "./admin/pages/staff/EditFuelingPage.tsx";
+import FuelingDetailPage from "./admin/pages/staff/FuelingDetailPage.tsx";
+import EditMaintenance from "./admin/pages/staff/EditMaintenance.tsx";
+import MaintenanceDetail from "./admin/pages/staff/MaintenanceDetail.tsx";
+import VehicleEditPage from "./admin/pages/vehicles/VehicleEditPage.tsx";
 
 function App() {
   // global state holders for currently logged in user
@@ -199,11 +203,19 @@ function App() {
               <Route path="tasks/add" element={<AddTaskPage />} />
               <Route path="tasks/:taskId/edit" element={<EditTaskPage />} />
               <Route path="staff" element={<StaffListPage />} />
+              <Route path="staff/fueling/:fuelingPersonId/edit" element={<EditFuelingPage />} />
+              <Route path="staff/fueling/:fuelingPersonId/detail" element={<FuelingDetailPage />} />
+              <Route path="staff/maintenance/:maintenancePersonId/edit" element={<EditMaintenance />} />
+              <Route path="staff/maintenance/:maintenancePersonId/detail" element={<MaintenanceDetail />} />
+
+
               <Route path="staff/add/fueling" element={<AddFueling />} />
               <Route path="staff/add/maintenance" element={<AddMaintenance />} />
+
               <Route path="vehicles" element={<VehiclesListPage />} />
               <Route path="vehicles/add" element={<VehiclesAddPage />} />
-              <Route path="vehicles/:vid/report" element={<VehicleReport />} />
+              <Route path="vehicles/:vehicleId/detail" element={<VehicleReport />} />
+              <Route path="vehicles/:vehicleId/edit" element={<VehicleEditPage />} />
               <Route path="reports" element={<Reports />} />
               <Route path="auction" element={<Auction />} />
               <Route path="auction/add" element={<AddAuctionVeh />} />

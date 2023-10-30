@@ -3,11 +3,11 @@ import useAuth from '@/shared/hooks/useAuth';
 import { Separator } from '@/shared/shad-ui/ui/separator';
 import { useToast } from '@/shared/shad-ui/ui/use-toast';
 import { Vehicle } from '@/shared/types/types';
-import { useEffect, useRef, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { Link, useParams } from 'react-router-dom';
 import { Spinner } from '@nextui-org/react';
 import { Button } from '@/shared/shad-ui/ui/button';
-import { Download } from 'lucide-react';
+import { Download, Pencil } from 'lucide-react';
 import { Bar, BarChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/shared/shad-ui/ui/select';
 import { CardHeader, Card, CardContent } from '@/shared/shad-ui/ui/card';
@@ -17,17 +17,20 @@ import generatePDF, { Margin } from 'react-to-pdf';
 
 const VehicleReport = () => {
     // get vehicle id from url using useParams hook from react
-    const vehicleId = useParams().vid;
+    const vehicleId = useParams().vehicleId;
     // get auth context to access currently logged in user data
     const auth = useAuth();
+    // initialize reference using usePDF to generate pdf file on specific component 
     const { targetRef } = usePDF({ filename: 'page.pdf' });
     // states to store vehicle data 
     const [vehicle, setVehicle] = useState<Vehicle>();
     const [vehicleReportData, setVehicleReportData] = useState<any>();
+    // states to store filters - used to change year on graphics
     const [fuelingYearFilter, setFuelingYearFilter] = useState<number>(new Date().getFullYear());
     const [maintenanceYearFilter, setMaintenanceYearFilter] = useState<number>(new Date().getFullYear());
     const [usageNumberYearFilter, setUsageNumberYearFilter] = useState<number>(new Date().getFullYear());
     const [usageDistanceYearFilter, setUsageDistanceYearFilter] = useState<number>(new Date().getFullYear());
+    // states to store information
     const [numberOfUsages, setNumberOfUsages] = useState<number>(0);
     const [totalDistance, setTotalDistance] = useState<number>(0);
     // custom hook to make API calls
@@ -39,7 +42,6 @@ const VehicleReport = () => {
     const getData = async () => {
         // clear error at start to get rid of any not actual previous errors
         clearError();
-
         // get data with custom Hook
         const [vehicleData, reportData] = await Promise.all([
             sendRequest(`/api/vehicles/${vehicleId}/`, 'get', {
@@ -52,26 +54,30 @@ const VehicleReport = () => {
         if (vehicleData && reportData) {
             // set data to response result
             setVehicle(vehicleData);
+            // counters for total distance and total number of usages
             let totalDist = 0;
             let totalUsages = 0;
+
             Object.keys(reportData['usage']).forEach((year) => {
+                // reformat distance
                 const new_arr = reportData['usage'][year].map((obj: any) => ({
                     ...obj,
                     distance: obj.distance / 1000
                 }))
                 reportData['usage'][year] = new_arr;
+                // count total distance and total number of usages
                 reportData['usage'][year].forEach((obj: any) => {
                     totalUsages += obj.count;
                     totalDist += obj.distance;
                 })
             })
+            // save to state
             setNumberOfUsages(totalUsages);
             setTotalDistance(totalDist);
             setVehicleReportData(reportData);
         }
 
     }
-
 
     // call getData when vehicleId from url changes to always have accurate data
     useEffect(() => {
@@ -80,7 +86,7 @@ const VehicleReport = () => {
         }
     }, [vehicleId]);
 
-
+    // function to generate items for select component
     const getYearSelectItems = (data: any) => {
         const sortedKeys = Object.keys(data).sort((a: string, b: string) => parseInt(b) - parseInt(a)); // Sort the keys in ascending order
 
@@ -89,6 +95,7 @@ const VehicleReport = () => {
         ));
         return yearSelectItems;
     }
+
     const CustomTooltip = (tooltipPayload: any) => {
         if (tooltipPayload.active && tooltipPayload.payload && tooltipPayload.payload.length) {
             return (
@@ -102,6 +109,7 @@ const VehicleReport = () => {
 
         return null;
     };
+    // function to create PDF filename based on vehicle name and current date
     const getFileName = (vehicle: Vehicle) => {
         const date = new Date();
         const day = String(date.getDate()).padStart(2, '0');
@@ -111,6 +119,7 @@ const VehicleReport = () => {
 
         return `Report_on_${vehicle.make}_${vehicle.model}_${formattedDate}.pdf`;
     }
+    // function to get pdf and send it to backend
     const constructPDF = async (vehicle: Vehicle) => {
         const pdfBlob = await generatePDF(targetRef, { filename: getFileName(vehicle), page: { margin: Margin.LARGE } })
         const bl = pdfBlob.output("blob")
@@ -130,8 +139,9 @@ const VehicleReport = () => {
         <div>
             {loading && <Spinner />}
             {!loading && vehicle && <div className='w-full h-full flex flex-col'>
-                <div className='flex justify-between items-center mb-2'>
+                <div className='flex items-center mb-2'>
                     <h1 className="text-2xl font-bold mr-4">Vehicle Report</h1>
+                    <Link className="mr-4" to={`/admin/vehicles/${vehicle.id}/edit/`}><Button variant="secondary"><Pencil className="w-4 mr-1" /> Edit vehicle data</Button></Link>
                     <Button onClick={() => constructPDF(vehicle)}><Download className='w-4 mr-2' />Save as PDF</Button>
                 </div>
 

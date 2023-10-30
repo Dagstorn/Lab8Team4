@@ -7,34 +7,35 @@ import {
     TableRow,
 } from "@/shared/shad-ui/ui/table";
 import { Separator } from "@/shared/shad-ui/ui/separator";
-import { Spinner } from "@nextui-org/react";
-import { PaginatorObj, Task } from "@/shared/types/types";
-
+import { Driver, PaginatorObj } from "@/shared/types/types";
 import { Link } from "react-router-dom";
-import { useHttp } from "@/shared/hooks/http-hook";
 import { useEffect, useState } from "react";
 import useAuth from "@/shared/hooks/useAuth";
-import { useToast } from "@/shared/shad-ui/ui/use-toast";
-import TaskDetails from "../components/TaskDetail";
-import FadeTransition from "../components/FadeTransition";
-import Paginator from "../components/Paginator";
+import { Spinner } from "@nextui-org/react";
+import { useHttp } from "@/shared/hooks/http-hook";
+import DriverDetailRow from "../../components/DriverDetailRow";
+import Paginator from "../../components/Paginator";
+import FadeTransition from "../../components/FadeTransition";
 
-const TasksPage = () => {
+const DriversListPage = () => {
+    // auth context to get currently logged in user data
     const auth = useAuth();
+    // state which stores drivers list
+    const [drivers, setDrivers] = useState<Driver[]>([]);
     // paginator object stores data related to pagination like count, next page, prev page and page size
     const [paginationObj, setPaginationObj] = useState<PaginatorObj | null>(null);
-    const [tasks, setTasks] = useState<Task[]>([]);
+    // custom http hook to make api calls
     const { loading, error, sendRequest, clearError } = useHttp();
-    const { toast } = useToast();
+
     // function to retrieve data from api
     const getData = async (page: number) => {
-        // get data with custom Hook
-        const responseData = await sendRequest(`/api/tasks/paginated/?page=${page}`, 'get', {
+        // get data from api with custom Hook
+        const responseData = await sendRequest(`/api/drivers/paginated/?page=${page}`, 'get', {
             Authorization: `Bearer ${auth.tokens.access}`
         })
         if (responseData) {
             // set data to response result
-            setTasks(responseData.results)
+            setDrivers(responseData.results);
             if (paginationObj) {
                 const updatedObj = {
                     ...paginationObj,
@@ -52,70 +53,66 @@ const TasksPage = () => {
                 })
             }
         }
-
     }
-    // when conponent mounts - meaning when it is created we get data
+    // when conponent mounts - meaning when it is initialized we call get data function
     useEffect(() => {
-        // clear error at start to get rid of any not actual previous errors
+        // clear error at start to get rid of any previous errors
         clearError();
         getData(1);
     }, []);
-
-    const deleteTask = async (task: Task) => {
-        if (tasks) {
-            const updatedList = tasks.filter((item: Task) => item.id !== task.id);
-            // send data with custom Hook
-            const response = await sendRequest(`/api/tasks/${task.id}`, 'delete', {
-                Authorization: `Bearer ${auth.tokens.access}`
-            })
-            if (response) {
-                toast({ title: "Tasks deleted successfully!" })
-                setTasks(updatedList);
-            }
-        }
+    // function to remove a driver from list of current drivers
+    // used when deleting driver, because even if we make api call to delete driver from Database, driver still be present on page before the next refresh of the page
+    // therefore, in that case we need to manually delete it from current state in order to have consistent data on page
+    const removeDriverFromList = (driverId: number) => {
+        // fitler out driver
+        const updatedDrivers = drivers.filter(driver => driver.id !== driverId);
+        // update state
+        setDrivers(updatedDrivers);
     }
 
     return (
         <>
-            <div className="flex justify-between">
-
-                <div className="flex gap-4">
-                    <h1 className="text-2xl font-bold mb-4">Driver Tasks & Jobs</h1>
+            <div className="flex justify-between mb-2">
+                <div className="flex gap-4 items-center">
+                    <h1 className="text-2xl font-bold ">Drivers list</h1>
                     {loading && <div className="">
                         <Spinner></Spinner>
                     </div>}
+
                 </div>
-                <Link to='/admin/tasks/add'>
-                    <Button variant='default'>Add Task</Button>
-                </Link>
+
+                <Link to="/admin/drivers/add"><Button variant='default'>Add driver</Button></Link>
             </div>
             <Separator />
-            {error ? <div className="text-red-400 mt-4 ">Error: {error}</div> : null}
-            <FadeTransition show={tasks.length > 0}>
+            {error ? <div className="text-red-400 mt-4 mb-2">Error: {error}</div> : null}
 
+            <FadeTransition show={drivers.length > 0}>
                 <Table>
                     <TableHeader>
                         <TableRow>
                             <TableHead>Driver</TableHead>
-                            <TableHead>Date time</TableHead>
-                            <TableHead>Assigned Vehicle</TableHead>
+                            <TableHead>Phone</TableHead>
+                            <TableHead>Email</TableHead>
                             <TableHead className="text-right">Action</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
                         {
-                            tasks.map((task) => {
-                                return <TaskDetails key={task.id} task={task} deleteTask={deleteTask} />
-                            })
+                            drivers.map((driver) => (
+                                <DriverDetailRow key={driver.id} driver={driver} removeDriverFromList={removeDriverFromList} />
+                            ))
                         }
-
                     </TableBody>
                 </Table>
                 {paginationObj && <Paginator getData={getData} paginatorData={paginationObj} />}
+
             </FadeTransition>
+
+
+
 
         </>
     );
 };
 
-export default TasksPage;
+export default DriversListPage;

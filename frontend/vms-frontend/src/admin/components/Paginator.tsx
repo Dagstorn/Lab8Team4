@@ -3,11 +3,13 @@ import { PaginatorObj } from "@/shared/types/types";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useEffect, useState } from "react";
 
+
 const Paginator = ({ getData, paginatorData }: { getData: (page: number) => void, paginatorData: PaginatorObj }) => {
     // paginator object stores data related to pagination like count, next page, prev page and page size
     const [paginationObj, setPaginationObj] = useState<PaginatorObj | null>(null);
+    // state to store page number
     const [page, setPage] = useState(1);
-
+    // update state when paginatorData changes to ensure cosistent data
     useEffect(() => {
         setPaginationObj(paginatorData);
     }, [paginatorData]);

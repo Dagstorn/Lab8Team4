@@ -1,13 +1,5 @@
 import { cn } from "@/lib/utils";
 import { Button } from "@/shared/shad-ui/ui/button";
-import {
-    Users2,
-    ListOrdered,
-    AlarmClock,
-    LayoutDashboard,
-    CarFront,
-    FileText,
-} from "lucide-react";
 import { NavLink } from "react-router-dom";
 interface SidebarItem {
     title: string,
@@ -18,9 +10,6 @@ interface SidebarItem {
 interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {
     links: SidebarItem[]
 }
-
-
-
 
 
 export function Sidebar({ className, links }: SidebarProps) {

@@ -5,7 +5,6 @@ import { useHttp } from "@/shared/hooks/http-hook";
 import { useToast } from "@/shared/shad-ui/ui/use-toast";
 import { Select, SelectItem, Spinner } from "@nextui-org/react";
 import { FieldValues, useForm } from "react-hook-form";
-
 import { Button } from "@/shared/shad-ui/ui/button";
 
 const BODY_TYPES = [
@@ -20,22 +19,25 @@ const BODY_TYPES = [
     { "value": "Crossover" },
     { "value": "Sports Car" }
 ]
+
 const AddAuctionVeh = () => {
+    // get auth context to have access to currently logged in user data
     const auth = useAuth();
+    // navigation component to redirect user
     const navigate = useNavigate();
-
+    // custom HTTP hook to make  API calls
     const { loading, error, sendRequest, clearError } = useHttp();
+    // react hook form initialization 
     const {
-        register, handleSubmit, reset, formState: { errors, isSubmitting },
+        register, handleSubmit, reset, formState: { errors },
     } = useForm();
+    // toast library to show toast messages like notifications
     const { toast } = useToast();
-
-
+    // function to process form submission
     async function onSubmit(values: FieldValues) {
-
         clearError();
+        // get actual file from files array from form data
         values.image = values.image[0]
-        console.log(values)
 
         // send task data to backend
         const response = await sendRequest('/api/auction/', 'post', {
@@ -44,9 +46,7 @@ const AddAuctionVeh = () => {
         }, values)
         if (response) {
             reset();
-            toast({
-                title: "Auction Vehicle was added successfully!",
-            })
+            toast({ title: "Auction Vehicle was added successfully!" })
             navigate('/admin/auction/');
         }
     }

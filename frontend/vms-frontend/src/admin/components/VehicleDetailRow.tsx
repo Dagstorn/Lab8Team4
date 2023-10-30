@@ -3,46 +3,53 @@ import useAuth from '@/shared/hooks/useAuth'
 import { Button } from '@/shared/shad-ui/ui/button'
 import { TableCell, TableRow } from '@/shared/shad-ui/ui/table'
 import { useToast } from '@/shared/shad-ui/ui/use-toast'
-import { Driver } from '@/shared/types/types'
-import { useNavigate } from 'react-router-dom'
+import { Vehicle } from '@/shared/types/types'
+import { Link, useNavigate } from 'react-router-dom'
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@nextui-org/react";
 import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from "@nextui-org/react";
+import { formatDistance } from '@/shared/utils/utils'
 
-const DriverDetailRow = ({ driver, removeDriverFromList }: { driver: Driver, removeDriverFromList: (driverId: number) => void }) => {
-    // get auth context to have access to currently logged in user data
-    const auth = useAuth();
-    // navigation component to redirect user
+const VehicleDetailRow = ({ vehicle, removeFromList }: { vehicle: Vehicle, removeFromList: (vehicleId: number) => void }) => {
+    const auth = useAuth(); // currently logged in user daat
     const navigate = useNavigate();
 
     const { sendRequest, clearError } = useHttp(); // custom HTTP hook to call APIs
     const { toast } = useToast(); // toast messages library
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
-    const deleteDriver = async () => {
-        if (driver) {
+    const deleteVehicle = async () => {
+        if (vehicle) {
             // clear previous errors if any
             clearError();
 
             // delete the user through api endpoitn
-            const response = await sendRequest(`/api/drivers/${driver.id}/`, 'delete', {
+            const response = await sendRequest(`/api/vehicles/${vehicle.id}/`, 'delete', {
                 Authorization: `Bearer ${auth.tokens.access}`
             })
             if (response) {
                 // delete the user from current state, because even if it is deleted from database, it can still be on the page, if page is not refreshed, therefore we manually remove it from page
-                removeDriverFromList(driver.id);
+                removeFromList(vehicle.id);
                 toast({ title: "Driver deleted successfully" })
             }
-
         }
     }
 
     return (
         <TableRow  >
             <TableCell className="font-medium">
-                {driver.name} {driver.middle_name} {driver.surname}
+                {vehicle.make} {vehicle.model}
             </TableCell>
-            <TableCell>{driver.phone}</TableCell>
-            <TableCell>{driver.email}</TableCell>
+            <TableCell>
+                <div className="flex items-center">
+                    <img className="w-10 h-auto mr-2"
+                        src={`/vehicleIcons/${vehicle.type.toLowerCase()}.png`} alt="" />
+                    {vehicle.type}
+                </div>
+            </TableCell>
+            <TableCell>{vehicle.year}</TableCell>
+            <TableCell>{formatDistance(vehicle.mileage.toString())}</TableCell>
+            <TableCell>{vehicle.license_plate}</TableCell>
+
             <TableCell className="text-right">
                 <Dropdown>
                     <DropdownTrigger className='focus:outline-none'>
@@ -51,10 +58,10 @@ const DriverDetailRow = ({ driver, removeDriverFromList }: { driver: Driver, rem
                         </Button>
                     </DropdownTrigger>
                     <DropdownMenu aria-label="Static Actions" className='text-center'>
-                        <DropdownItem key="details" onClick={() => navigate(`/admin/drivers/${driver.id}/detail`)}>
+                        <DropdownItem key="details" onClick={() => navigate(`/admin/vehicles/${vehicle.id}/detail`)}>
                             View details
                         </DropdownItem>
-                        <DropdownItem key="edit" onClick={() => navigate(`/admin/drivers/${driver.id}/edit`)}>
+                        <DropdownItem key="edit" onClick={() => navigate(`/admin/vehicles/${vehicle.id}/edit`)}>
                             Edit
                         </DropdownItem>
                         <DropdownItem onClick={onOpen} key="delete" className="text-danger pl-4" color="danger">
@@ -70,23 +77,15 @@ const DriverDetailRow = ({ driver, removeDriverFromList }: { driver: Driver, rem
                                 <ModalHeader className="flex flex-col gap-1">Are you absolutely sure?</ModalHeader>
                                 <ModalBody>
                                     <p>
-                                        This action cannot be undone. This will permanently delete {`${driver.name}'s`} account
-                                        and remove all data associated with this account.<br />
-                                        Specifically,
-                                        <span><br />
-                                            <span>- Personal information</span><br />
-                                            <span>- Currently assigned tasks</span><br />
-                                            <span>- Routes history</span><br />
-                                            <span>- Completed tasks</span><br />
-                                            <span>- Appointments</span><br />
-                                        </span>
+                                        This action cannot be undone. This will permanently delete {`${vehicle.make} ${vehicle.model}`}
+                                        and remove all data associated with it.<br />
                                     </p>
                                 </ModalBody>
                                 <ModalFooter>
                                     <Button onClick={onClose} variant="secondary">Cancel</Button>
                                     <Button onClick={() => {
                                         onClose()
-                                        deleteDriver()
+                                        deleteVehicle()
                                     }} variant="destructive">Delete</Button>
                                 </ModalFooter>
                             </>
@@ -100,4 +99,4 @@ const DriverDetailRow = ({ driver, removeDriverFromList }: { driver: Driver, rem
     )
 }
 
-export default DriverDetailRow
+export default VehicleDetailRow

@@ -2,7 +2,6 @@ import { Button } from "@/shared/shad-ui/ui/button";
 import {
     Table,
     TableBody,
-    TableCell,
     TableHead,
     TableHeader,
     TableRow,
@@ -14,47 +13,51 @@ import { Link } from "react-router-dom";
 import useAuth from "@/shared/hooks/useAuth";
 import { useEffect, useState } from "react";
 import { useHttp } from "@/shared/hooks/http-hook";
-import FadeTransition from "../components/FadeTransition";
+import FadeTransition from "../../components/FadeTransition";
 import { Spinner } from "@nextui-org/react";
+import FuelingDetailRow from "../../components/FuelingDetailRow";
+import MaintenanceDetailRow from "@/admin/components/MaintenanceDetailRow";
 
 const StaffListPage = () => {
+    // get auth context to have access to currently logged in user data
     const auth = useAuth();
 
-    // state which stores drivers list
+    // states which store list of fueling persons and list of maintenance persons
     const [fuelingStaff, setFuelingStaff] = useState<FuelingPerson[]>([]);
     const [maintenanceStaff, setMaintenanceStaff] = useState<MaintenancePerson[]>([]);
+    // custom HTTP hook to make  API calls
     const { loading, error, sendRequest, clearError } = useHttp();
 
-
+    // retrieve data from api
+    const getData = async () => {
+        // get data with custom Hook
+        const [fuelingStaffData, maintenanceStaffData] = await Promise.all([
+            sendRequest('/api/staff/fueling', 'get', {
+                Authorization: `Bearer ${auth.tokens.access}`
+            }),
+            sendRequest('/api/staff/maintenance', 'get', {
+                Authorization: `Bearer ${auth.tokens.access}`
+            })
+        ]);
+        if (fuelingStaffData && maintenanceStaffData) {
+            // set data to response result
+            setFuelingStaff(fuelingStaffData)
+            setMaintenanceStaff(maintenanceStaffData)
+        }
+    }
     // when conponent mounts - meaning when it is created we get data
     useEffect(() => {
         // clear error at start to get rid of any not actual previous errors
         clearError();
-        // retrieve data from api
-        const getData = async () => {
-            // get data with custom Hook
-            const [fuelingStaffData, maintenanceStaffData] = await Promise.all([
-                sendRequest('/api/getstaff/fueling', 'get', {
-                    Authorization: `Bearer ${auth.tokens.access}`
-                }),
-                sendRequest('/api/getstaff/maintenance', 'get', {
-                    Authorization: `Bearer ${auth.tokens.access}`
-                })
-            ]);
-            if (fuelingStaffData && maintenanceStaffData) {
-                // set data to response result
-                setFuelingStaff(fuelingStaffData)
-                setMaintenanceStaff(maintenanceStaffData)
-            }
-        }
         getData();
     }, []);
-
+    const updateLists = () => {
+        getData();
+    }
 
     return (
         <>
             <div className="flex justify-between">
-
                 <div className="flex gap-4">
                     <h1 className="text-2xl font-bold mb-4">Staff list</h1>
                     {loading && <div className="">
@@ -88,14 +91,7 @@ const StaffListPage = () => {
                     <TableBody>
                         {
                             fuelingStaff.map((employee) => {
-                                return <TableRow key={employee.id}>
-                                    <TableCell className="font-medium w-1/4">{employee.name} {employee.surname}</TableCell>
-                                    <TableCell className="w-1/4">{employee.phone}</TableCell>
-                                    <TableCell className="w-1/4">{employee.email}</TableCell>
-                                    <TableCell className="text-right w-1/4">
-                                        <Button variant="outline">View details</Button>
-                                    </TableCell>
-                                </TableRow>
+                                return <FuelingDetailRow key={`fueling${employee.id}`} fueling_person={employee} updateLists={updateLists} />
                             })
                         }
                     </TableBody>
@@ -112,14 +108,7 @@ const StaffListPage = () => {
                     <TableBody>
                         {
                             maintenanceStaff.map((employee) => {
-                                return <TableRow key={employee.id}>
-                                    <TableCell className="font-medium w-1/4">{employee.name} {employee.surname}</TableCell>
-                                    <TableCell className="w-1/4">{employee.phone}</TableCell>
-                                    <TableCell className="w-1/4">{employee.email}</TableCell>
-                                    <TableCell className="text-right w-1/4">
-                                        <Button variant="outline">View details</Button>
-                                    </TableCell>
-                                </TableRow>
+                                return <MaintenanceDetailRow key={`maintenance${employee.id}`} maintenance_person={employee} updateLists={updateLists} />
                             })
                         }
 

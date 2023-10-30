@@ -11,26 +11,32 @@ import { Driver, Vehicle } from "@/shared/types/types";
 import { ChangeEvent, useRef, useState } from "react";
 import Map from "@/shared/components/Map";
 import { useNavigate } from "react-router-dom";
+
 const AddTaskPage = () => {
+    // get auth context to have access to currently logged in user data
     const auth = useAuth();
+    // navigation component to redirect user
     const navigate = useNavigate();
-
+    // custom HTTP hook to make  API calls
     const { loading, error, sendRequest, clearError } = useHttp();
-
+    // states to store lists of vehicles and drivers
     const [vehicles, setVehicles] = useState<Vehicle[]>([]);
     const [drivers, setDrivers] = useState<Driver[]>([]);
+    // states to store not available drivers and vehicles
     const [busyDrivers, setBusyDrivers] = useState<Set<number>>(new Set());
     const [busyCars, setBusyCars] = useState<Set<number>>(new Set());
 
+    // references to inputs for start and end points of task
     const startPointCoords = useRef<HTMLInputElement>(null);
     const endPointCoords = useRef<HTMLInputElement>(null);
+    // state to show custom error
     const [customMapError, setCustomMapError] = useState("");
-
+    // initialization of react hook form
     const {
         register, handleSubmit, formState: { errors, isSubmitting }, setError, reset, getValues
     } = useForm();
 
-
+    // fumction to retrieve data and store to state
     const getData = async (startDateTime: string, endDateTime: string) => {
         // get drivers and vehicles with custom Hook
         const [driversData, vehiclesData, notAvailable] = await Promise.all([
@@ -55,38 +61,37 @@ const AddTaskPage = () => {
             setDrivers(driversData);
             setVehicles(vehiclesData);
         }
-
     }
+    // function to process selection of first date
+    // if both dates are selected we will retrieve data 
     const startDateHandler = (e: ChangeEvent<HTMLInputElement>) => {
         setError('startDate', { type: 'custom', message: '' });
-        console.log(e.target.value)
         if (getValues('endDate')) {
             getData(e.target.value, getValues('endDate'));
         }
     }
+    // function to process selection of second date
     const endDateHandler = (e: ChangeEvent<HTMLInputElement>) => {
         if (!getValues('startDate')) {
             setError('startDate', { type: 'custom', message: 'Select start date and time!' });
         }
-
         if (getValues('startDate')) {
             getData(getValues('startDate'), e.target.value);
         }
     }
-
+    // function to process form submission
     async function onSubmit(values: FieldValues) {
-
         clearError();
         if (startPointCoords.current!.value === '' || endPointCoords.current!.value === '') {
             setCustomMapError("Select start and end points");
             return;
         }
-
+        // add coordinates values to form data
         values.from_point = startPointCoords.current!.value;
         values.to_point = endPointCoords.current!.value;
 
         // send task data to backend
-        await sendRequest('/api/tasks/add/', 'post', {
+        const response = await sendRequest('/api/tasks/add/', 'post', {
             Authorization: `Bearer ${auth.tokens.access}`
         }, values)
         if (response) {
@@ -96,8 +101,6 @@ const AddTaskPage = () => {
             })
             navigate("/admin/tasks");
         }
-
-
     }
 
     return (
@@ -209,7 +212,7 @@ const AddTaskPage = () => {
                                 {`${customMapError}`}
                             </div>}
 
-                            <Map startPointCoordsRef={startPointCoords} endPointCoordsRef={endPointCoords} />
+                            <Map startFormInp={startPointCoords} endFormInp={endPointCoords} />
 
                             {isSubmitting ?
                                 <Button disabled className="mt-4 w-full">

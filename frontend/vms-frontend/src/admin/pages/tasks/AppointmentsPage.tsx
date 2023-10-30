@@ -11,9 +11,9 @@ import useAuth from "@/shared/hooks/useAuth";
 import { useEffect, useState } from "react";
 import { useHttp } from "@/shared/hooks/http-hook";
 import { Spinner } from "@nextui-org/react";
-import AppointmentDetails from '../components/AppointmentDetails';
-import FadeTransition from "../components/FadeTransition";
-import Paginator from "../components/Paginator";
+import AppointmentDetails from '../../components/AppointmentDetails';
+import FadeTransition from "../../components/FadeTransition";
+import Paginator from "../../components/Paginator";
 
 const DriversListPage = () => {
     const auth = useAuth();

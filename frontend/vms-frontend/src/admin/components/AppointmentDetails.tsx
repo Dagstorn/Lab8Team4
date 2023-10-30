@@ -6,10 +6,8 @@ import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure
 import { Link } from "react-router-dom";
 
 
-interface Props {
-    appointment: Appointment
-}
-const AppointmentDetails = ({ appointment }: Props) => {
+const AppointmentDetails = ({ appointment }: { appointment: Appointment }) => {
+    // initialize modal window
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
     return (

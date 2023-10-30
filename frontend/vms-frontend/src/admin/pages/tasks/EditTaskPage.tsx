@@ -1,7 +1,6 @@
 import { FieldValues, useForm } from "react-hook-form";
 import { Button } from "@/shared/shad-ui/ui/button";
 import { Loader2 } from "lucide-react"
-import { Spinner } from "@nextui-org/react";
 import { Select, SelectItem } from "@nextui-org/react";
 import useAuth from "@/shared/hooks/useAuth";
 import { useHttp } from "@/shared/hooks/http-hook";
@@ -11,17 +10,20 @@ import { Driver, Task, Vehicle } from "@/shared/types/types";
 import { ChangeEvent, useEffect, useRef, useState } from "react";
 import Map from "@/shared/components/Map";
 import { useNavigate, useParams } from "react-router-dom";
-import FadeTransition from "../components/FadeTransition";
+import FadeTransition from "../../components/FadeTransition";
 import { formatDateTime } from "@/shared/utils/utils";
 
 const EditTaskPage = () => {
+    // Get id from route parameters
     const taskId = useParams().taskId;
-
+    // get auth context to have access to currently logged in user data
     const auth = useAuth();
+    // navigation component to redirect user
     const navigate = useNavigate();
+    // custom HTTP hook to make  API calls
+    const { error, sendRequest, clearError } = useHttp();
 
-    const { loading, error, sendRequest, clearError } = useHttp();
-
+    // states to store data
     const [task, setTask] = useState<Task>();
     const [vehicles, setVehicles] = useState<Vehicle[]>([]);
     const [drivers, setDrivers] = useState<Driver[]>([]);
@@ -32,10 +34,12 @@ const EditTaskPage = () => {
     const endPointCoords = useRef<HTMLInputElement>(null);
     const [customMapError, setCustomMapError] = useState("");
 
+    // initialization of react hook form
     const {
-        register, handleSubmit, formState: { errors, isSubmitting }, setValue, setError, reset, getValues
+        register, handleSubmit, formState: { errors, isSubmitting }, setValue, setError, getValues
     } = useForm();
 
+    // useEffect will run everytime taskId changes and will retrieve initial data
     useEffect(() => {
         const getInitialData = async () => {
             const taskData = await sendRequest(`/api/tasks/${taskId}/`, 'get', {
@@ -55,9 +59,8 @@ const EditTaskPage = () => {
     }, [taskId])
 
 
-
+    // function to retrive data based on changed dates
     const getData = async (startDateTime: string, endDateTime: string, currentData: { driver: number, vehicle: number } | null) => {
-
         // get drivers and vehicles with custom Hook
         const [driversData, vehiclesData, notAvailable] = await Promise.all([
             sendRequest('/api/drivers', 'get', {
@@ -74,9 +77,8 @@ const EditTaskPage = () => {
             })
         ])
 
-        if (response) {
+        if (driversData && vehiclesData && notAvailable) {
             // get list of drivers and vehicles that are not available at the selected time
-
             if (currentData) {
                 setBusyDrivers(new Set(notAvailable.map((obj: { driver: number, car: number }) => {
                     if (obj.driver !== currentData.driver) {
@@ -96,12 +98,11 @@ const EditTaskPage = () => {
                 setBusyDrivers(new Set(notAvailable.map((obj: { driver: number, car: number }) => obj.driver)))
                 setBusyCars(new Set(notAvailable.map((obj: { driver: number, car: number }) => obj.car)))
             }
-
             setDrivers(driversData);
             setVehicles(vehiclesData);
         }
-
     }
+
     const startDateHandler = (e: ChangeEvent<HTMLInputElement>) => {
         setError('startDate', { type: 'custom', message: '' });
         if (getValues('endDate')) {
@@ -117,6 +118,7 @@ const EditTaskPage = () => {
             getData(getValues('startDate'), e.target.value, null);
         }
     }
+    // function to process form submission
 
     async function onSubmit(values: FieldValues) {
         clearError();
@@ -124,17 +126,15 @@ const EditTaskPage = () => {
             setCustomMapError("Select start and end points");
             return;
         }
-
         if (!task) {
             return
         }
-
+        // add values to form data
         values.from_point = startPointCoords.current!.value;
         values.to_point = endPointCoords.current!.value;
         if (values.driver === '') {
             values.driver = task.driver.id;
         }
-
         if (values.car === '') {
             values.car = task.car.id;
         }
@@ -148,10 +148,7 @@ const EditTaskPage = () => {
                 title: "Changes are saved successfully!",
             })
             navigate("/admin/tasks");
-
         }
-
-
     }
 
     return (
@@ -264,8 +261,8 @@ const EditTaskPage = () => {
                                 </div>}
 
                                 <Map
-                                    startPointCoordsRef={startPointCoords}
-                                    endPointCoordsRef={endPointCoords}
+                                    startFormInp={startPointCoords}
+                                    endFormInp={endPointCoords}
                                     initialStart={task.from_point}
                                     initialDestination={task.to_point}
                                 />

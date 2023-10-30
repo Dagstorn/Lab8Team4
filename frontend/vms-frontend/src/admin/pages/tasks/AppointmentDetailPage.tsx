@@ -1,9 +1,3 @@
-// interface Driver {
-//     id: number;
-//     name: string;
-//     email: string;
-// }
-
 import { useHttp } from "@/shared/hooks/http-hook";
 import useAuth from "@/shared/hooks/useAuth";
 import { Separator } from "@/shared/shad-ui/ui/separator";
@@ -27,10 +21,12 @@ import { Button } from "@/shared/shad-ui/ui/button";
 
 
 const AppointmentDetailPage = () => {
+    // Get id from route parameters
     const appointmentId = useParams().appointmentId;
+    // get auth context to have access to currently logged in user data
     const auth = useAuth();
+    // navigation component to redirect user
     const navigate = useNavigate();
-
 
     // state which stores appointent, vehicles and not available vehicles
     const [appointment, setAppointment] = useState<Appointment>();
@@ -42,13 +38,14 @@ const AppointmentDetailPage = () => {
     // toast notifications
     const { toast } = useToast();
 
-
+    // references to inputs for start and end points of task
     const startPointCoords = useRef<HTMLInputElement>(null);
     const endPointCoords = useRef<HTMLInputElement>(null);
     const [customMapError, setCustomMapError] = useState("");
 
+    // initialization of react hook form
     const {
-        register, handleSubmit, formState: { errors, isSubmitting }, setError, reset, getValues
+        register, handleSubmit, formState: { errors, isSubmitting }, reset
     } = useForm();
 
     // when conponent mounts - meaning when it is created we get data
@@ -85,18 +82,20 @@ const AppointmentDetailPage = () => {
         getData();
     }, []);
 
+    // function to process form submission
     async function onSubmit(values: FieldValues) {
-
         clearError();
         if (startPointCoords.current!.value === '' || endPointCoords.current!.value === '') {
             setCustomMapError("Select start and end points");
             return;
         }
+        // clear custom error
         setCustomMapError('');
         if (!appointment) {
             return
         }
 
+        // add values to form data
         values.from_point = startPointCoords.current!.value;
         values.to_point = endPointCoords.current!.value;
         values.driver = appointment.driver.id;
@@ -105,7 +104,7 @@ const AppointmentDetailPage = () => {
         values.description = appointment.description;
 
         // send task data to backend
-        await Promise.all([
+        const [taskAddedResponse, appointmentDeletedResponse] = await Promise.all([
             sendRequest('/api/tasks/add/', 'post', {
                 Authorization: `Bearer ${auth.tokens.access}`
             }, values),
@@ -113,7 +112,7 @@ const AppointmentDetailPage = () => {
                 Authorization: `Bearer ${auth.tokens.access}`
             })
         ])
-        if (response) {
+        if (taskAddedResponse && appointmentDeletedResponse) {
             reset();
             toast({
                 title: "Task added successfully!",
@@ -241,7 +240,7 @@ const AppointmentDetailPage = () => {
                                 {`${customMapError}`}
                             </div>}
 
-                            <Map startPointCoordsRef={startPointCoords} endPointCoordsRef={endPointCoords} />
+                            <Map startFormInp={startPointCoords} endFormInp={endPointCoords} />
 
                             {isSubmitting ?
                                 <Button disabled className="mt-4 w-full">

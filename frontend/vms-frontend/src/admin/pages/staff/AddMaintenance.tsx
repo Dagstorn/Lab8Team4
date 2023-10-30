@@ -4,9 +4,7 @@ import { useForm } from "react-hook-form";
 import { Button } from "@/shared/shad-ui/ui/button";
 //@ts-ignore
 import validator from 'validator';
-
 import { Input } from "@/shared/shad-ui/ui/input";
-
 import {
     Form,
     FormControl,
@@ -16,6 +14,10 @@ import {
     FormMessage,
 } from "@/shared/shad-ui/ui/form";
 import { toast } from "@/shared/shad-ui/ui/use-toast";
+import { useNavigate } from "react-router-dom";
+import { useHttp } from "@/shared/hooks/http-hook";
+import useAuth from "@/shared/hooks/useAuth";
+import { Loader2 } from "lucide-react";
 
 const formSchema = z.object({
     firstname: z.string().nonempty({
@@ -33,16 +35,14 @@ const formSchema = z.object({
     }),
 })
 
-import { useNavigate } from "react-router-dom";
-import { useHttp } from "@/shared/hooks/http-hook";
-import useAuth from "@/shared/hooks/useAuth";
-import { Loader2 } from "lucide-react";
-
-const AddFueling = () => {
+const AddMaintenance = () => {
+    // get auth context to have access to currently logged in user data
     const auth = useAuth();
+    // navigation component to redirect user
     const navigate = useNavigate();
+    // custom HTTP hook to make  API calls
     const { loading, error, sendRequest, clearError } = useHttp();
-
+    // form initialization using react hook form and form schema
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
@@ -53,12 +53,11 @@ const AddFueling = () => {
             email: "",
         },
     })
+    // function to process form submission
     async function onSubmit(values: z.infer<typeof formSchema>) {
-        console.log(values)
-
         clearError();
         // send task data to backend
-        const response = await sendRequest('/api/fueling/add/', 'post', {
+        const response = await sendRequest('/api/staff/maintenance/', 'post', {
             Authorization: `Bearer ${auth.tokens.access}`
         }, values)
         if (response) {
@@ -66,13 +65,12 @@ const AddFueling = () => {
                 title: "Staff memmber was added successfully!",
             })
             navigate("/admin/staff");
-
         }
-
     }
+
     return (
         <>
-            <h1 className="text-2xl font-bold mb-4 text-center">Add Fueling Person</h1>
+            <h1 className="text-2xl font-bold mb-4 text-center">Add Maintenance Person</h1>
             {error ? <div className="flex justify-center">
                 <span className="text-red-500 justify-self-center">{error}</span>
             </div> : null}
@@ -164,4 +162,4 @@ const AddFueling = () => {
     );
 };
 
-export default AddFueling;
+export default AddMaintenance;

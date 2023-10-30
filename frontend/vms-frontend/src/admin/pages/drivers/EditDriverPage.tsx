@@ -9,21 +9,31 @@ import { FieldValues, useForm } from "react-hook-form";
 import { useNavigate, useParams } from "react-router-dom";
 
 const EditDriverPage = () => {
+    // getting driver id parameter from url
     const driverID = useParams().driverID;
+    // get auth context to have access to currently logged in user data
     const auth = useAuth();
+    // navigation component to redirect user
     const navigate = useNavigate();
-
+    // state to store driver data
     const [driver, setDriver] = useState<Driver>();
-    const { error, sendRequest, clearError } = useHttp();
+    // custom HTTP hook to make  API calls
+    const { sendRequest, clearError } = useHttp();
+    // toast library to show toast messages like notifications
     const { toast } = useToast();
+    // react hook form initialization 
     const { register, handleSubmit, formState: { errors }, setValue } = useForm();
+    // function to get driver data
     const getDriver = async () => {
         if (driverID) {
+            // make api call
             const driverData = await sendRequest(`/api/drivers/${driverID}/`, 'get', {
                 Authorization: `Bearer ${auth.tokens.access}`
             })
             if (driverData) {
+                // save driver data to component state
                 setDriver(driverData);
+                // set values of form inputs
                 setValue('name', driverData.name);
                 setValue('surname', driverData.surname);
                 setValue('middle_name', driverData.middle_name);
@@ -37,12 +47,14 @@ const EditDriverPage = () => {
         }
     }
 
+    // useEffect will call getDriver function everytime driverID is updated
+    // this ensures that for every id change in url parameters we get accurate data
     useEffect(() => {
         getDriver();
     }, [driverID])
 
+    // function to process form submission
     async function onSubmit(values: FieldValues) {
-        console.log(values)
         if (driverID) {
             clearError();
             // send task data to backend
@@ -158,6 +170,18 @@ const EditDriverPage = () => {
                                     className="custom-input"
                                 />
                                 {errors.license_code && <p className="text-red-500">{`${errors.license_code.message}`}</p>}
+                            </div>
+                        </div>
+                        <div className="mb-1 grid grid-cols-4">
+                            <label className="col-span-1" htmlFor="">Password</label>
+                            <div className="col-span-3">
+
+                                <input
+                                    {...register('password')}
+                                    type='password'
+                                    className="custom-input"
+                                />
+                                {errors.password && <p className="text-red-500">{`${errors.password.message}`}</p>}
                             </div>
                         </div>
                         <Button className="w-full mt-4">Save changes</Button>

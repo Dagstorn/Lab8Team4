@@ -2,30 +2,30 @@ import { Button } from "@/shared/shad-ui/ui/button";
 import {
     Table,
     TableBody,
-    TableCell,
     TableHead,
     TableHeader,
     TableRow,
 } from "@/shared/shad-ui/ui/table";
 import { Separator } from "@/shared/shad-ui/ui/separator";
 import { Vehicle, PaginatorObj } from "@/shared/types/types";
-
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import useAuth from "@/shared/hooks/useAuth";
 import { useHttp } from "@/shared/hooks/http-hook";
-import { formatDistance } from "@/shared/utils/utils";
 import { Spinner } from "@nextui-org/react";
-import Paginator from "../components/Paginator";
-import FadeTransition from "../components/FadeTransition";
+import Paginator from "../../components/Paginator";
+import FadeTransition from "../../components/FadeTransition";
+import VehicleDetailRow from "@/admin/components/VehicleDetailRow";
 
 
 const VehiclesListPage = () => {
+    // get auth context to have access to currently logged in user data
     const auth = useAuth();
-
     // state which stores drivers list
     const [vehicles, setVehicles] = useState<Vehicle[]>([]);
+    // paginator object stores data related to pagination like count, next page, prev page and page size
     const [paginationObj, setPaginationObj] = useState<PaginatorObj | null>(null);
+    // custom HTTP hook to make  API calls
     const { loading, error, sendRequest, clearError } = useHttp();
 
     // retrieve data from api
@@ -56,9 +56,13 @@ const VehiclesListPage = () => {
             }
             setVehicles(responseData.results)
         }
-
     }
-
+    const removeFromList = (vehicleId: number) => {
+        // fitler out driver
+        const updatedList = vehicles.filter(vehicle => vehicle.id !== vehicleId);
+        // update state
+        setVehicles(updatedList);
+    }
     // when conponent mounts - meaning when it is created we get data
     useEffect(() => {
         getData(1);
@@ -95,26 +99,8 @@ const VehiclesListPage = () => {
                     <TableBody>
                         {
                             vehicles.map((vehicle) => {
-                                return <TableRow key={vehicle.id + vehicle.year + vehicle.mileage}>
-                                    <TableCell className="font-medium">
-                                        {vehicle.make} {vehicle.model}
-                                    </TableCell>
-                                    <TableCell>
-                                        <div className="flex items-center">
-                                            <img className="w-10 h-auto mr-2"
-                                                src={`/vehicleIcons/${vehicle.type.toLowerCase()}.png`} alt="" />
-                                            {vehicle.type}
-                                        </div>
+                                return <VehicleDetailRow key={vehicle.id + vehicle.year + vehicle.mileage} vehicle={vehicle} removeFromList={removeFromList} />
 
-                                    </TableCell>
-                                    <TableCell>{vehicle.year}</TableCell>
-                                    <TableCell>{formatDistance(vehicle.mileage.toString())}</TableCell>
-                                    <TableCell>{vehicle.license_plat}</TableCell>
-
-                                    <TableCell className="text-right">
-                                        <Link to={`/admin/vehicles/${vehicle.id}/report`}><Button variant="outline">View details</Button></Link>
-                                    </TableCell>
-                                </TableRow>
                             })
                         }
 

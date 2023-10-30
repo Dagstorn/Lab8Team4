@@ -21,7 +21,7 @@ const transitionStyles = {
     exited: { opacity: 0 },
 };
 
-
+// Wrapper component that will provide fade in effect transition
 const FadeTransition: React.FC<Props> = ({ children, show }) => {
     return (
         < Transition in={show} timeout={duration}>

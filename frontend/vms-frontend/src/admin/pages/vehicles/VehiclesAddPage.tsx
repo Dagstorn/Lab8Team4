@@ -5,7 +5,6 @@ import { useHttp } from "@/shared/hooks/http-hook";
 import { useToast } from "@/shared/shad-ui/ui/use-toast";
 import { Select, SelectItem, Spinner } from "@nextui-org/react";
 import { FieldValues, useForm } from "react-hook-form";
-
 import { Button } from "@/shared/shad-ui/ui/button";
 
 const BODY_TYPES = [
@@ -20,25 +19,24 @@ const BODY_TYPES = [
     { "value": "Crossover" },
     { "value": "Sports Car" }
 ]
-const VehiclesAddPage = () => {
-    const auth = useAuth();
-    const navigate = useNavigate();
 
+const VehiclesAddPage = () => {
+    // get auth context to have access to currently logged in user data
+    const auth = useAuth();
+    // navigation component to redirect user
+    const navigate = useNavigate();
+    // custom HTTP hook to make  API calls
     const { loading, error, sendRequest, clearError } = useHttp();
+    // react hook form initialization 
     const {
-        register, handleSubmit, reset, formState: { errors, isSubmitting },
+        register, handleSubmit, reset, formState: { errors },
     } = useForm();
+    // toast library to show toast messages like notifications
     const { toast } = useToast();
 
-
-
-
-
-
+    // function to process form submission
     async function onSubmit(values: FieldValues) {
-
         clearError();
-        console.log(values)
         // send task data to backend
         const response = await sendRequest('/api/vehicles/', 'post', {
             Authorization: `Bearer ${auth.tokens.access}`,
@@ -47,8 +45,9 @@ const VehiclesAddPage = () => {
         if (response) {
             reset();
             toast({
-                title: "Fueling record was added successfully!",
+                title: "Vehicle was added successfully!",
             })
+            navigate('/admin/vehicles')
         }
     }
     return (

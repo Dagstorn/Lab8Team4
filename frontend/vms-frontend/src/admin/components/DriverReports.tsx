@@ -14,7 +14,7 @@ const DriverReports = ({ driver }: { driver: Driver }) => {
 
 
     // custom hook to make API calls
-    const { error, sendRequest, clearError } = useHttp();
+    const { sendRequest, clearError } = useHttp();
 
     // retrieve data from api
     const getData = async () => {
@@ -39,7 +39,7 @@ const DriverReports = ({ driver }: { driver: Driver }) => {
         }
     }, [driver]);
 
-
+    // function to generate items for select component
     const getYearSelectItems = (data: any) => {
         const sortedKeys = Object.keys(data).sort((a: string, b: string) => parseInt(b) - parseInt(a)); // Sort the keys in ascending order
 
