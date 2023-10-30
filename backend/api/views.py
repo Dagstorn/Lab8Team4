@@ -54,10 +54,15 @@ def drivers_list(request):
         return Response(serializer.data)
     elif request.method == 'POST':
         try:
-            # initiate random strong password generator
-            pwgen = PasswordGenerator()
-            # get new random password
-            password = pwgen.generate()
+            password = ''
+            if request.data.get('password'):
+                password = request.data.get('password')
+            else:
+                # initiate random strong password generator
+                pwgen = PasswordGenerator()
+                # get new random password
+                password = pwgen.generate()
+                
             # get email from POST data
             email = request.data.get('email')
             # create new User object with email and password
@@ -81,6 +86,7 @@ def drivers_list(request):
         
         serializer = DriverSerializer(new_driver, many=False)
         return Response(serializer.data)
+
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -123,7 +129,14 @@ def driver_detail(request, pk):
             request.data.pop('email')
         if 'user' in request.data:
             request.data.pop('user')
-            
+        if 'password' in request.data:
+            new_password = request.data.pop('password')
+            user = driver.user
+            user.password = new_password
+            user.save()
+            driver.password = new_password
+            driver.save()
+
         serializer = DriverSerializer(driver, data=request.data, partial=True)
         print(request.data)
         if serializer.is_valid():
@@ -135,7 +148,7 @@ def driver_detail(request, pk):
         user = driver.user
         driver.delete()
         user.delete()
-        return Response({'message': 'Driver object deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
+        return Response({'message': 'Driver object deleted successfully'})
 
 
 def getCompletedTaksData(driver):
@@ -480,83 +493,187 @@ def auction_vehicles(request):
 
 
 
-@api_view(['POST'])
+
+# Retrieve list of fueling persons or create new Fueling person object
+@api_view(['GET', 'POST'])
 @permission_classes([IsAuthenticated])
 @user_type_required(['admin'])
-def addFueling(request):
-    # try:
-    pwgen = PasswordGenerator()
-    password = pwgen.generate()
-    email = request.data.get('email')
-    user = User.objects.create_user(
-        username=email, 
-        email=email, 
-        password=password
-    )
-    new_obj = FuelingPerson.objects.create(
-        user = user,
-        name = request.data.get('firstname'),
-        surname = request.data.get('lastname'),
-        middle_name = request.data.get('middlename'),
-        phone = request.data.get('phone'),
-        email = request.data.get('email'),
-        password = password,
-    )
-    # except:
-    #     raise ValidationError("Wrong data format or missing data", code=status.HTTP_400_BAD_REQUEST)
+def maintenance_staff(request):
+    if request.method == 'GET':   
+        # get all fueling persons
+        maintenance_persons = MaintenancePerson.objects.all()
+        # serialze and return data
+        serializer = MaintenanceSerializer(maintenance_persons, many=True)
+        return Response(serializer.data)
+    elif request.method == 'POST':
+        try:
+            password = ''
+            if request.data.get('password'):
+                password = request.data.get('password')
+            else:
+                # initiate random strong password generator
+                pwgen = PasswordGenerator()
+                # get new random password
+                password = pwgen.generate()
+ 
+            # get email from POST data
+            email = request.data.get('email')
+            # create new User object with email and password
+            user = User.objects.create_user(username=email, email=email, password=password)
+            # create new Driver object using User object we just created and POST data
+            new_obj = MaintenancePerson.objects.create(
+                user = user,
+                name = request.data.get('firstname'),
+                surname = request.data.get('lastname'),
+                middle_name = request.data.get('middlename'),
+                phone = request.data.get('phone'),
+                email = request.data.get('email'),
+                password = password
+            )
+        except:
+            return Response({'message': "Wrong data format or missing data"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        serializer = MaintenanceSerializer(new_obj, many=False)
+        return Response(serializer.data)
 
-    serializer = FuelingSerializer(new_obj, many=False)
-    return Response(serializer.data)
 
-@api_view(['POST'])
+# Handle single driver methods
+# retrieve single driver data, update driver data, delete driver
+@api_view(['GET', 'PUT', 'PATCH', 'DELETE'])
 @permission_classes([IsAuthenticated])
 @user_type_required(['admin'])
-def addMaintenance(request):
+def maintenance_detail(request, pk):
     try:
-        pwgen = PasswordGenerator()
-        password = pwgen.generate()
-        email = request.data.get('email')
-        user = User.objects.create_user(
-            username=email, 
-            email=email, 
-            password=password
-        )
-        new_obj = MaintenancePerson.objects.create(
-            user = user,
-            name = request.data.get('firstname'),
-            surname = request.data.get('lastname'),
-            middle_name = request.data.get('middlename'),
-            phone = request.data.get('phone'),
-            email = request.data.get('email'),
-            password = password
-        )
-    except:
-        raise ValidationError("Wrong data format or missing data", code=status.HTTP_400_BAD_REQUEST)
+        # get fueling_person by unique identifier
+        maintenance_person = MaintenancePerson.objects.get(pk=pk)
+    except Exception as e:
+        # in case if there is no driver with such id, or any other unexpected eror
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-    serializer = MaintenanceSerializer(new_obj, many=False)
-    return Response(serializer.data)
+    # process different methods
+    if request.method == 'GET':
+        # serialize driver data and convert it to appropriate format
+        serializer = MaintenanceSerializer(maintenance_person, many=False)
+        return Response(serializer.data)
+    elif request.method in ['PUT', 'PATCH']:
+        if 'email' in request.data:
+            request.data.pop('email')
+        if 'user' in request.data:
+            request.data.pop('user')
+        if 'password' in request.data:
+            new_password = request.data.pop('password')
+            user = maintenance_person.user
+            user.password = new_password
+            user.save()
+            maintenance_person.password = new_password
+            maintenance_person.save()
+
+        serializer = MaintenanceSerializer(maintenance_person, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        else:
+            return Response({'error': "Something went wrong!"}, status=status.HTTP_400_BAD_REQUEST)
+    elif request.method == 'DELETE':
+        user = maintenance_person.user
+        maintenance_person.delete()
+        user.delete()
+        return Response({'message': 'Driver object deleted successfully'})
 
 
-
-
-
-
-@api_view(['GET'])
+# Retrieve list of fueling persons or create new Fueling person object
+@api_view(['GET', 'POST'])
 @permission_classes([IsAuthenticated])
 @user_type_required(['admin'])
-def getFueling(request):
-    staff = FuelingPerson.objects.all()
-    serializer = FuelingSerializer(staff, many=True)
-    return Response(serializer.data)
+def fueling_staff(request):
+    if request.method == 'GET':   
+        # get all fueling persons
+        fueling_persons = FuelingPerson.objects.all()
+        # serialze and return data
+        serializer = FuelingSerializer(fueling_persons, many=True)
+        return Response(serializer.data)
+    elif request.method == 'POST':
+        try:
+            password = ''
+            if request.data.get('password'):
+                password = request.data.get('password')
+            else:
+                # initiate random strong password generator
+                pwgen = PasswordGenerator()
+                # get new random password
+                password = pwgen.generate()
+ 
+            email = request.data.get('email')
+            # create new User object with email and password
+            user = User.objects.create_user(username=email, email=email, password=password)
+            # create new Driver object using User object we just created and POST data
+            new_obj = FuelingPerson.objects.create(
+                user = user,
+                name = request.data.get('firstname'),
+                surname = request.data.get('lastname'),
+                middle_name = request.data.get('middlename'),
+                phone = request.data.get('phone'),
+                email = request.data.get('email'),
+                password = password,
+            )
+        except:
+            return Response({'message': "Wrong data format or missing data"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        serializer = FuelingSerializer(new_obj, many=False)
+        return Response(serializer.data)
 
 
-@api_view(['GET'])
+# Handle single driver methods
+# retrieve single driver data, update driver data, delete driver
+@api_view(['GET', 'PUT', 'PATCH', 'DELETE'])
 @permission_classes([IsAuthenticated])
 @user_type_required(['admin'])
-def getMaintenance(request):
-    staff = MaintenancePerson.objects.all()
-    serializer = MaintenanceSerializer(staff, many=True)
-    return Response(serializer.data)
+def fueling_detail(request, pk):
+    try:
+        # get fueling_person by unique identifier
+        fueling_person = FuelingPerson.objects.get(pk=pk)
+    except Exception as e:
+        # in case if there is no driver with such id, or any other unexpected eror
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+    # process different methods
+    if request.method == 'GET':
+        # serialize driver data and convert it to appropriate format
+        serializer = FuelingSerializer(fueling_person, many=False)
+        return Response(serializer.data)
+    elif request.method in ['PUT', 'PATCH']:
+        if 'email' in request.data:
+            request.data.pop('email')
+        if 'user' in request.data:
+            request.data.pop('user')
+        if 'password' in request.data:
+            new_password = request.data.pop('password')
+            user = fueling_person.user
+            user.password = new_password
+            user.save()
+            fueling_person.password = new_password
+            fueling_person.save()
+
+        serializer = FuelingSerializer(fueling_person, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        else:
+            return Response({'error': "Something went wrong!"}, status=status.HTTP_400_BAD_REQUEST)
+    elif request.method == 'DELETE':
+        user = fueling_person.user
+        fueling_person.delete()
+        user.delete()
+        return Response({'message': 'Driver object deleted successfully'})
+
+
+
+
+
+
+
+
+
 
 @api_view(['GET', 'POST'])
 @permission_classes([IsAuthenticated])
@@ -599,29 +716,35 @@ def getVehiclesPaginated(request):
     return paginator.get_paginated_response(serializer.data)
 
 
-@api_view(['GET'])
+@api_view(['GET', 'PUT', 'PATCH', 'DELETE'])
 @permission_classes([IsAuthenticated])
-@user_type_required(['admin', 'fueling', 'maintenance'])
-def getVehicle(request, vid):
+@user_type_required(['admin'])
+def vehicle_detail(request, pk):
     try:
-        vehicle = Vehicle.objects.get(id=vid)
-    except:
-        raise ValidationError("Wrong vehicle id", code=status.HTTP_400_BAD_REQUEST)
+        # get vehicle by unique identifier
+        vehicle = Vehicle.objects.get(pk=pk)
+    except Exception as e:
+        # in case if there is no driver with such id, or any other unexpected eror
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-    serializer = VehicleSerializer(vehicle, many=False)
-    return Response(serializer.data)
+    # process different methods
+    if request.method == 'GET':
+        # serialize driver data and convert it to appropriate format
+        serializer = VehicleSerializer(vehicle, many=False)
+        return Response(serializer.data)
+    elif request.method in ['PUT', 'PATCH']:
+        serializer = VehicleSerializer(vehicle, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        else:
+            return Response({'error': "Something went wrong!"}, status=status.HTTP_400_BAD_REQUEST)
+    elif request.method == 'DELETE':
+        vehicle.delete()
+        return Response({'message': 'Driver object deleted successfully'})
 
-@api_view(['GET'])
-@permission_classes([IsAuthenticated])
-def getVehicleFuelingReports(request, vid):
-    try:
-        vehicle = Vehicle.objects.get(id=vid)
-        reports = FuelingProof.objects.filter(vehicle=vehicle)
-    except:
-        raise ValidationError("Wrong vehicle id", code=status.HTTP_400_BAD_REQUEST)
 
-    serializer = FuelingProofSerializer(reports, many=True)
-    return Response(serializer.data)
+
 
 
 
@@ -808,7 +931,7 @@ def task_detail(request, pk):
             return Response({'error': "Wrong data format!"}, status=status.HTTP_400_BAD_REQUEST)
     elif request.method == 'DELETE':
         task.delete()
-        return Response({'message': 'Task deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
+        return Response({'message': 'Task deleted successfully'})
 
 
 @api_view(['POST'])
