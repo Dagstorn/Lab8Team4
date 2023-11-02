@@ -8,7 +8,7 @@ import {
 } from "@/shared/shad-ui/ui/table";
 import { Separator } from "@/shared/shad-ui/ui/separator";
 import { Admin, FuelingPerson, MaintenancePerson } from "@/shared/types/types";
-import { Fuel, Wrench } from 'lucide-react';
+import { Fuel, Info, Wrench } from 'lucide-react';
 import { Link } from "react-router-dom";
 import useAuth from "@/shared/hooks/useAuth";
 import { useEffect, useState } from "react";
@@ -83,45 +83,8 @@ const StaffListPage = () => {
             <Separator />
             {error ? <div className="text-red-400 mt-4 ">Error: {error}</div> : null}
 
-            <FadeTransition show={maintenanceStaff.length > 0}>
-
-                {fuelingStaff.length > 0 ? <Table>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead>Fueling Person</TableHead>
-                            <TableHead>Phone</TableHead>
-                            <TableHead>Email</TableHead>
-                            <TableHead className="text-right">Action</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {
-                            fuelingStaff.map((employee) => {
-                                return <FuelingDetailRow key={`fueling${employee.id}`} fueling_person={employee} updateLists={updateLists} />
-                            })
-                        }
-                    </TableBody>
-                </Table> : <span className="ml-4 py-4 font-bold">No fueling persons yet</span>}
-                {maintenanceStaff.length > 0 ? <Table className="mt-12">
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead>Maintenance Person</TableHead>
-                            <TableHead>Phone</TableHead>
-                            <TableHead>Email</TableHead>
-                            <TableHead className="text-right">Action</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {
-                            maintenanceStaff.map((employee) => {
-                                return <MaintenanceDetailRow key={`maintenance${employee.id}`} maintenance_person={employee} updateLists={updateLists} />
-                            })
-                        }
-
-                    </TableBody>
-                </Table> : <span className="ml-4 py-4 font-bold">No maintenance persons yet</span>}
-
-                {adminStaff.length > 0 ? <Table className="mt-12">
+            <FadeTransition show={maintenanceStaff.length > 0 || fuelingStaff.length > 0 || adminStaff.length > 0}>
+                {adminStaff.length > 0 ? <Table>
                     <TableHeader>
                         <TableRow>
                             <TableHead>Admin</TableHead>
@@ -140,6 +103,57 @@ const StaffListPage = () => {
 
                     </TableBody>
                 </Table> : <span className="ml-4 py-4 font-bold">No maintenance persons yet</span>}
+                {fuelingStaff.length > 0 ? <Table className="mt-12">
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead>Fueling Person</TableHead>
+                            <TableHead>Phone</TableHead>
+                            <TableHead>Email</TableHead>
+                            <TableHead className="text-right">Action</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {
+                            fuelingStaff.map((employee) => {
+                                return <FuelingDetailRow key={`fueling${employee.id}`} fueling_person={employee} updateLists={updateLists} />
+                            })
+                        }
+                    </TableBody>
+                </Table> : <div className="w-full flex justify-center items-center text-center">
+                    <div className="mt-2 text-gray-500">
+                        <h3 className="mt-4 text-lg font-semibold">No Fueling staff to display</h3>
+                        <p className="mb-4 mt-2 text-sm text-muted-foreground">
+                            You have not added any Fueling person.
+                        </p>
+                    </div>
+                </div>}
+                {maintenanceStaff.length > 0 ? <Table className="mt-12">
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead>Maintenance Person</TableHead>
+                            <TableHead>Phone</TableHead>
+                            <TableHead>Email</TableHead>
+                            <TableHead className="text-right">Action</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {
+                            maintenanceStaff.map((employee) => {
+                                return <MaintenanceDetailRow key={`maintenance${employee.id}`} maintenance_person={employee} updateLists={updateLists} />
+                            })
+                        }
+
+                    </TableBody>
+                </Table> : <div className="w-full flex justify-center items-center text-center">
+                    <div className="mt-2 text-gray-500">
+                        <h3 className="mt-4 text-lg font-semibold">No Maintenance staff to display</h3>
+                        <p className="mb-4 mt-2 text-sm text-muted-foreground">
+                            You have not added any Maintenance person.
+                        </p>
+                    </div>
+                </div>}
+
+
             </FadeTransition>
         </>
     );

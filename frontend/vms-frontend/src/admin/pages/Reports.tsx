@@ -37,6 +37,7 @@ const Reports = () => {
         if (response) {
             // set data to response result
             setReportData(response);
+            console.log(response)
         }
 
     }
@@ -185,6 +186,19 @@ const Reports = () => {
                     </ResponsiveContainer>
 
 
+                </div>}
+                {reportData && Object.keys(reportData['fueling']).length === 0 && <div className="mt-2 text-gray-500">
+
+                    <h3 className="mt-4 text-lg font-semibold">No fueling reports yet</h3>
+                    <p className="mb-4 mt-2 text-sm text-muted-foreground">
+                        Reports will appear here after fueling records are added
+                    </p>
+                </div>}
+                {reportData && Object.keys(reportData['maintenance']).length === 0 && <div className="mt-2 text-gray-500">
+                    <h3 className="mt-4 text-lg font-semibold">No maintenance reports yet</h3>
+                    <p className="mb-4 mt-2 text-sm text-muted-foreground">
+                        Reports will appear here after fueling records are added
+                    </p>
                 </div>}
             </div>
 

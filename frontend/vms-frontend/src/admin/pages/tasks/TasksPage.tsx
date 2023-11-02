@@ -18,6 +18,7 @@ import { useToast } from "@/shared/shad-ui/ui/use-toast";
 import TaskDetails from "../../components/TaskDetail";
 import FadeTransition from "../../components/FadeTransition";
 import Paginator from "../../../shared/components/Paginator";
+import { Info } from "lucide-react";
 
 const TasksPage = () => {
     // get auth context to have access to currently logged in user data
@@ -97,6 +98,18 @@ const TasksPage = () => {
             </div>
             <Separator />
             {error ? <div className="text-red-400 mt-4 ">Error: {error}</div> : null}
+            {tasks.length === 0 && <div className="mt-10 w-full flex justify-center items-center text-center">
+                <div className="mt-2 text-gray-500">
+                    <div className="w-full flex justify-center">
+                        <Info className="w-32" />
+                    </div>
+                    <h3 className="mt-4 text-lg font-semibold">No task added</h3>
+                    <p className="mb-4 mt-2 text-sm text-muted-foreground">
+                        You have not added any task. Add one below.
+                    </p>
+                    <Link to="/admin/tasks/add"><Button variant='default'>Add Task</Button></Link>
+                </div>
+            </div>}
             <FadeTransition show={tasks.length > 0}>
 
                 <Table>

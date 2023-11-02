@@ -16,6 +16,7 @@ import { Spinner } from "@nextui-org/react";
 import Paginator from "../../../shared/components/Paginator";
 import FadeTransition from "../../components/FadeTransition";
 import VehicleDetailRow from "@/admin/components/VehicleDetailRow";
+import { Info } from "lucide-react";
 
 
 const VehiclesListPage = () => {
@@ -83,7 +84,18 @@ const VehiclesListPage = () => {
 
             <Separator />
             {error ? <div className="text-red-400 mt-4 ">Error: {error}</div> : null}
-
+            {vehicles.length === 0 && <div className="mt-10 w-full flex justify-center items-center text-center">
+                <div className="mt-2 text-gray-500">
+                    <div className="w-full flex justify-center">
+                        <Info className="w-32" />
+                    </div>
+                    <h3 className="mt-4 text-lg font-semibold">No vehicle added</h3>
+                    <p className="mb-4 mt-2 text-sm text-muted-foreground">
+                        You have not added any vehicles. Add one below.
+                    </p>
+                    <Link to="/admin/vehicles/add"><Button variant='default'>Add Vehicle</Button></Link>
+                </div>
+            </div>}
             <FadeTransition show={vehicles.length > 0}>
                 <Table>
                     <TableHeader>

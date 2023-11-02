@@ -7,7 +7,7 @@ import AuctionVehicleCard from "../../components/AuctionVehicleCard";
 import FadeTransition from "../../components/FadeTransition";
 import { Button } from "@/shared/shad-ui/ui/button";
 import { Link } from "react-router-dom";
-import { Plus } from "lucide-react";
+import { Info, Plus } from "lucide-react";
 
 const Auction = () => {
     // get auth context to have access to currently logged in user data
@@ -31,6 +31,18 @@ const Auction = () => {
 
     return (
         <>
+            {vehicles.length === 0 && <div className="mt-10 w-full flex justify-center items-center text-center">
+                <div className="mt-2 text-gray-500">
+                    <div className="w-full flex justify-center">
+                        <Info className="w-32" />
+                    </div>
+                    <h3 className="mt-4 text-lg font-semibold">No auction vehicle added</h3>
+                    <p className="mb-4 mt-2 text-sm text-muted-foreground">
+                        You have not added any auction vehicles. Add one below.
+                    </p>
+                    <Link to="/admin/auction/add"><Button variant='default'>Add Auction Vehicle</Button></Link>
+                </div>
+            </div>}
             <FadeTransition show={vehicles.length > 0}>
 
                 <div className="flex justify-between items-center mb-2">

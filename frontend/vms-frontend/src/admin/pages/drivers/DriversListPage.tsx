@@ -16,6 +16,7 @@ import { useHttp } from "@/shared/hooks/http-hook";
 import DriverDetailRow from "../../components/DriverDetailRow";
 import Paginator from "../../../shared/components/Paginator";
 import FadeTransition from "../../components/FadeTransition";
+import { Info } from "lucide-react";
 
 const DriversListPage = () => {
     // auth context to get currently logged in user data
@@ -85,7 +86,18 @@ const DriversListPage = () => {
             </div>
             <Separator />
             {error ? <div className="text-red-400 mt-4 mb-2">Error: {error}</div> : null}
-
+            {drivers.length === 0 && <div className="mt-10 w-full flex justify-center items-center text-center">
+                <div className="mt-2 text-gray-500">
+                    <div className="w-full flex justify-center">
+                        <Info className="w-32" />
+                    </div>
+                    <h3 className="mt-4 text-lg font-semibold">No drivers added</h3>
+                    <p className="mb-4 mt-2 text-sm text-muted-foreground">
+                        You have not added any driver. Add one below.
+                    </p>
+                    <Link to="/admin/drivers/add"><Button variant='default'>Add Driver</Button></Link>
+                </div>
+            </div>}
             <FadeTransition show={drivers.length > 0}>
                 <Table>
                     <TableHeader>
@@ -107,6 +119,7 @@ const DriversListPage = () => {
                 {paginationObj && <Paginator getData={getData} paginatorData={paginationObj} />}
 
             </FadeTransition>
+
 
 
 
