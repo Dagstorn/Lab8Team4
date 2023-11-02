@@ -26,6 +26,8 @@ class Task(models.Model):
         ("Assigned", "Assigned"),
         ("In progress", "In progress"),
         ("Completed", "Completed"),
+        ("Delayed", "Delayed"),
+        ("Canceled", "Canceled"),
     )
     driver = models.ForeignKey(Driver, related_name="tasks", on_delete=models.CASCADE, null=True)
     car = models.ForeignKey('vehicles.Vehicle', on_delete=models.CASCADE, related_name="assigned_task", null=True)
@@ -46,11 +48,11 @@ class Task(models.Model):
 class CompletedRoute(models.Model):
     driver = models.ForeignKey(Driver, related_name="routes", on_delete=models.CASCADE, null=True)
     vehicle = models.ForeignKey('vehicles.Vehicle', on_delete=models.SET_NULL, related_name="completed_routes", null=True)
-    from_point = models.JSONField(verbose_name="departure point")
-    to_point = models.JSONField(verbose_name="arrival point")
+    from_point = models.CharField(verbose_name="departure point", max_length=200)
+    to_point = models.CharField(verbose_name="arrival point", max_length=200)
     time_from = models.DateTimeField(auto_now_add=False, blank=True, null=True)
     time_to = models.DateTimeField(auto_now_add=False, blank=True, null=True)
-    distance_covered = models.FloatField()
+    distance_covered = models.FloatField(default=0.0)
     time_spent = models.PositiveIntegerField(default=0)
 
     class Meta:

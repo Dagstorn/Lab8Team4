@@ -55,6 +55,12 @@ urlpatterns = [
     path('staff/maintenance/<str:pk>/', views.maintenance_detail),
     path('staff/admin/', views.admin_staff),
     path('staff/admin/<str:pk>/', views.admin_detail),
+
+    path('staff/tasks/maintenance/', views.admin_maintenance_tasks_list),
+    path('staff/tasks/maintenance/<str:pk>/', views.admin_maintenance_tasks_detail),
+    path('staff/tasks/fueling/', views.admin_fueling_tasks_list),
+    path('staff/tasks/fueling/<str:pk>/', views.admin_fueling_tasks_detail),
+    
     ## Auction vehicles
     path('auction/', views.auction_vehicles),
     path('auction/vehicles/', views.auction_vehicles_list),
@@ -64,12 +70,16 @@ urlpatterns = [
     # DRIVER API endpoints
     path('driver/', views.getDriver),
     path('driver/tasks/', views.getDriverTasks),
+    path('driver/tasks/<str:pk>/', views.tasks_detail),
     path('routes_history/', views.getRoutesHistory),
     path('tasks/<str:tid>/complete/', views.completeTask),
 
     # FUELING PERSON API endpoints
+    path('fueling/personal_data/', views.fueling_personal_data),
+    path('fueling/vehicles/', views.fueling_get_vehicles),
     path('fueling/reports/', views.getFuelingReports),
-    path('fueling/reports/add/', views.addFuelingReport),
+    path('fueling/records/', views.fueling_records),
+    path('fueling/records/<str:pk>/', views.fueling_record_detail),
 
     # MAINTENANCE PERSON API endpoints
     path('maintenance/personal_data/', views.maintenance_personal_data),
@@ -77,7 +87,8 @@ urlpatterns = [
     path('maintenance/jobs/<str:pk>/', views.maintenance_jobs_detail),
     path('maintenance/jobs/<str:pk>/parts/', views.maintenance_parts),
     path('maintenance/jobs/<str:pk>/complete/', views.maintenance_jobs_complete),
-    path('maintenance/vehicles/paginated/', views.maintenance_vehicle_list),
+    path('maintenance/vehicles_paginated/', views.maintenance_vehicle_list_paginated),
+    path('maintenance/vehicles/', views.maintenance_vehicle_list),
     path('maintenance/vehicles/<str:pk>/', views.maintenance_vehicle_detail),
 
 ]

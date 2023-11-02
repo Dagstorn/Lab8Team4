@@ -14,10 +14,10 @@ from rest_framework import status
 
 from .decorators import user_type_required
 
-from .serializers import DriverSerializer, VehicleSerializer,AuctionVehicleSerializer, AppointmentSerializer, TaskSerializer, CompletedRouteSerializer, FuelingSerializer, MaintenanceSerializer, FuelingProofSerializer, MaintenanceJobSerializer, RepairPartsSerializer, AdminSerializer
+from .serializers import DriverSerializer, VehicleSerializer,AuctionVehicleSerializer, AppointmentSerializer, TaskSerializer, CompletedRouteSerializer, FuelingSerializer, MaintenanceSerializer, FuelingProofSerializer, MaintenanceJobSerializer, RepairPartsSerializer, AdminSerializer, FuelingTaskSerializer
 
 from accounts.models import Admin, Driver, FuelingPerson, MaintenancePerson, DriverReport
-from vehicles.models import Vehicle, AuctionVehicle, FuelingProof, MaintenanceJob, MaintenanceRecord, VehicleReport, RepairingPart, RepairedPartRecord
+from vehicles.models import Vehicle, AuctionVehicle, FuelingProof, MaintenanceJob, MaintenanceRecord, VehicleReport, RepairingPart, RepairedPartRecord, FuelingTask
 from tasks.models import Appointment, Task, CompletedRoute
 
 
@@ -671,7 +671,7 @@ def admin_staff(request):
             return Response(serializer.data)
         except:
             return Response({'message': "Wrong data format or missing data"}, status=status.HTTP_400_BAD_REQUEST)
-        
+
 
 # Handle single driver methods
 # retrieve single driver data, update driver data, delete driver
@@ -720,6 +720,10 @@ def admin_detail(request, pk):
             return Response(serializer.data)
         except:
             return Response({'error': "Wrong data!"}, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+
 
 # Retrieve list of fueling persons or create new Fueling person object
 @api_view(['GET', 'POST'])
@@ -809,11 +813,122 @@ def fueling_detail(request, pk):
 
 
 
+# Retrieve list of maintenance jobs or create new one
+@api_view(['GET', 'POST'])
+@permission_classes([IsAuthenticated])
+@user_type_required(['admin'])
+def admin_maintenance_tasks_list(request):
+    if request.method == 'GET':   
+        # get all jobs with status scheduled and order by bringing newer jobs to top
+        jobs = MaintenanceJob.objects.filter(status="scheduled").order_by('-created_on')
+        print(jobs)
+        # serialze and return data
+        serializer = MaintenanceJobSerializer(jobs, many=True)
+        return Response(serializer.data)
+    elif request.method == 'POST':
+        try:
+            # get vehicle object by id from recieved data
+            print(request.data.get('vehicle'))
+            vehicle = Vehicle.objects.get(id=request.data.get('vehicle'))
+            print(vehicle)
+            # set vehicle status to non-active
+            vehicle.on_maintenance()
+            vehicle.save()
+            # create new job
+            new_job = MaintenanceJob.objects.create(
+                vehicle=vehicle,
+                description=request.data.get('description'),
+                type=request.data.get('type')
+            )
+        except:
+            return Response({'message': "Wrong data format or missing data"}, status=status.HTTP_400_BAD_REQUEST)
+        serializer = MaintenanceJobSerializer(new_job, many=False)
+        return Response(serializer.data)
 
 
 
+# get specific maintenance job or edit pecific maintenance job by id
+@api_view(['GET', 'PATCH'])
+@permission_classes([IsAuthenticated])
+@user_type_required(['admin'])
+def admin_maintenance_tasks_detail(request, pk):
+    try:
+        # get maintenance_job by unique identifier
+        maintenance_job = MaintenanceJob.objects.get(pk=pk)
+    except Exception as e:
+        # in case if there is no driver with such id, or any other unexpected eror
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+    # process different methods
+    if request.method == 'GET':
+        # serialize data and convert it to appropriate format
+        serializer = MaintenanceJobSerializer(maintenance_job, many=False)
+        return Response(serializer.data)
+    elif request.method in ['PATCH']:
+        # update description if it is in request
+        if 'description' in request.data:
+            maintenance_job.description = request.data.get('description')
+            maintenance_job.save()
+        # update repairing parts if rhey are in request
+
+        serializer = MaintenanceJobSerializer(maintenance_job, many=False)
+        return Response(serializer.data)
 
 
+
+# Retrieve list of maintenance jobs or create new one
+@api_view(['GET', 'POST'])
+@permission_classes([IsAuthenticated])
+@user_type_required(['admin'])
+def admin_fueling_tasks_list(request):
+    if request.method == 'GET':   
+        # get all fueling tasks 
+        tasks = FuelingTask.objects.all()
+        # serialze and return data
+        serializer = FuelingTaskSerializer(tasks, many=True)
+        return Response(serializer.data)
+    elif request.method == 'POST':
+        try:
+            # get vehicle object by id from recieved data
+            vehicle = Vehicle.objects.get(id=request.data.get('vehicle'))
+            new_obj = FuelingTask.objects.create(
+                vehicle=vehicle,
+                task=request.data.get('task')
+            )
+            serializer = FuelingTaskSerializer(new_obj, many=False)
+            return Response(serializer.data)
+        except:
+            return Response({'message': "Wrong data format or missing data"}, status=status.HTTP_400_BAD_REQUEST)
+        
+
+
+# get specific maintenance job or edit pecific maintenance job by id
+@api_view(['GET', 'PATCH', 'DELETE'])
+@permission_classes([IsAuthenticated])
+@user_type_required(['admin'])
+def admin_fueling_tasks_detail(request, pk):
+    try:
+        # get maintenance_job by unique identifier
+        task = FuelingTask.objects.get(pk=pk)
+    except Exception as e:
+        # in case if there is no task with such id, or any other unexpected eror
+        return Response({'error': "Task with this id does not exist"}, status=status.HTTP_400_BAD_REQUEST)
+
+    # process different methods
+    if request.method == 'GET':
+        # serialize data and convert it to appropriate format
+        serializer = FuelingTaskSerializer(task, many=False)
+        return Response(serializer.data)
+    elif request.method in ['PATCH']:
+        # update description if it is in request
+        if 'task' in request.data:
+            task.task = request.data.get('task')
+            task.save()
+        serializer = FuelingTaskSerializer(task, many=False)
+        return Response(serializer.data)
+    elif request.method == 'DELETE':
+        task.delete()
+        return Response({'message': 'Driver object deleted successfully'})
 
 @api_view(['GET', 'POST'])
 @permission_classes([IsAuthenticated])
@@ -1005,13 +1120,35 @@ def makeAppointment(request):
     return Response(serializer.data)
 
 
-@api_view(['GET'])
+@api_view(['GET', 'PATCH'])
 @permission_classes([IsAuthenticated])
 @user_type_required(['driver'])
 def getDriver(request):
     driver = request.user.driver_acc
-    serializer = DriverSerializer(driver, many=False)
-    return Response(serializer.data)
+    
+    if request.method == 'GET':
+        serializer = DriverSerializer(driver, many=False)
+        return Response(serializer.data)
+    elif request.method == 'PATCH':
+        if 'email' in request.data:
+            request.data.pop('email')
+        if 'user' in request.data:
+            request.data.pop('user')
+        if 'password' in request.data:
+            new_password = request.data.pop('password')
+            if len(new_password) > 0:
+                user = driver.user
+                user.set_password(new_password)
+                user.save()
+                driver.password = new_password
+                driver.save()
+
+        serializer = DriverSerializer(driver, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        else:
+            return Response({'error': "Wrong data format!"}, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET'])
 def getTasks(request):
@@ -1095,12 +1232,44 @@ def updateTask(request, tid):
 @user_type_required(['driver'])
 def getDriverTasks(request):
     try:
-        tasks = Task.objects.filter(driver=request.user.driver_acc, status="Assigned")
+        # get all tasks related to current driver with status not Completed and not Canceled
+        tasks = request.user.driver_acc.tasks.all().exclude(status__in=["Completed", "Canceled"])
+        serializer = TaskSerializer(tasks, many=True)
+        return Response(serializer.data)
     except:
         raise ValidationError("Wrong data format or missing data", code=status.HTTP_400_BAD_REQUEST)
     
-    serializer = TaskSerializer(tasks, many=True)
-    return Response(serializer.data)
+
+
+
+@api_view(['GET', 'PATCH'])
+@permission_classes([IsAuthenticated])
+@user_type_required(['driver'])
+def tasks_detail(request, pk):
+    try:
+        # get task by unique identifier
+        task = request.user.driver_acc.tasks.all().filter(pk=pk).first()
+    except Exception as e:
+        # in case if there is no driver with such id, or any other unexpected eror
+        return Response({'error': 'Task with this id does not exist!'}, status=status.HTTP_400_BAD_REQUEST)
+
+    # process different methods
+    if request.method == 'GET':
+        # serialize driver data and convert it to appropriate format
+        serializer = TaskSerializer(task, many=False)
+        return Response(serializer.data)
+    elif request.method == 'PATCH': 
+        if 'status' in request.data:
+            if request.data.get('status') in ["Assigned","In progress","Completed","Delayed","Canceled"]:
+                task.status = request.data.get('status')
+                task.save()
+            else:
+                return Response({'error': "Wrong status format!"}, status=status.HTTP_400_BAD_REQUEST)
+        serializer = TaskSerializer(task, many=False)
+        return Response(serializer.data)        
+    elif request.method == 'DELETE':
+        task.delete()
+        return Response({'message': 'Task deleted successfully'})
 
 
 @api_view(['GET'])
@@ -1108,12 +1277,13 @@ def getDriverTasks(request):
 @user_type_required(['driver'])
 def getRoutesHistory(request):
     try:
-        routes = CompletedRoute.objects.filter(driver=request.user.driver_acc)
+        routes = request.user.driver_acc.routes.all()
+        serializer = CompletedRouteSerializer(routes, many=True)
+        return Response(serializer.data)
     except:
         raise ValidationError("Wrong data format or missing data", code=status.HTTP_400_BAD_REQUEST)
     
-    serializer = CompletedRouteSerializer(routes, many=True)
-    return Response(serializer.data)
+    
 
 
 @api_view(['POST'])
@@ -1124,10 +1294,10 @@ def completeTask(request, tid):
         task = Task.objects.get(id=tid)
         task.status = "Completed"
         time_spent = request.data.get('time_spent')
-        timeEnded = request.data.get('timeEnded')
+        timeEnded = request.data.get('time_ended')
         task.time_to = timeEnded
-
         distance_covered = request.data.get('distance_covered')
+
         vehicle = task.car
         vehicle.mileage = vehicle.mileage + distance_covered
         vehicle.save()
@@ -1143,6 +1313,8 @@ def completeTask(request, tid):
             distance_covered = distance_covered
         )
 
+        serializer = CompletedRouteSerializer(comp_route, many=False)
+        return Response(serializer.data)
     except:
         raise ValidationError("Wrong data format or missing data", code=status.HTTP_400_BAD_REQUEST)
     
@@ -1152,6 +1324,46 @@ def completeTask(request, tid):
 
 
 # Fueling
+@api_view(['GET', 'PATCH'])
+@permission_classes([IsAuthenticated])
+@user_type_required(['fueling'])
+def fueling_personal_data(request):
+    fueling_account = request.user.fueling_acc
+    if request.method == 'GET':
+        serializer = FuelingSerializer(fueling_account, many=False)
+        return Response(serializer.data)
+    elif request.method == 'PATCH':
+        if 'email' in request.data:
+            request.data.pop('email')
+        if 'user' in request.data:
+            request.data.pop('user')
+        if 'password' in request.data:
+            new_password = request.data.pop('password')
+            if len(new_password) > 0:
+                user = fueling_account.user
+                user.set_password(new_password)
+                user.save()
+                fueling_account.password = new_password
+                fueling_account.save()
+
+        serializer = FuelingSerializer(fueling_account, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        else:
+            return Response({'error': "Wrong data format!"}, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+@user_type_required(['fueling'])
+def fueling_get_vehicles(request):
+    vehicles = Vehicle.objects.filter(status="active")
+    serializer = VehicleSerializer(vehicles, many=True)
+    return Response(serializer.data)
+
+
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 @user_type_required(['fueling'])
@@ -1165,30 +1377,65 @@ def getFuelingReports(request):
     return Response(serializer.data)
 
 
-@api_view(['POST'])
+@api_view(['GET', 'POST'])
 @permission_classes([IsAuthenticated])
 @user_type_required(['fueling'])
-def addFuelingReport(request):
+def fueling_records(request):
+    if request.method == 'GET':   
+        # get all fueling records
+        records = FuelingProof.objects.all()
+        # serialze and return data
+        serializer = FuelingProofSerializer(records, many=True)
+        return Response(serializer.data)
+    elif request.method == 'POST':
+        try:
+            vehicle = Vehicle.objects.get(id=request.data.get('vehicle'))
+            
+            new_obj = FuelingProof.objects.create(
+                vehicle=vehicle,
+                fueling_person=request.user.fueling_acc,
+                image_before=request.FILES.get('image_before'),
+                image_after=request.FILES.get('image_after'),
+                date=request.data.get('upload_time'),
+                type = request.data.get('fuelType'),
+                amount = request.data.get('amount'),
+                cost = request.data.get('cost'),
+            )
+            serializer = FuelingProofSerializer(new_obj, many=False)
+            return Response(serializer.data)
+        except:
+            return Response({'message': "Wrong data format or missing data"}, status=status.HTTP_400_BAD_REQUEST)
+        
+@api_view(['GET', 'PATCH'])
+@permission_classes([IsAuthenticated])
+@user_type_required(['fueling'])
+def fueling_record_detail(request, pk):
     try:
-        veh_id = request.data.get('car')
-        vehicle = Vehicle.objects.get(id=veh_id)
-        upload_time = datetime.strptime(request.data.get('datetime'), "%Y-%m-%dT%H:%M")
-        new_obj = FuelingProof.objects.create(
-            vehicle=vehicle,
-            fueling_person=request.user.fueling_acc,
-            image_before=request.FILES.get('image_before'),
-            image_after=request.FILES.get('image_after'),
-            date=timezone.make_aware(upload_time, timezone.get_current_timezone()),
-            type = request.data.get('fuelType'),
-            amount = request.data.get('amount'),
-            cost = request.data.get('cost'),
-        )
+        # get fueling record by unique identifier
+        record = FuelingProof.objects.get(pk=pk)
+    except Exception as e:
+        # in case if there is no driver with such id, or any other unexpected eror
+        return Response({'error': 'Fueling record with this id does not exist!'}, status=status.HTTP_400_BAD_REQUEST)
 
-    except:
-        raise ValidationError("Wrong data format or missing data", code=status.HTTP_400_BAD_REQUEST)
-    
-    serializer = FuelingProofSerializer(new_obj, many=False)
-    return Response(serializer.data)
+    # process different methods
+    if request.method == 'GET':
+        serializer = FuelingProofSerializer(record, many=False)
+        return Response(serializer.data)
+    elif request.method == 'PATCH': 
+        if 'type' in request.data:
+            record.type = request.data.get('type')
+            record.save()
+        elif 'amount' in request.data:
+            record.amount = request.data.get('amount')
+            record.save()
+        elif 'cost' in request.data:
+            record.cost = request.data.get('cost')
+            record.save()
+        else:
+            return Response({'error': "Wrong data format!"}, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer = FuelingProofSerializer(record, many=False)
+        return Response(serializer.data)        
 
 
 # function to get and edit personal data of logged in maintenance person
@@ -1350,22 +1597,24 @@ def maintenance_jobs_complete(request, pk):
             description = maintenance_job.description,
             cost = request.data.get('cost')
         )
-        # set maintenance job status to complete and save
+        # # set maintenance job status to complete and save
         maintenance_job.complete()
         maintenance_job.save()
-        # set vehicle status to active and save
+        # # set vehicle status to active and save
         maintenance_job.vehicle.off_maintenance()
         maintenance_job.vehicle.save()
+
         # get lists of part numbers and photos from submitted data
         part_number_arr = request.data.getlist('part_number[]', [])
         part_photo_arr = request.data.getlist('part_photo[]', [])
+        repair_parts = maintenance_job.repair_parts.all()
 
         # loop over and create RepairPartRecord for each of them
         for index, (part_num, photo) in enumerate(zip(part_number_arr, part_photo_arr)):
             RepairedPartRecord.objects.create(
                 record=new_maintenance_record,
-                part_name=request.data.get(f"repair_parts[{index}][part_name]"),
-                condition=request.data.get(f"repair_parts[{index}][condition]"),
+                part_name=repair_parts[index].part_name,
+                condition=repair_parts[index].condition,
                 part_number=part_num,
                 part_photo=photo
             )
@@ -1382,7 +1631,7 @@ def maintenance_jobs_complete(request, pk):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 @user_type_required(['admin', 'fueling', 'maintenance'])
-def maintenance_vehicle_list(request):
+def maintenance_vehicle_list_paginated(request):
     paginator = PageNumberPagination()
     paginator.page_size = 5
 
@@ -1390,6 +1639,7 @@ def maintenance_vehicle_list(request):
     result_page = paginator.paginate_queryset(vehicles, request)
     serializer = VehicleSerializer(result_page, many=True)
     return paginator.get_paginated_response(serializer.data)
+
 
 
 # get specific vehicle by id or edit it
@@ -1418,5 +1668,13 @@ def maintenance_vehicle_detail(request, pk):
             return Response({'error': "Something went wrong!"}, status=status.HTTP_400_BAD_REQUEST)
 
 
+# get list of vehicles using pagination
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+@user_type_required(['maintenance'])
+def maintenance_vehicle_list(request):
+    vehicles = Vehicle.objects.all()
+    serializer = VehicleSerializer(vehicles, many=True)
+    return Response(serializer.data)
 
 

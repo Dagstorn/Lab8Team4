@@ -56,3 +56,6 @@ class DriverReport(models.Model):
 
     class Meta:
         ordering = ["-date"]
+
+
+

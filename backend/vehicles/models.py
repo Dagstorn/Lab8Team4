@@ -36,9 +36,25 @@ class Vehicle(models.Model):
     
 
 
+class FuelingTask(models.Model):
+    STATUS_TYPES = (
+        ("assigned", "assigned"),
+        ("completed", "completed"),
+    )
+    vehicle = models.ForeignKey(Vehicle, on_delete=models.CASCADE, related_name="fueling_tasks")
+    task = models.CharField(max_length=400)
+    status = models.CharField(max_length=10, choices=STATUS_TYPES, default="assigned")
+    created_on = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.title
+    
+    class Meta:
+        ordering = ["-created_on"]
+
 class FuelingProof(models.Model):
     vehicle = models.ForeignKey(Vehicle, on_delete=models.CASCADE, null=True, related_name="fueling_proofs")
-    fueling_person = models.ForeignKey(FuelingPerson, on_delete=models.CASCADE, related_name="fueling_proofs")
+    fueling_person = models.ForeignKey(FuelingPerson, on_delete=models.SET_NULL, null=True, blank=True, related_name="fueling_proofs")
     driver_photo = models.ImageField(verbose_name="photo of the Driver", upload_to ='fueling_records/')
     image_before = models.ImageField(verbose_name="image before fueling", upload_to ='fueling_records/')
     image_after = models.ImageField(verbose_name="image after fueling", upload_to ='fueling_records/')
@@ -49,6 +65,9 @@ class FuelingProof(models.Model):
 
     def __str__(self):
         return f'FP on {self.vehicle.make} {self.vehicle.model} on {self.date}'
+    
+    class Meta:
+        ordering = ["-date"]
     
 class MaintenanceJob(models.Model):
     STATUS_TYPES = (
@@ -70,7 +89,6 @@ class MaintenanceJob(models.Model):
     def complete(self):
         self.status = "completed"
         
-
 class RepairingPart(models.Model):
     job = models.ForeignKey(MaintenanceJob, on_delete=models.CASCADE, related_name="repair_parts")
     part_name = models.CharField(max_length=100)
@@ -90,7 +108,6 @@ class RepairedPartRecord(models.Model):
     condition = models.CharField(max_length=100)
     part_number = models.CharField(max_length=100, null=True, blank=True)
     part_photo = models.ImageField(upload_to ='maintenance_records/', null=True, blank=True)
-
 
 class AuctionVehicle(models.Model):
     BODY_TYPES =(
@@ -114,8 +131,6 @@ class AuctionVehicle(models.Model):
     def __str__(self):
         return f'{self.make} {self.model} {self.year} | {self.license_plate} | {self.type}'
    
-
-
 class VehicleReport(models.Model):
     vehicle = models.ForeignKey(Vehicle, on_delete=models.CASCADE, null=True, blank=True, related_name="reports")
     report_file = models.FileField(upload_to='reports/vehicle/')
