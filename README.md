@@ -3,7 +3,7 @@
 Frontend - React\
 Backedn - Django, Postrgresql
 
-## Installation:
+## Installation & Running:
 
 install git
 
