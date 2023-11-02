@@ -52,7 +52,7 @@ final response = await http.post(
 
 ## API description for mobile app part
 
-============= FOR DRIVER ======================
+### ================= FOR DRIVER ======================
 
 ---
 
@@ -80,8 +80,9 @@ final response = await http.post(
     - will return specific task
   - for PACTH method
     - will update task status
-    - should pass status object with request, for example {status: "Completed"}
-    - allowed status types: ["Assigned","In progress","Completed","Delayed","Canceled"]
+    - should pass status object with request, for example `{status: "Completed"}`
+    - allowed status types:
+      - `["Assigned","In progress","Completed","Delayed","Canceled"]`
 
 `/api/routes_history/`
 
@@ -101,7 +102,7 @@ final response = await http.post(
 
 ---
 
-============= FOR FUELING ======================
+### ================= FOR FUELING ======================
 
 ---
 
@@ -151,7 +152,7 @@ final response = await http.post(
 
 ---
 
-============= FOR Maintenance ======================
+### ================= FOR Maintenance ======================
 
 ---
 
@@ -175,9 +176,10 @@ final response = await http.post(
     - required data:
     - vehicle: vehicle id
     - description: string
-    - type: string, one of ["monthly", "yearly", "accidental"]
+    - type: string, one of `["monthly", "yearly", "accidental"]`
     - repair_parts: List of objects of format: {part_name: string, condition: string}
-      For example: [{part_name: "Brake pads", condition: "old"}, {part_name: "Oil filter", condition: "new"}]
+    - For example:
+      - `[{part_name: "Brake pads", condition: "old"}, {part_name: "Oil filter", condition: "new"}] `
 
 `/api/maintenance/jobs/<id>/`
 
@@ -189,8 +191,9 @@ final response = await http.post(
     - update fields that are recieved
     - fields are
     - description: string
-    - repair_parts: List of objects of format: {part_name: string, condition: string}
-      For example: [{part_name: "Brake pads", condition: "old"}, {part_name: "Oil filter", condition: "new"}]
+    - repair_parts: List of objects of format: `{part_name: string, condition: string}`
+    - For example:
+      - `[{part_name: "Brake pads", condition: "old"}, {part_name: "Oil filter", condition: "new"}]`
 
 `/api/maintenance/jobs/<id>/parts/`
 
