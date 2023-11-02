@@ -9,24 +9,24 @@ install git
 
 open terminal/cmd in some folder
 
-git clone https://github.com/Dagstorn/Lab8Team4.git
+`git clone https://github.com/Dagstorn/Lab8Team4.git`
 
-python -m venv venv
+`python -m venv venv`
 
 On mac:
 
-source venv\Scripts\activate
+`source venv\Scripts\activate`
 
 On windows CMD
 
-venv\Scripts\activate
+`venv\Scripts\activate`
 
 On windows Powershell
 
-.\venv\Scripts\Activate.ps1
+`.\venv\Scripts\Activate.ps1`
 
-cd Lab8Team4/backend
+`cd Lab8Team4/backend`
 
-pip install -r requirements.txt
+`pip install -r requirements.txt`
 
-python manage.py runserver
+`python manage.py runserver`
