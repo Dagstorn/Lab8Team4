@@ -88,7 +88,7 @@ class RepairedPartRecord(models.Model):
     record = models.ForeignKey(MaintenanceRecord, on_delete=models.CASCADE, related_name="repaired_parts")
     part_name = models.CharField(max_length=100)
     condition = models.CharField(max_length=100)
-    part_number = models.CharField(null=True, blank=True)
+    part_number = models.CharField(max_length=100, null=True, blank=True)
     part_photo = models.ImageField(upload_to ='maintenance_records/', null=True, blank=True)
 
 

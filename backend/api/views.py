@@ -464,9 +464,6 @@ def general_reports(request):
                         fueling_report[year].append(entry)
         
         report['fueling'] = fueling_report
-        print("here =-=-=-=-=-=-=-=-=- 1 ")
-        data_test = getMaintenanceData(vehicle=vehicle) 
-        print("here =-=-=-=-=-=-=-=-=- 2 ")
 
         
         list_of_maintenance_reports_by_vehicles = []
@@ -476,7 +473,6 @@ def general_reports(request):
                 list_of_maintenance_reports_by_vehicles.append(data)
 
         maintenance_report = {}
-        print("here =-=-=-=-=-=-=-=-=- 4 ")
      
         for item in list_of_maintenance_reports_by_vehicles:
             for year, values in item.items():
@@ -493,7 +489,6 @@ def general_reports(request):
                     else:
                         maintenance_report[year].append(entry)
         
-        print("here =-=-=-=-=-=-=-=-=- 5 ")
 
         report['maintenance'] = maintenance_report
         # return data   
