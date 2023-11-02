@@ -25,6 +25,8 @@ On windows Powershell
 
 `.\venv\Scripts\Activate.ps1`
 
+After venv is activated
+
 `cd Lab8Team4/backend`
 
 `pip install -r requirements.txt`
