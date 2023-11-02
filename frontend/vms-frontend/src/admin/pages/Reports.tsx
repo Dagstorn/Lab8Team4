@@ -34,7 +34,6 @@ const Reports = () => {
         const response = await sendRequest('/api/reports/', 'get', {
             Authorization: `Bearer ${auth.tokens.access}`
         });
-        console.log(response)
         if (response) {
             // set data to response result
             setReportData(response);
@@ -52,7 +51,7 @@ const Reports = () => {
         const sortedKeys = Object.keys(data).sort((a: string, b: string) => parseInt(b) - parseInt(a)); // Sort the keys in ascending order
 
         const yearSelectItems = sortedKeys.map(year => (
-            <SelectItem value={`${year}`}>{year}</SelectItem>
+            <SelectItem key={year} value={`${year}`}>{year}</SelectItem>
         ));
         return yearSelectItems;
     }

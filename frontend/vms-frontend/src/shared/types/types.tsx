@@ -1,3 +1,16 @@
+export interface User {
+    first_name: String;
+    last_name: String;
+    username: String;
+    email: String;
+}
+export interface Admin {
+    id: number;
+    phone: String;
+    user: User;
+}
+
+
 export interface Driver {
     id: number;
     goverment_id: String;

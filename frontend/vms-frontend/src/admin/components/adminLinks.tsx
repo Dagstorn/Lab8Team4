@@ -1,4 +1,4 @@
-import { AlarmClock, CarFront, FileText, LayoutDashboard, ListOrdered, Users2 } from "lucide-react";
+import { AlarmClock, CarFront, FileText, ListOrdered, User2, Users2 } from "lucide-react";
 
 export const sidebarNavItems = [
     {
@@ -7,9 +7,9 @@ export const sidebarNavItems = [
         icon: <FileText className="mr-2 h-4 w-4" />,
     },
     {
-        title: "Main Dashboard",
-        href: "/admin/",
-        icon: <LayoutDashboard className="mr-2 h-4 w-4" />,
+        title: "Personal data",
+        href: "/admin/personal_data",
+        icon: <User2 className="mr-2 h-4 w-4" />,
     },
     {
         title: "Drivers List",

@@ -63,6 +63,11 @@ import AddJob from "./staff/pages/maintenance/AddJob.tsx";
 import EditJob from "./staff/pages/maintenance/EditJob.tsx";
 import CompleteJob from "./staff/pages/maintenance/CompleteJob.tsx";
 import EditPersonalData from "./staff/pages/maintenance/EditPersonalData.tsx";
+import PersonalData from "./admin/pages/PersonalData.tsx";
+import EditAdminData from "./admin/pages/EditAdminData.tsx";
+import AuctionPage from "./shared/pages/AuctionPage.tsx";
+import AdminDetail from "./admin/pages/staff/AdminDetail.tsx";
+import EditAdminPage from "./admin/pages/staff/EditAdminPage.tsx";
 
 function App() {
   // global state holders for currently logged in user
@@ -178,6 +183,7 @@ function App() {
         <Routes>
           <Route path="/" element={<MainLayout />} >
             <Route index element={<Homepage />} />
+            <Route path="auction" element={<AuctionPage />} />
 
             <Route element={<RequireAuth allowedRole={"driver"} />}>
               <Route path="appointments/add" element={<MakeAppointmentPage />} />
@@ -198,6 +204,8 @@ function App() {
             <Route path="admin" element={<AdminLayout links={adminLinks} />}>
               <Route path="" element={<Navigate to="reports" replace />} />
 
+              <Route path="personal_data" element={<PersonalData />} />
+              <Route path="edit" element={<EditAdminData />} />
               <Route path="drivers" element={<DriversListPage />} />
               <Route path="drivers/add" element={<AddDriverPage />} />
               <Route path="drivers/:driverID/edit" element={<EditDriverPage />} />
@@ -212,7 +220,8 @@ function App() {
               <Route path="staff/fueling/:fuelingPersonId/detail" element={<FuelingDetailPage />} />
               <Route path="staff/maintenance/:maintenancePersonId/edit" element={<EditMaintenance />} />
               <Route path="staff/maintenance/:maintenancePersonId/detail" element={<MaintenanceDetail />} />
-
+              <Route path="staff/admin/:adminId/detail" element={<AdminDetail />} />
+              <Route path="staff/admin/:adminId/edit" element={<EditAdminPage />} />
 
               <Route path="staff/add/fueling" element={<AddFueling />} />
               <Route path="staff/add/maintenance" element={<AddMaintenance />} />

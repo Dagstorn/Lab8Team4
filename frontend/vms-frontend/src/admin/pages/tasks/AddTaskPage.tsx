@@ -158,9 +158,12 @@ const AddTaskPage = () => {
                                         <label htmlFor="">Select driver</label>
 
                                         <Select
-                                            {...register('driver')}
+                                            {...register('driver', {
+                                                required: "Select driver"
+                                            })}
                                             size="sm"
                                             items={drivers}
+                                            isRequired
                                             variant="bordered"
                                             placeholder="Select a driver"
                                             className="h-10 p-0"
@@ -174,9 +177,12 @@ const AddTaskPage = () => {
                                     <div className="mb-4">
                                         <label htmlFor="">Select car</label>
                                         <Select
-                                            {...register('car')}
+                                            {...register('car', {
+                                                required: "Select vehicle"
+                                            })}
                                             size="sm"
                                             items={vehicles}
+                                            isRequired
                                             variant="bordered"
                                             placeholder="Select a vehicle"
                                             className="h-10 p-0"

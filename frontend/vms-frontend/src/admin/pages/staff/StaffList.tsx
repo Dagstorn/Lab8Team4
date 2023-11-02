@@ -7,7 +7,7 @@ import {
     TableRow,
 } from "@/shared/shad-ui/ui/table";
 import { Separator } from "@/shared/shad-ui/ui/separator";
-import { FuelingPerson, MaintenancePerson } from "@/shared/types/types";
+import { Admin, FuelingPerson, MaintenancePerson } from "@/shared/types/types";
 import { Fuel, Wrench } from 'lucide-react';
 import { Link } from "react-router-dom";
 import useAuth from "@/shared/hooks/useAuth";
@@ -17,6 +17,7 @@ import FadeTransition from "../../components/FadeTransition";
 import { Spinner } from "@nextui-org/react";
 import FuelingDetailRow from "../../components/FuelingDetailRow";
 import MaintenanceDetailRow from "@/admin/components/MaintenanceDetailRow";
+import AdminDetailRow from "@/admin/components/AdminDetailRow";
 
 const StaffListPage = () => {
     // get auth context to have access to currently logged in user data
@@ -25,24 +26,29 @@ const StaffListPage = () => {
     // states which store list of fueling persons and list of maintenance persons
     const [fuelingStaff, setFuelingStaff] = useState<FuelingPerson[]>([]);
     const [maintenanceStaff, setMaintenanceStaff] = useState<MaintenancePerson[]>([]);
+    const [adminStaff, setAdminStaff] = useState<Admin[]>([]);
     // custom HTTP hook to make  API calls
     const { loading, error, sendRequest, clearError } = useHttp();
 
     // retrieve data from api
     const getData = async () => {
         // get data with custom Hook
-        const [fuelingStaffData, maintenanceStaffData] = await Promise.all([
+        const [fuelingStaffData, maintenanceStaffData, adminData] = await Promise.all([
             sendRequest('/api/staff/fueling', 'get', {
                 Authorization: `Bearer ${auth.tokens.access}`
             }),
             sendRequest('/api/staff/maintenance', 'get', {
                 Authorization: `Bearer ${auth.tokens.access}`
+            }),
+            sendRequest('/api/staff/admin', 'get', {
+                Authorization: `Bearer ${auth.tokens.access}`
             })
         ]);
-        if (fuelingStaffData && maintenanceStaffData) {
+        if (fuelingStaffData && maintenanceStaffData && adminData) {
             // set data to response result
             setFuelingStaff(fuelingStaffData)
             setMaintenanceStaff(maintenanceStaffData)
+            setAdminStaff(adminData)
         }
     }
     // when conponent mounts - meaning when it is created we get data
@@ -109,6 +115,26 @@ const StaffListPage = () => {
                         {
                             maintenanceStaff.map((employee) => {
                                 return <MaintenanceDetailRow key={`maintenance${employee.id}`} maintenance_person={employee} updateLists={updateLists} />
+                            })
+                        }
+
+                    </TableBody>
+                </Table> : <span className="ml-4 py-4 font-bold">No maintenance persons yet</span>}
+
+                {adminStaff.length > 0 ? <Table className="mt-12">
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead>Admin</TableHead>
+                            <TableHead>Phone</TableHead>
+                            <TableHead>Email</TableHead>
+                            <TableHead>Username</TableHead>
+                            <TableHead className="text-right">Action</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {
+                            adminStaff.map((employee) => {
+                                return <AdminDetailRow key={`maintenance${employee.id}`} admin={employee} />
                             })
                         }
 

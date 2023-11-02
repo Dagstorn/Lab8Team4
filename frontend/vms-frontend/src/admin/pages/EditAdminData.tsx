@@ -22,18 +22,17 @@ const EditPersonalData = () => {
     // function to get driver data
     const getData = async () => {
         // make api call
-        const responseData = await sendRequest('/api/maintenance/personal_data/', 'get', {
+        const responseData = await sendRequest('/api/admin/personal_data/', 'get', {
             Authorization: `Bearer ${auth.tokens.access}`
         })
-        console.log(responseData)
         if (responseData) {
+            console.log(responseData)
             // save data in components state
-            setValue('name', responseData.name);
-            setValue('surname', responseData.surname);
-            setValue('middle_name', responseData.middle_name);
+            setValue('first_name', responseData.user.first_name);
+            setValue('last_name', responseData.user.last_name);
+            setValue('username', responseData.user.username);
+            setValue('email', responseData.user.email);
             setValue('phone', responseData.phone);
-            setValue('email', responseData.email);
-            setValue('password', responseData.password);
         }
 
     }
@@ -47,13 +46,16 @@ const EditPersonalData = () => {
     // function to process form submission
     async function onSubmit(values: FieldValues) {
         clearError();
+        if (values.username) {
+            auth.assignUsername(values.username);
+        }
         // send task data to backend
-        const response = await sendRequest('/api/maintenance/personal_data/', 'patch', {
+        const response = await sendRequest('/api/admin/personal_data/', 'patch', {
             Authorization: `Bearer ${auth.tokens.access}`
         }, values)
         if (response) {
             toast({ title: "Changes saved!" })
-            navigate(`/maintenance/`);
+            navigate(`/admin/personal_data`);
         }
     }
     return (
@@ -67,13 +69,13 @@ const EditPersonalData = () => {
                             <label className="col-span-1" htmlFor="">First name</label>
                             <div className="col-span-3">
                                 <input
-                                    {...register('name', {
+                                    {...register('first_name', {
                                         required: "Enter name"
                                     })}
                                     type='text'
                                     className="custom-input"
                                 />
-                                {errors.name && <p className="text-red-500">{`${errors.name.message}`}</p>}
+                                {errors.first_name && <p className="text-red-500">{`${errors.first_name.message}`}</p>}
                             </div>
 
                         </div>
@@ -82,25 +84,41 @@ const EditPersonalData = () => {
                             <div className="col-span-3">
 
                                 <input
-                                    {...register('surname', {
-                                        required: "Enter surname"
+                                    {...register('last_name', {
+                                        required: "Enter last name"
                                     })}
                                     type='text'
                                     className="custom-input"
                                 />
-                                {errors.surname && <p className="text-red-500">{`${errors.surname.message}`}</p>}
+                                {errors.last_name && <p className="text-red-500">{`${errors.last_name.message}`}</p>}
                             </div>
                         </div>
                         <div className="mb-2 grid grid-cols-4">
-                            <label className="col-span-1" htmlFor="">Middle name</label>
+                            <label className="col-span-1" htmlFor="">Email</label>
                             <div className="col-span-3">
 
                                 <input
-                                    {...register('middle_name')}
+                                    {...register('email', {
+                                        required: "Enter email"
+                                    })}
+                                    type='email'
+                                    className="custom-input"
+                                />
+                                {errors.email && <p className="text-red-500">{`${errors.email.message}`}</p>}
+                            </div>
+                        </div>
+                        <div className="mb-2 grid grid-cols-4">
+                            <label className="col-span-1" htmlFor="">Username</label>
+                            <div className="col-span-3">
+
+                                <input
+                                    {...register('username', {
+                                        required: "Enter email"
+                                    })}
                                     type='text'
                                     className="custom-input"
                                 />
-                                {errors.middle_name && <p className="text-red-500">{`${errors.middle_name.message}`}</p>}
+                                {errors.username && <p className="text-red-500">{`${errors.username.message}`}</p>}
                             </div>
                         </div>
 

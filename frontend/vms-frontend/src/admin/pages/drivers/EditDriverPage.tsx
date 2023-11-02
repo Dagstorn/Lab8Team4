@@ -79,7 +79,9 @@ const EditDriverPage = () => {
                             <label className="col-span-1" htmlFor="">First name</label>
                             <div className="col-span-3">
                                 <input
-                                    {...register('name')}
+                                    {...register('name', {
+                                        required: "Enter first name"
+                                    })}
                                     type='text' required
                                     className="custom-input"
                                 />
@@ -92,7 +94,9 @@ const EditDriverPage = () => {
                             <div className="col-span-3">
 
                                 <input
-                                    {...register('surname')}
+                                    {...register('surname', {
+                                        required: "Enter last name"
+                                    })}
                                     type='text' required
                                     className="custom-input"
                                 />
@@ -116,7 +120,9 @@ const EditDriverPage = () => {
                             <div className="col-span-3">
 
                                 <input
-                                    {...register('goverment_id')}
+                                    {...register('goverment_id', {
+                                        required: "Enter goverment id"
+                                    })}
                                     type='text'
                                     className="custom-input"
                                 />
@@ -128,7 +134,9 @@ const EditDriverPage = () => {
                             <div className="col-span-3">
 
                                 <input
-                                    {...register('address')}
+                                    {...register('address', {
+                                        required: "Enter address"
+                                    })}
                                     type='text'
                                     className="custom-input"
                                 />
@@ -140,7 +148,9 @@ const EditDriverPage = () => {
                             <div className="col-span-3">
 
                                 <input
-                                    {...register('phone')}
+                                    {...register('phone', {
+                                        required: "Enter phone number"
+                                    })}
                                     type='text'
                                     className="custom-input"
                                 />
@@ -153,7 +163,9 @@ const EditDriverPage = () => {
                             <div className="col-span-3">
 
                                 <input
-                                    {...register('department')}
+                                    {...register('department', {
+                                        required: "Enter department name"
+                                    })}
                                     type='text'
                                     className="custom-input"
                                 />
@@ -165,7 +177,9 @@ const EditDriverPage = () => {
                             <div className="col-span-3">
 
                                 <input
-                                    {...register('license_code')}
+                                    {...register('license_code', {
+                                        required: "Enter drivers license code"
+                                    })}
                                     type='text'
                                     className="custom-input"
                                 />

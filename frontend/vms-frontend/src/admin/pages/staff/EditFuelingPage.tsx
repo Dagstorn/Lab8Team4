@@ -76,7 +76,9 @@ const EditFuelingPage = () => {
                             <label className="col-span-1" htmlFor="">First name</label>
                             <div className="col-span-3">
                                 <input
-                                    {...register('name')}
+                                    {...register('name', {
+                                        required: "Enter first name"
+                                    })}
                                     type='text' required
                                     className="custom-input"
                                 />
@@ -89,7 +91,9 @@ const EditFuelingPage = () => {
                             <div className="col-span-3">
 
                                 <input
-                                    {...register('surname')}
+                                    {...register('surname', {
+                                        required: "Enter last name"
+                                    })}
                                     type='text' required
                                     className="custom-input"
                                 />
@@ -114,7 +118,9 @@ const EditFuelingPage = () => {
                             <div className="col-span-3">
 
                                 <input
-                                    {...register('phone')}
+                                    {...register('phone', {
+                                        required: "Enter phone number"
+                                    })}
                                     type='text'
                                     className="custom-input"
                                 />

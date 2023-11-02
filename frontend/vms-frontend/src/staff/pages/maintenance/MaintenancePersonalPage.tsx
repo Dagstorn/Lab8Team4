@@ -21,7 +21,7 @@ const MaintenancePersonalPage = () => {
     // function to retrieve data from backend api
     const getData = async () => {
         // api call 
-        const responseData = await sendRequest('/api/maintenance/perosnal_data/', 'get', {
+        const responseData = await sendRequest('/api/maintenance/personal_data/', 'get', {
             Authorization: `Bearer ${auth.tokens.access}`
         })
         console.log(responseData)
@@ -30,7 +30,7 @@ const MaintenancePersonalPage = () => {
             setPersonalData(responseData);
         }
     }
-    // useEffect will call getDriver function everytime driverID is updated
+    // useEffect will call getData function when page laods
     // this ensures that for every id change in url parameters we get accurate data
     useEffect(() => {
         getData();

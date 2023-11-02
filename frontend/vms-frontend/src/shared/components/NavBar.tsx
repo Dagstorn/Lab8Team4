@@ -23,6 +23,10 @@ let routes = [
     href: "/",
     label: "Staff",
   },
+  {
+    href: "/auction",
+    label: "Auction vehicles",
+  },
 
 
 ];
