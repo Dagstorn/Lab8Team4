@@ -42,10 +42,10 @@ Example flutter api call:
 ```
 const baseApiUrl = 'http://10.0.2.2:8000/api';
 final response = await http.post(
-Uri.parse('$baseApiUrl/users/token/'),
-body: {
-'username': username,
-'password': password,
-},
+    Uri.parse('$baseApiUrl/users/token/'),
+    body: {
+        'username': username,
+        'password': password,
+    },
 );
 ```
