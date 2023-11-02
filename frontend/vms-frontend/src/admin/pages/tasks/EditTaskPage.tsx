@@ -100,6 +100,18 @@ const EditTaskPage = () => {
             }
             setDrivers(driversData);
             setVehicles(vehiclesData);
+
+            // if vehicle status is not active - meaning that it is on maintenance we make it not available for selection 
+            const newActiveItemsSet = new Set(busyCars);
+
+            vehiclesData.forEach((vehicle: Vehicle) => {
+                if (vehicle.status !== 'active') {
+                    newActiveItemsSet.add(vehicle.id);
+
+                }
+                setBusyCars(newActiveItemsSet);
+            });
+
         }
     }
 
@@ -157,7 +169,7 @@ const EditTaskPage = () => {
                 <h1 className="text-2xl font-bold mb-2">Edit task</h1>
                 <Separator />
 
-                <FadeTransition show={task !== undefined || task !== null}>
+                <FadeTransition show={vehicles.length > 0}>
                     {task && <form className="" onSubmit={handleSubmit(onSubmit)}>
                         <div className=" mt-2 grid grid-cols-3 grid-rows-1 gap-10">
                             <div className="col-span-1">

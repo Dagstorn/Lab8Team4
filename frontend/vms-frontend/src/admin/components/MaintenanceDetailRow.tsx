@@ -4,11 +4,13 @@ import { Button } from '@/shared/shad-ui/ui/button'
 import { TableCell, TableRow } from '@/shared/shad-ui/ui/table'
 import { useToast } from '@/shared/shad-ui/ui/use-toast'
 import { MaintenancePerson } from '@/shared/types/types'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@nextui-org/react";
 import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from "@nextui-org/react";
 
 const MaintenanceDetailRow = ({ maintenance_person, updateLists }: { maintenance_person: MaintenancePerson, updateLists: () => void }) => {
+    // navigation component to redirect user
+    const navigate = useNavigate();
     const auth = useAuth(); // currently logged in user daat
     const { sendRequest, clearError } = useHttp(); // custom HTTP hook to call APIs
     const { toast } = useToast(); // toast messages library
@@ -45,11 +47,11 @@ const MaintenanceDetailRow = ({ maintenance_person, updateLists }: { maintenance
                         </Button>
                     </DropdownTrigger>
                     <DropdownMenu aria-label="Static Actions" className='text-center'>
-                        <DropdownItem key="details">
-                            <Link className="p-2 rounded-sm w-full" to={`/admin/staff/maintenance/${maintenance_person.id}/detail`}>View details</Link>
+                        <DropdownItem key="details" onClick={() => navigate(`/admin/staff/maintenance/${maintenance_person.id}/detail`)}>
+                            View details
                         </DropdownItem>
-                        <DropdownItem key="edit">
-                            <Link className="p-2 rounded-sm w-full" to={`/admin/staff/maintenance/${maintenance_person.id}/edit`}>Edit</Link>
+                        <DropdownItem key="edit" onClick={() => navigate(`/admin/staff/maintenance/${maintenance_person.id}/edit`)}>
+                            Edit
                         </DropdownItem>
                         <DropdownItem onClick={onOpen} key="delete" className="text-danger pl-4" color="danger">
                             Delete

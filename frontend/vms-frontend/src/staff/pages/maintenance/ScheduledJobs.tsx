@@ -12,7 +12,7 @@ import { Spinner } from "@nextui-org/react";
 import { useEffect, useState } from "react";
 import useAuth from "@/shared/hooks/useAuth";
 import { useHttp } from "@/shared/hooks/http-hook";
-import JobDetails from "@/staff/components/maintenance/JobDetails";
+import JobDetails from "@/staff/components/maintenance/JobDetailsRow";
 
 const ScheduledJobs = () => {
     const auth = useAuth();
@@ -46,26 +46,31 @@ const ScheduledJobs = () => {
     return (
         <>
             <div className="flex justify-between">
-                <h1 className="text-2xl font-bold mb-4">Scheduled Jobs list</h1>
+                <div className="flex gap-4">
+                    <h1 className="text-2xl font-bold mb-4">Scheduled Jobs list</h1>
+                    {loading && <div className="">
+                        <Spinner></Spinner>
+                    </div>}
+                </div>
+
             </div>
 
             <Separator />
-            {loading && <div className="flex justify-center mt-4">
-                <Spinner></Spinner>
-            </div>}
+
             <Table>
                 <TableHeader>
                     <TableRow>
                         <TableHead>Vehicle</TableHead>
-                        <TableHead>Date</TableHead>
+                        <TableHead>Created on</TableHead>
                         <TableHead>Description</TableHead>
+                        <TableHead>Type</TableHead>
                         <TableHead className="text-right">Action</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
                     {
                         jobs.map((job) => {
-                            return <JobDetails job={job} />
+                            return <JobDetails key={job.id} job={job} />
                         })
                     }
 

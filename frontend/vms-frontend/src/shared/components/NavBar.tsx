@@ -52,7 +52,7 @@ function NavBar() {
                 <Link to="/">VMS</Link>
               </h1>
             </div>
-            <nav className="flex items-center space-x-4 lg:space-x-6 hidden md:block">
+            <nav className="lg:flex items-center space-x-4 lg:space-x-6 hidden md:block">
               {routes.map((route, i) => (
                 <Link to={route.href} key={i}>
                   <Button variant="ghost" >
@@ -71,6 +71,12 @@ function NavBar() {
               {auth.isLoggedIn && auth.role == "admin" && <Link to="/admin">
                 <Button variant="ghost" >
                   Admin dashboard
+                </Button>
+              </Link>
+              }
+              {auth.isLoggedIn && auth.role == "maintenance" && <Link to="/maintenance">
+                <Button variant="ghost" >
+                  Maintenance dashboard
                 </Button>
               </Link>
               }

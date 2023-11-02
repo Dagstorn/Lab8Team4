@@ -1,4 +1,5 @@
 import { AspectRatio } from "@/shared/shad-ui/ui/aspect-ratio"
+import { Badge } from "@/shared/shad-ui/ui/badge"
 import { Card, CardContent } from "@/shared/shad-ui/ui/card"
 import { AuctionVehicle } from "@/shared/types/types"
 import { getVehicleInfo } from "@/shared/utils/utils"
@@ -18,7 +19,7 @@ const AuctionVehicleCard = ({ vehicle }: { vehicle: AuctionVehicle }) => {
                     <div className="mt-2 w-4/6">
                         <p className="font-bold ">{vehicle.make} {vehicle.model} {vehicle.year}</p>
                         {getVehicleInfo(vehicle)}
-                        <p className="">Condition: {vehicle.condition}</p>
+                        <p className=""><Badge>Condition</Badge> {vehicle.condition}</p>
                         {vehicle.additional_indormation && <p className="">Additional info: {vehicle.additional_indormation}</p>}
                     </div>
                 </div>

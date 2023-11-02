@@ -55,7 +55,7 @@ const DriverDetailPage = () => {
         values.image_after = values.photoAfter[0]
 
         // send task data to backend
-        await sendRequest('/api/fueling/reports/add/', 'post', {
+        const response = await sendRequest('/api/fueling/reports/add/', 'post', {
             Authorization: `Bearer ${auth.tokens.access}`,
             "Content-Type": "multipart/form-data"
         }, values)
@@ -185,7 +185,7 @@ const DriverDetailPage = () => {
                                             </div>
                                             <div className="flex">
                                                 <span className="w-2/5 font-bold mr-2">License plate:</span>
-                                                <span>{vehicle.license_plat}</span>
+                                                <span>{vehicle.license_plate}</span>
                                             </div>
 
                                         </div> : <div className="flex justify-center">

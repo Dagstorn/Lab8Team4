@@ -13,7 +13,7 @@ import { useEffect, useState } from "react";
 import useAuth from "@/shared/hooks/useAuth";
 import { useHttp } from "@/shared/hooks/http-hook";
 import { Spinner } from "@nextui-org/react";
-import Paginator from "../../components/Paginator";
+import Paginator from "../../../shared/components/Paginator";
 import FadeTransition from "../../components/FadeTransition";
 import VehicleDetailRow from "@/admin/components/VehicleDetailRow";
 
@@ -88,8 +88,9 @@ const VehiclesListPage = () => {
                 <Table>
                     <TableHeader>
                         <TableRow>
-                            <TableHead className="w-1/4">Make & Model</TableHead>
-                            <TableHead className="w-1/5">Body type</TableHead>
+                            <TableHead className="">Make & Model</TableHead>
+                            <TableHead className="">Status</TableHead>
+                            <TableHead className="">Body type</TableHead>
                             <TableHead className="">Year</TableHead>
                             <TableHead className="">Mileage</TableHead>
                             <TableHead className="">License plate number</TableHead>
@@ -107,11 +108,12 @@ const VehiclesListPage = () => {
                     </TableBody>
                 </Table>
                 {paginationObj && <Paginator getData={getData} paginatorData={paginationObj} />}
-            </FadeTransition>
+            </FadeTransition >
 
 
 
-            {error ? <span>{error}</span> : null}
+            {error ? <span>{error}</span> : null
+            }
         </>
     );
 };

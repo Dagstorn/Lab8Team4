@@ -60,6 +60,14 @@ const AddTaskPage = () => {
             setBusyCars(new Set(notAvailable.map((obj: { driver: number, car: number }) => obj.car)))
             setDrivers(driversData);
             setVehicles(vehiclesData);
+            // if vehicle status is not active - meaning that it is on maintenance we make it not available for selection 
+            const newActiveItemsSet = new Set(busyCars);
+            vehiclesData.forEach((vehicle: Vehicle) => {
+                if (vehicle.status !== 'active') {
+                    newActiveItemsSet.add(vehicle.id);
+                }
+                setBusyCars(newActiveItemsSet);
+            });
         }
     }
     // function to process selection of first date

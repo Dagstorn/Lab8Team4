@@ -1,51 +1,42 @@
 import { Vehicle } from "@/shared/types/types";
 import { TableCell, TableRow } from "@/shared/shad-ui/ui/table";
 import { Button } from "@/shared/shad-ui/ui/button";
-import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@nextui-org/react";
+import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure, DropdownTrigger, DropdownMenu, DropdownItem, Dropdown, Chip } from "@nextui-org/react";
 import { Separator } from "@/shared/shad-ui/ui/separator";
-import { formatDistance } from "@/shared/utils/utils";
-import { FieldValues, useForm } from "react-hook-form";
 import useAuth from "@/shared/hooks/useAuth";
 import { useHttp } from "@/shared/hooks/http-hook";
 import { useToast } from "@/shared/shad-ui/ui/use-toast";
-import { Loader2 } from "lucide-react";
-
+import { useNavigate } from "react-router";
+import { getVehicleInfo } from "@/shared/utils/utils";
 interface Props {
-    vehicle: Vehicle
+    vehicle: Vehicle,
+    changeStatus: (vehicleId: number, status: string) => void
 }
 
 
-const VehicleDetails = ({ vehicle }: Props) => {
+const VehicleDetails = ({ vehicle, changeStatus }: Props) => {
     const auth = useAuth();
-    const { register, handleSubmit, formState: { errors }, reset } = useForm();
-    const { loading, error, sendRequest, clearError } = useHttp();
+    const navigate = useNavigate();
+    const { sendRequest } = useHttp();
     const { toast } = useToast();
 
 
 
     // modal window for task details
-    const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure();
+    const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
-    const onSubmit = async (values: FieldValues) => {
-        clearError();
-        if (!vehicle) {
-            return
-        }
-        values.vehicle = vehicle.id;
 
-        // send task data to backend
-        const response = await sendRequest('/api/maintenance/jobs/add/', 'post', {
+
+    const changeVehicleStatus = async (status: string) => {
+        const response = await sendRequest(`/api/maintenance/vehicles/${vehicle.id}/`, 'patch', {
             Authorization: `Bearer ${auth.tokens.access}`
-        }, values)
+        }, {
+            status: status
+        })
         if (response) {
-            reset();
-            toast({
-                title: "Maintenance job was added successfully!",
-            })
+            toast({ title: "Status changed!" })
+            changeStatus(vehicle.id, status);
         }
-        onClose();
-
-
     }
 
     return (
@@ -62,98 +53,67 @@ const VehicleDetails = ({ vehicle }: Props) => {
             </TableCell>
 
             <TableCell>{vehicle.year}</TableCell>
-            <TableCell>{formatDistance(vehicle.mileage.toString())}</TableCell>
 
-            <TableCell>{vehicle.license_plat}</TableCell>
+            <TableCell>{vehicle.license_plate}</TableCell>
+            <TableCell>
+                {vehicle.status == 'active' ? (
+                    <Chip size="sm" variant="flat" color="success"
+                        className="cursor-pointer"
+                        onClick={() => changeVehicleStatus("notactive")}
+                    >{vehicle.status}</Chip>
+                ) : (
+                    <Chip size="sm" variant="flat" color="danger"
+                        className="cursor-pointer"
+                        onClick={() => changeVehicleStatus("active")}
+                    >Not active</Chip>
+                )}
+
+            </TableCell>
 
             <TableCell className="text-right">
-                <Button variant="outline" onClick={onOpen}> Schedule a job</Button>
+                <Dropdown>
+                    <DropdownTrigger className='focus:outline-none'>
+                        <Button variant="outline">
+                            Open Menu
+                        </Button>
+                    </DropdownTrigger>
+                    <DropdownMenu aria-label="Static Actions" className='text-center'>
+                        <DropdownItem key="schedule" onClick={() => navigate(`/maintenance/vehicles/${vehicle.id}/schedule`)} >
+                            Schedule a job
+                        </DropdownItem>
+                        <DropdownItem key="details" onClick={onOpen}>
+                            View details
+                        </DropdownItem>
+                        <DropdownItem key="edit" onClick={() => navigate(`/maintenance/vehicles/${vehicle.id}/edit`)}>
+                            Edit
+                        </DropdownItem>
+                    </DropdownMenu>
+                </Dropdown>
             </TableCell>
 
             <Modal size="xl" isOpen={isOpen} onOpenChange={onOpenChange}>
                 <ModalContent>
                     {(onClose) => (
                         <>
-                            <form onSubmit={handleSubmit(onSubmit)} className="w-full">
-                                <ModalHeader className="flex flex-col gap-1 pb-0">
-                                    Schedule maintenance for - {vehicle.make} {vehicle.model} {vehicle.year}
-                                    <Separator />
-                                </ModalHeader>
-                                <ModalBody>
-                                    <div className="flex flex-col text-base">
-                                        <div className="flex">
-                                            <span className="w-2/6 font-bold mr-2">Year:</span>
-                                            <span>{vehicle.year}</span>
-                                        </div>
-                                        <div className="flex">
-                                            <span className="w-2/6 font-bold mr-2">Body type:</span>
-                                            <span>{vehicle.type}</span>
-                                        </div>
-                                        <div className="flex">
-                                            <span className="w-2/6 font-bold mr-2">Sitting Capacity:</span>
-                                            <span>{vehicle.capacity}</span>
-                                        </div>
-                                        <div className="flex">
-                                            <span className="w-2/6 font-bold mr-2">Mileage:</span>
-                                            <span>{formatDistance(vehicle.mileage.toString())}</span>
-                                        </div>
-                                        <div className="flex mb-2">
-                                            <span className="w-2/6 font-bold mr-2">License plate:</span>
-                                            <span>{vehicle.license_plat}</span>
-                                        </div>
-                                        <Separator />
-                                        <div className="flex mt-2 mb-2">
-                                            <div className="w-full">
-                                                <label className="font-bold" htmlFor="">Date and time</label>
-                                                <input
-                                                    {...register('datetime', {
-                                                        required: "Date-time is required"
-                                                    })}
-                                                    type='datetime-local' required
-                                                    className="custom-input"
-                                                />
-                                                {errors.datetime && <p className="text-red-500">{`${errors.datetime.message}`}</p>}
-                                            </div>
-                                            {error ? <div className="flex justify-center">
-                                                <span className="text-red-500 justify-self-center">{error}</span>
-                                            </div> : null}
-                                        </div>
-                                        <div className="mb-4">
-                                            <label className="font-bold">Maintenance Job description</label>
-                                            <textarea {...register("description", {
-                                                required: "Description is required"
-                                            })}
-                                                className="w-full rounded-md border"
-                                                rows={4} // Specify the number of visible rows
-                                                // Specify the number of visible columns
-                                                placeholder="Describe maintenance job..."
-                                            ></textarea>
-
-                                            {errors.amount && <p className="text-red-500">{`${errors.amount.message}`}</p>}
-                                        </div>
-                                    </div>
-                                </ModalBody>
-                                <ModalFooter className="pt-0 mt-0">
-                                    <Button color="danger" variant="ghost" onClick={onClose}>
-                                        Close
-                                    </Button>
-                                    {loading ?
-                                        <Button disabled className="">
-                                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />Loading...
-                                        </Button> :
-
-                                        <Button className="" type="submit">
-                                            Schedule a job
-                                        </Button>
-                                    }
-                                </ModalFooter>
-                            </form>
-
+                            <ModalHeader className="flex flex-col gap-1 pb-0">
+                                {vehicle.make} {vehicle.model} {vehicle.year}
+                                <Separator />
+                            </ModalHeader>
+                            <ModalBody>
+                                {getVehicleInfo(vehicle)}
+                            </ModalBody>
+                            <ModalFooter className="pt-0 mt-0">
+                                <Button color="danger" variant="ghost" onClick={onClose}>
+                                    Close
+                                </Button>
+                            </ModalFooter>
                         </>
                     )}
                 </ModalContent>
             </Modal>
-        </TableRow>
+
+
+        </TableRow >
     )
 }
 

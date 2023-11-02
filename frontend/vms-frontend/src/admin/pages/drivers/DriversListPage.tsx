@@ -14,7 +14,7 @@ import useAuth from "@/shared/hooks/useAuth";
 import { Spinner } from "@nextui-org/react";
 import { useHttp } from "@/shared/hooks/http-hook";
 import DriverDetailRow from "../../components/DriverDetailRow";
-import Paginator from "../../components/Paginator";
+import Paginator from "../../../shared/components/Paginator";
 import FadeTransition from "../../components/FadeTransition";
 
 const DriversListPage = () => {

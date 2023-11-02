@@ -26,7 +26,7 @@ const VehicleEditPage = () => {
     // fumction to fetch vehicles list from api
     const getVehicle = async () => {
         if (vehicleId) {
-            const responseData = await sendRequest(`/api/vehicles/${vehicleId}/`, 'get', {
+            const responseData = await sendRequest(`/api/maintenance/vehicles/${vehicleId}/`, 'get', {
                 Authorization: `Bearer ${auth.tokens.access}`
             })
             if (responseData) {
@@ -39,6 +39,7 @@ const VehicleEditPage = () => {
                 setValue('type', responseData.type);
                 setValue('capacity', responseData.capacity);
                 setValue('license_plate', responseData.license_plate);
+                setValue('mileage', responseData.mileage);
             }
         }
     }
@@ -53,32 +54,34 @@ const VehicleEditPage = () => {
         if (vehicleId) {
             clearError();
             // send task data to backend
-            const response = await sendRequest(`/api/vehicles/${vehicleId}/`, 'patch', {
+            const response = await sendRequest(`/api/maintenance/vehicles/${vehicleId}/`, 'patch', {
                 Authorization: `Bearer ${auth.tokens.access}`
             }, values)
             if (response) {
-                toast({ title: "Changes saved!" })
-                navigate(`/admin/vehicles`);
+                toast({ title: "Changes saved!" });
+                navigate(`/maintenance/vehicles`);
             }
-
         }
     }
     return (
         <div>
-            <h1 className="text-2xl font-bold mb-4">Edit data: {vehicle?.make} {vehicle?.model} </h1>
+            <h1 className="text-2xl font-bold mb-4">{vehicle?.make} {vehicle?.model} - Edit </h1>
             <Separator />
             <div className="grid grid-cols-3 mt-4">
                 <div className="xl:col-span-2 sm:col-span-3">
                     <form className="" onSubmit={handleSubmit(onSubmit)}>
                         <div className="mb-2 grid grid-cols-4 items-center">
-                            <label className="col-span-1" htmlFor="">Make</label>
-                            <div className="col-span-3 ">
+                            <label className="col-span-1 " htmlFor="">Make</label>
+                            <div className="col-span-3">
                                 <input
-                                    {...register('make')}
-                                    type='text' required
+                                    {...register('make', {
+                                        required: "Enter vehicle make",
+                                    })}
+
+                                    type='text'
                                     className="custom-input"
                                 />
-                                {errors.name && <p className="text-red-500">{`${errors.name.message}`}</p>}
+                                {errors.make && <p className="text-red-500">{`${errors.make.message}`}</p>}
                             </div>
 
                         </div>
@@ -87,11 +90,11 @@ const VehicleEditPage = () => {
                             <div className="col-span-3">
 
                                 <input
-                                    {...register('model')}
-                                    type='text' required
+                                    {...register('model', { required: "Enter vehicle model", })}
+                                    type='text'
                                     className="custom-input"
                                 />
-                                {errors.surname && <p className="text-red-500">{`${errors.surname.message}`}</p>}
+                                {errors.model && <p className="text-red-500">{`${errors.model.message}`}</p>}
                             </div>
                         </div>
                         <div className="mb-2 grid grid-cols-4 items-center">
@@ -99,11 +102,11 @@ const VehicleEditPage = () => {
                             <div className="col-span-3">
 
                                 <input
-                                    {...register('year')}
+                                    {...register('year', { required: "Enter vehicle year", })}
                                     type='text'
                                     className="custom-input"
                                 />
-                                {errors.middle_name && <p className="text-red-500">{`${errors.middle_name.message}`}</p>}
+                                {errors.year && <p className="text-red-500">{`${errors.year.message}`}</p>}
                             </div>
                         </div>
                         <div className="mb-2 grid grid-cols-4 items-center">
@@ -111,11 +114,11 @@ const VehicleEditPage = () => {
                             <div className="col-span-3">
 
                                 <input
-                                    {...register('type')}
+                                    {...register('type', { required: "Enter vehicle type", })}
                                     type='text'
                                     className="custom-input"
                                 />
-                                {errors.middle_name && <p className="text-red-500">{`${errors.middle_name.message}`}</p>}
+                                {errors.type && <p className="text-red-500">{`${errors.type.message}`}</p>}
                             </div>
                         </div>
                         <div className="mb-2 grid grid-cols-4 items-center">
@@ -123,11 +126,16 @@ const VehicleEditPage = () => {
                             <div className="col-span-3">
 
                                 <input
-                                    {...register('capacity')}
+                                    {...register('capacity', {
+                                        required: "Specify sitting capacity", pattern: {
+                                            value: /^[1-9]\d*$/, // non negative numbers
+                                            message: 'Give non-negative number',
+                                        }
+                                    })}
                                     type='text'
                                     className="custom-input"
                                 />
-                                {errors.middle_name && <p className="text-red-500">{`${errors.middle_name.message}`}</p>}
+                                {errors.capacity && <p className="text-red-500">{`${errors.capacity.message}`}</p>}
                             </div>
                         </div>
                         <div className="mb-2 grid grid-cols-4 items-center">
@@ -135,11 +143,28 @@ const VehicleEditPage = () => {
                             <div className="col-span-3">
 
                                 <input
-                                    {...register('license_plate')}
+                                    {...register('license_plate', { required: "Enter license plate number" })}
                                     type='text'
                                     className="custom-input"
                                 />
-                                {errors.middle_name && <p className="text-red-500">{`${errors.middle_name.message}`}</p>}
+                                {errors.license_plate && <p className="text-red-500">{`${errors.license_plate.message}`}</p>}
+                            </div>
+                        </div>
+                        <div className="mb-2 grid grid-cols-4 items-center">
+                            <label className="col-span-1" htmlFor="">Mileage</label>
+                            <div className="col-span-3">
+
+                                <input
+                                    {...register('mileage', {
+                                        required: "Enter mileage", pattern: {
+                                            value: /^[0-9]\d*$/, // non negative numbers
+                                            message: 'Invalid mileage format', // Pattern validation message
+                                        },
+                                    })}
+                                    type='text'
+                                    className="custom-input"
+                                />
+                                {errors.mileage && <p className="text-red-500">{`${errors.mileage.message}`}</p>}
                             </div>
                         </div>
 

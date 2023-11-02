@@ -17,7 +17,7 @@ import useAuth from "@/shared/hooks/useAuth";
 import { useToast } from "@/shared/shad-ui/ui/use-toast";
 import TaskDetails from "../../components/TaskDetail";
 import FadeTransition from "../../components/FadeTransition";
-import Paginator from "../../components/Paginator";
+import Paginator from "../../../shared/components/Paginator";
 
 const TasksPage = () => {
     // get auth context to have access to currently logged in user data

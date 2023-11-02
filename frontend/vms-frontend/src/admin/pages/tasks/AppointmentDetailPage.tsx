@@ -77,6 +77,14 @@ const AppointmentDetailPage = () => {
                     setNotAvailableCars(new Set(notAvailable.map((obj: { driver: number, car: number }) => obj.car)))
                     setVehicles(vehiclesData);
                 }
+                // if vehicle status is not active - meaning that it is on maintenance we make it not available for selection 
+                const newActiveItemsSet = new Set(notAvailableCars);
+                vehiclesData.forEach((vehicle: Vehicle) => {
+                    if (vehicle.status !== 'active') {
+                        newActiveItemsSet.add(vehicle.id);
+                    }
+                    setNotAvailableCars(newActiveItemsSet);
+                });
             }
         }
         getData();

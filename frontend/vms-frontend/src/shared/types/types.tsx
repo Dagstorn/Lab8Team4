@@ -20,7 +20,8 @@ export interface Vehicle {
     year: number,
     license_plate: string,
     capacity: number,
-    mileage: number
+    mileage: number,
+    status: string
 }
 export interface AuctionVehicle {
     id: number;
@@ -117,9 +118,20 @@ export interface MaintenanceJob {
     maintenance_person: MaintenancePerson;
     description: string;
     status: string;
+    type: string;
     date: string;
+    created_on: string;
 }
 
+export interface RepairPart {
+    part_name: string;
+    condition: string;
+}
+
+
+export interface ReplacedPart {
+    index: number;
+}
 
 export interface PaginatorObj {
     count: number;

@@ -58,6 +58,11 @@ import FuelingDetailPage from "./admin/pages/staff/FuelingDetailPage.tsx";
 import EditMaintenance from "./admin/pages/staff/EditMaintenance.tsx";
 import MaintenanceDetail from "./admin/pages/staff/MaintenanceDetail.tsx";
 import VehicleEditPage from "./admin/pages/vehicles/VehicleEditPage.tsx";
+import EditVehicle from "./staff/pages/maintenance/EditVehicle.tsx";
+import AddJob from "./staff/pages/maintenance/AddJob.tsx";
+import EditJob from "./staff/pages/maintenance/EditJob.tsx";
+import CompleteJob from "./staff/pages/maintenance/CompleteJob.tsx";
+import EditPersonalData from "./staff/pages/maintenance/EditPersonalData.tsx";
 
 function App() {
   // global state holders for currently logged in user
@@ -235,8 +240,14 @@ function App() {
           <Route element={<RequireAuth allowedRole={"maintenance"} />}>
             <Route path="maintenance" element={<AdminLayout links={maintenanceLinks} />}>
               <Route path="" element={<MaintenancePersonalPage />} />
+              <Route path="edit" element={<EditPersonalData />} />
               <Route path="vehicles" element={<MaintenanceVehiclesList />} />
+              <Route path="vehicles/:vehicleId/edit" element={<EditVehicle />} />
+              <Route path="vehicles/:vehicleId/schedule" element={<AddJob />} />
               <Route path="jobs" element={<ScheduledJobs />} />
+              <Route path="jobs/:jobId/edit" element={<EditJob />} />
+              <Route path="jobs/:jobId/complete" element={<CompleteJob />} />
+
             </Route>
           </Route>
 

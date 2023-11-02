@@ -13,7 +13,7 @@ import { useHttp } from "@/shared/hooks/http-hook";
 import { Spinner } from "@nextui-org/react";
 import AppointmentDetails from '../../components/AppointmentDetails';
 import FadeTransition from "../../components/FadeTransition";
-import Paginator from "../../components/Paginator";
+import Paginator from "../../../shared/components/Paginator";
 
 const DriversListPage = () => {
     const auth = useAuth();
