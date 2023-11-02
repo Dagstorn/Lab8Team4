@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from accounts.models import Driver, FuelingPerson, MaintenancePerson
-from vehicles.models import Vehicle, FuelingProof, MaintenanceJob, AuctionVehicle
+from vehicles.models import Vehicle, FuelingProof, MaintenanceJob, AuctionVehicle, RepairingPart
 from tasks.models import Appointment, Task, CompletedRoute
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
@@ -58,7 +58,7 @@ class MaintenanceSerializer(serializers.ModelSerializer):
 class VehicleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Vehicle
-        fields = ['id', 'make', 'model', 'type', 'year', 'license_plate', 'capacity', 'mileage']
+        fields = ['id', 'make', 'model', 'type', 'year', 'license_plate', 'capacity', 'mileage', 'status']
 
 
 class AuctionVehicleSerializer(serializers.ModelSerializer):
@@ -80,6 +80,12 @@ class MaintenanceJobSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = MaintenanceJob
+        fields = '__all__'
+
+class RepairPartsSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = RepairingPart
         fields = '__all__'
 
 # Tasks Serializers

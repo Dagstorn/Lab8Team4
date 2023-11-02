@@ -69,7 +69,12 @@ urlpatterns = [
     path('fueling/reports/add/', views.addFuelingReport),
 
     # MAINTENANCE PERSON API endpoints
-    path('maintenance/jobs/', views.getMaintenanceJobs),
-    path('maintenance/jobs/add/', views.addMaintenanceJob),
+    path('maintenance/perosnal_data/', views.maintenance_personal_data),
+    path('maintenance/jobs/', views.maintenance_jobs_list),
+    path('maintenance/jobs/<str:pk>/', views.maintenance_jobs_detail),
+    path('maintenance/jobs/<str:pk>/parts/', views.maintenance_parts),
+    path('maintenance/jobs/<str:pk>/complete/', views.maintenance_jobs_complete),
+    path('maintenance/vehicles/paginated/', views.maintenance_vehicle_list),
+    path('maintenance/vehicles/<str:pk>/', views.maintenance_vehicle_detail),
 
 ]

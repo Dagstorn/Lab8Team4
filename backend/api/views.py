@@ -14,10 +14,10 @@ from rest_framework import status
 
 from .decorators import user_type_required
 
-from .serializers import DriverSerializer, VehicleSerializer,AuctionVehicleSerializer, AppointmentSerializer, TaskSerializer, CompletedRouteSerializer, FuelingSerializer, MaintenanceSerializer, FuelingProofSerializer, MaintenanceJobSerializer
+from .serializers import DriverSerializer, VehicleSerializer,AuctionVehicleSerializer, AppointmentSerializer, TaskSerializer, CompletedRouteSerializer, FuelingSerializer, MaintenanceSerializer, FuelingProofSerializer, MaintenanceJobSerializer, RepairPartsSerializer
 
 from accounts.models import Driver, FuelingPerson, MaintenancePerson, DriverReport
-from vehicles.models import Vehicle, AuctionVehicle, FuelingProof, MaintenanceJob, MaintenanceRecord, VehicleReport
+from vehicles.models import Vehicle, AuctionVehicle, FuelingProof, MaintenanceJob, MaintenanceRecord, VehicleReport, RepairingPart, RepairedPartRecord
 from tasks.models import Appointment, Task, CompletedRoute
 
 
@@ -132,7 +132,7 @@ def driver_detail(request, pk):
         if 'password' in request.data:
             new_password = request.data.pop('password')
             user = driver.user
-            user.password = new_password
+            user.set_password(new_password)
             user.save()
             driver.password = new_password
             driver.save()
@@ -561,10 +561,13 @@ def maintenance_detail(request, pk):
         if 'user' in request.data:
             request.data.pop('user')
         if 'password' in request.data:
+            print("password")
             new_password = request.data.pop('password')
             user = maintenance_person.user
-            user.password = new_password
+            user.set_password(new_password)
             user.save()
+            print(new_password)
+
             maintenance_person.password = new_password
             maintenance_person.save()
 
@@ -649,7 +652,7 @@ def fueling_detail(request, pk):
         if 'password' in request.data:
             new_password = request.data.pop('password')
             user = fueling_person.user
-            user.password = new_password
+            user.set_password(new_password)
             user.save()
             fueling_person.password = new_password
             fueling_person.save()
@@ -1051,37 +1054,232 @@ def addFuelingReport(request):
     return Response(serializer.data)
 
 
+# function to get and edit personal data of logged in maintenance person
+@api_view(['GET', 'PATCH'])
+@permission_classes([IsAuthenticated])
+@user_type_required(['maintenance'])
+def maintenance_personal_data(request):
+    # get maintenance_person by unique identifier
+    maintenance_person = request.user.maintenance_acc
 
+    # process different methods
+    if request.method == 'GET':
+        # serialize maintenance_person data and convert it to appropriate format
+        serializer = MaintenanceSerializer(maintenance_person, many=False)
+        return Response(serializer.data)
+    elif request.method in ['PATCH']:
+        # for safety remove email and user from request data, since they cannot be processed by serializer
+        # we do not update email and referenced one to one user for safety reasons
+        if 'email' in request.data:
+            request.data.pop('email')
+        if 'user' in request.data:
+            request.data.pop('user')
+        # process password update manually
+        if 'password' in request.data:
+            new_password = request.data.pop('password')
+            if len(new_password) > 0:
+                user = maintenance_person.user
+                user.set_password(new_password)
+                user.save()
+                maintenance_person.password = new_password
+                maintenance_person.save()
+
+        serializer = MaintenanceSerializer(maintenance_person, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        else:
+            return Response({'error': "Something went wrong!"}, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+
+# Retrieve list of maintenance jobs or create new one
+@api_view(['GET', 'POST'])
+@permission_classes([IsAuthenticated])
+@user_type_required(['maintenance'])
+def maintenance_jobs_list(request):
+    if request.method == 'GET':   
+        # get all jobs with status scheduled and order by bringing newer jobs to top
+        jobs = request.user.maintenance_acc.maintenance_jobs.all().filter(status="scheduled").order_by('-created_on')
+        # serialze and return data
+        serializer = MaintenanceJobSerializer(jobs, many=True)
+        return Response(serializer.data)
+    elif request.method == 'POST':
+        try:
+            # get vehicle object by id from recieved data
+            vehicle = Vehicle.objects.get(id=request.data.get('vehicle'))
+            # set vehicle status to non-active
+            vehicle.on_maintenance()
+            vehicle.save()
+            # create new job
+            new_job = MaintenanceJob.objects.create(
+                vehicle=vehicle,
+                maintenance_person=request.user.maintenance_acc,
+                description=request.data.get('description'),
+                type=request.data.get('type')
+            )
+            # get repair parts list
+            # create RepairPart object for each item in the list and bind them with newly created job
+            repair_parts_raw = request.data.get('repair_parts')
+            for part in repair_parts_raw:
+                new_rep_part = RepairingPart.objects.create(
+                    job=new_job,
+                    part_name=part["part_name"],
+                    condition=part["condition"],
+                )
+
+        except:
+            return Response({'message': "Wrong data format or missing data"}, status=status.HTTP_400_BAD_REQUEST)
+        serializer = MaintenanceJobSerializer(new_job, many=False)
+        return Response(serializer.data)
+
+
+# get specific maintenance job or edit pecific maintenance job by id
+@api_view(['GET', 'PATCH'])
+@permission_classes([IsAuthenticated])
+@user_type_required(['maintenance'])
+def maintenance_jobs_detail(request, pk):
+    try:
+        # get maintenance_job by unique identifier
+        maintenance_job = MaintenanceJob.objects.get(pk=pk)
+    except Exception as e:
+        # in case if there is no driver with such id, or any other unexpected eror
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+    # process different methods
+    if request.method == 'GET':
+        # serialize data and convert it to appropriate format
+        serializer = MaintenanceJobSerializer(maintenance_job, many=False)
+        return Response(serializer.data)
+    elif request.method in ['PATCH']:
+        # update description if it is in request
+        if 'description' in request.data:
+            maintenance_job.description = request.data.get('description')
+            maintenance_job.save()
+        # update repairing parts if rhey are in request
+        if request.data.get('repair_parts'):
+            # delete all current repair parts related to current job
+            # because new number of repairing parts might be less than number of them we have now
+            # therefore we just delete all and create again
+            for current_repair_part in maintenance_job.repair_parts.all():
+                current_repair_part.delete()
+
+            # add repair parts from request data
+            for part in request.data.get('repair_parts'):
+                RepairingPart.objects.create(
+                    job=maintenance_job,
+                    part_name=part["part_name"],
+                    condition=part["condition"]
+                )
+
+        serializer = MaintenanceJobSerializer(maintenance_job, many=False)
+        return Response(serializer.data)
+
+
+# get list of repair_parts on particular job
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 @user_type_required(['maintenance'])
-def getMaintenanceJobs(request):
+def maintenance_parts(request, pk):
     try:
-        jobs = MaintenanceJob.objects.filter(maintenance_person=request.user.maintenance_acc)
-    except:
-        raise ValidationError("Wrong data format or missing data", code=status.HTTP_400_BAD_REQUEST)
-    
-    serializer = MaintenanceJobSerializer(jobs, many=True)
-    return Response(serializer.data)
+        # get maintenance_job by unique identifier
+        maintenance_job = MaintenanceJob.objects.get(pk=pk)
+    except Exception as e:
+        # in case if there is maintenance_job driver with such id, or any other unexpected eror
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
+    # process different methods
+    if request.method == 'GET':
+        # serialize maintenance repair parts data and convert it to appropriate format
+        repair_parts = maintenance_job.repair_parts.all()
+        serializer = RepairPartsSerializer(repair_parts, many=True)
+        return Response(serializer.data)
+
+
+# complete the maintenance job
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 @user_type_required(['maintenance'])
-def addMaintenanceJob(request):
+def maintenance_jobs_complete(request, pk):
     try:
-        veh_id = request.data.get('vehicle')
-        vehicle = Vehicle.objects.get(id=veh_id)
-        schedule_time = datetime.strptime(request.data.get('datetime'), "%Y-%m-%dT%H:%M")
-
-        new_obj = MaintenanceJob.objects.create(
-            vehicle=vehicle,
-            description = request.data.get('description'),
-            maintenance_person=request.user.maintenance_acc,
-            date=timezone.make_aware(schedule_time, timezone.get_current_timezone()),
+        # get maintenance_job by unique identifier
+        maintenance_job = MaintenanceJob.objects.get(pk=pk)
+        # create new maintenance record
+        new_maintenance_record = MaintenanceRecord.objects.create(
+            vehicle = maintenance_job.vehicle,
+            maintenance_person = maintenance_job.maintenance_person,
+            job = maintenance_job,
+            description = maintenance_job.description,
+            cost = request.data.get('cost')
         )
+        # set maintenance job status to complete and save
+        maintenance_job.complete()
+        maintenance_job.save()
+        # set vehicle status to active and save
+        maintenance_job.vehicle.off_maintenance()
+        maintenance_job.vehicle.save()
+        # get lists of part numbers and photos from submitted data
+        part_number_arr = request.data.getlist('part_number[]', [])
+        part_photo_arr = request.data.getlist('part_photo[]', [])
 
-    except:
-        raise ValidationError("Wrong data format or missing data", code=status.HTTP_400_BAD_REQUEST)
-    
-    serializer = MaintenanceJobSerializer(new_obj, many=False)
-    return Response(serializer.data)
+        # loop over and create RepairPartRecord for each of them
+        for index, (part_num, photo) in enumerate(zip(part_number_arr, part_photo_arr)):
+            RepairedPartRecord.objects.create(
+                record=new_maintenance_record,
+                part_name=request.data.get(f"repair_parts[{index}][part_name]"),
+                condition=request.data.get(f"repair_parts[{index}][condition]"),
+                part_number=part_num,
+                part_photo=photo
+            )
+
+        return Response({'success' : 'ok'})
+
+    except Exception as e:
+        # in case if there is maintenance_job driver with such id, or any other unexpected eror
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+# get list of vehicles using pagination
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+@user_type_required(['admin', 'fueling', 'maintenance'])
+def maintenance_vehicle_list(request):
+    paginator = PageNumberPagination()
+    paginator.page_size = 5
+
+    vehicles = Vehicle.objects.all()
+    result_page = paginator.paginate_queryset(vehicles, request)
+    serializer = VehicleSerializer(result_page, many=True)
+    return paginator.get_paginated_response(serializer.data)
+
+
+# get specific vehicle by id or edit it
+@api_view(['GET', 'PATCH'])
+@permission_classes([IsAuthenticated])
+@user_type_required(['maintenance'])
+def maintenance_vehicle_detail(request, pk):
+    try:
+        # get vehicle by unique identifier
+        vehicle = Vehicle.objects.get(pk=pk)
+    except Exception as e:
+        # in case if there is no driver with such id, or any other unexpected eror
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+    # process different methods
+    if request.method == 'GET':
+        # serialize driver data and convert it to appropriate format
+        serializer = VehicleSerializer(vehicle, many=False)
+        return Response(serializer.data)
+    elif request.method  == 'PATCH':
+        serializer = VehicleSerializer(vehicle, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        else:
+            return Response({'error': "Something went wrong!"}, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+
