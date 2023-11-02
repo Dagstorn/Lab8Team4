@@ -56,7 +56,7 @@ final response = await http.post(
 
 ---
 
-/api/driver/
+`/api/driver/`
 
 - accepts GET and PATCH methods
   - for GET method
@@ -67,12 +67,12 @@ final response = await http.post(
     - options are: goverment_id, department, name, surname, middle_name, address, phone, license_code, password
     - you can update all fields or one, or few
 
-/api/driver/tasks/
+`/api/driver/tasks/`
 
 - accepts GET method
 - get currently logged in driver's tasks which are not Canceled and not Completed
 
-/api/driver/tasks/<id>/
+`/api/driver/tasks/<id>/`
 
 - accepts GET and PATCH methods
   - <id> is substituted with actual task id
@@ -83,12 +83,12 @@ final response = await http.post(
     - should pass status object with request, for example {status: "Completed"}
     - allowed status types: ["Assigned","In progress","Completed","Delayed","Canceled"]
 
-/api/routes_history/
+`/api/routes_history/`
 
 - accepts GET method
 - get currently logged in driver's completed routes(or tasks) list
 
-/api/tasks/<id>/complete/
+`/api/tasks/<id>/complete/`
 
 - accepts only POST method
 - should be called when driver finishes a task
@@ -105,7 +105,7 @@ final response = await http.post(
 
 ---
 
-/api/fueling/personal_data/
+`/api/fueling/personal_data/`
 
 - accepts GET and PATCH methods
   - for GET method
@@ -116,12 +116,12 @@ final response = await http.post(
     - options are: name, surname, middle_name, phone, password
     - you can update all fields or one, or few
 
-/api/fueling/vehicles/
+`/api/fueling/vehicles/`
 
 - accepts GET method
 - returns list of vehicles which are active
 
-/api/fueling/records/
+`/api/fueling/records/`
 
 - accepts GET and POST methods
   - for GET method
@@ -137,7 +137,7 @@ final response = await http.post(
     - image_after: File
     - driver_photo: File
 
-/api/fueling/records/<id>/
+`/api/fueling/records/<id>/`
 
 - <id> is substituted with actual fueling proof id
 - accepts GET and PATCH methods
@@ -155,7 +155,7 @@ final response = await http.post(
 
 ---
 
-/api/fueling/personal_data/
+`/api/fueling/personal_data/`
 
 - accepts GET and PATCH methods
   - for GET method
@@ -166,7 +166,7 @@ final response = await http.post(
     - options are: name, surname, middle_name, phone, password
     - you can update all fields or one, or few
 
-/api/maintenance/jobs/
+`/api/maintenance/jobs/`
 
 - accepts GET and POST methods
   - for GET method
@@ -179,7 +179,7 @@ final response = await http.post(
     - repair_parts: List of objects of format: {part_name: string, condition: string}
       For example: [{part_name: "Brake pads", condition: "old"}, {part_name: "Oil filter", condition: "new"}]
 
-/api/maintenance/jobs/<id>/
+`/api/maintenance/jobs/<id>/`
 
 - <id> is substituted with actual maintenance job id
 - accepts GET and PATCH methods
@@ -192,12 +192,12 @@ final response = await http.post(
     - repair_parts: List of objects of format: {part_name: string, condition: string}
       For example: [{part_name: "Brake pads", condition: "old"}, {part_name: "Oil filter", condition: "new"}]
 
-/api/maintenance/jobs/<id>/parts/
+`/api/maintenance/jobs/<id>/parts/`
 
 - <id> is substituted with actual maintenance job id
   returns list of repair parts for this job
 
-/api/maintenance/jobs/<id>/complete/
+`/api/maintenance/jobs/<id>/complete/`
 
 - <id> is substituted with actual maintenance job id
 - accepts only POST method
@@ -207,10 +207,10 @@ final response = await http.post(
   - part_number: list of part_numbers
   - part_photo: list of part_photos
 
-/api/maintenance/vehicles/
+`/api/maintenance/vehicles/`
 returns list of vehicles
 
-/api/maintenance/vehicles/<id>/
+`/api/maintenance/vehicles/<id>/`
 
 - <id> is substituted with actual vehicle id
 - accepts GET and PATCH methods
