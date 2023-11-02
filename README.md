@@ -15,7 +15,7 @@ open terminal/cmd in some folder
 
 On mac:
 
-`source venv/s/activate`
+`source venv/bin/activate`
 
 On windows CMD
 
