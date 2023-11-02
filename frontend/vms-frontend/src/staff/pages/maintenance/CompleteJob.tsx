@@ -61,8 +61,7 @@ const CompleteJob = () => {
         values.part_photo.forEach((_, index) => {
             values.part_photo[index] = values.part_photo[index][0];
         })
-        // add repair parts to form data
-        values.repair_parts = repairParts
+
 
         clearError();
         if (job) {

@@ -118,6 +118,7 @@ const TasksPage = () => {
                             <TableHead>Driver</TableHead>
                             <TableHead>Date time</TableHead>
                             <TableHead>Assigned Vehicle</TableHead>
+                            <TableHead>Status</TableHead>
                             <TableHead className="text-right">Action</TableHead>
                         </TableRow>
                     </TableHeader>

@@ -37,6 +37,9 @@ const TaskDetails = ({ task, deleteTask }: Props) => {
             <TableCell className="font-medium">{task.driver.name} {task.driver.surname}</TableCell>
             <TableCell> {formatTimeRange(task.time_from, task.time_to)}</TableCell>
             <TableCell>{`${task.car.make} ${task.car.model} ${task.car.year}`}</TableCell>
+            <TableCell>
+                <Chip color="warning" variant="flat">{task.status}</Chip>
+            </TableCell>
             <TableCell className="text-right">
                 <Button variant="outline" onClick={onOpen} >View details</Button>
             </TableCell>

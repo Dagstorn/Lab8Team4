@@ -14,6 +14,7 @@ export const useHttp = () => {
         setLoading(true);
 
         try {
+
             const response = await axios({
                 method: method.toLowerCase(),
                 url: url,
@@ -21,10 +22,12 @@ export const useHttp = () => {
                 headers: headers,
                 data: postValues || {}
             });
+
             setLoading(false);
             setError('');
             return response.data;
         } catch (err: any) {
+
             setLoading(false);
             let errMes = "";
             if (err.code !== 'ERR_CANCELED') {

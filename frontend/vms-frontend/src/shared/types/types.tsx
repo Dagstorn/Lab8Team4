@@ -152,3 +152,12 @@ export interface PaginatorObj {
     next: string | null;
     previous: string | null;
 }
+
+export interface FuelingTask {
+    id: number;
+    vehicle: Vehicle;
+    task: string;
+    status: string;
+    created_on: string;
+
+}

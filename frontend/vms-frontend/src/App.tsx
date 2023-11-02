@@ -68,6 +68,10 @@ import EditAdminData from "./admin/pages/EditAdminData.tsx";
 import AuctionPage from "./shared/pages/AuctionPage.tsx";
 import AdminDetail from "./admin/pages/staff/AdminDetail.tsx";
 import EditAdminPage from "./admin/pages/staff/EditAdminPage.tsx";
+import MaintenanceTasks from "./admin/pages/staff/MaintenanceTasks.tsx";
+import AddMaintenanceTask from "./admin/pages/staff/AddmaintenanceTask.tsx";
+import FuelingTasks from "./admin/pages/staff/FuelingTasks.tsx";
+import AddFuelingTask from "./admin/pages/staff/AddFuelingTask.tsx";
 
 function App() {
   // global state holders for currently logged in user
@@ -202,7 +206,7 @@ function App() {
 
           <Route element={<RequireAuth allowedRole={"admin"} />}>
             <Route path="admin" element={<AdminLayout links={adminLinks} />}>
-              <Route path="" element={<Navigate to="reports" replace />} />
+              <Route path="" element={<Navigate to="personal_data" replace />} />
 
               <Route path="personal_data" element={<PersonalData />} />
               <Route path="edit" element={<EditAdminData />} />
@@ -225,6 +229,10 @@ function App() {
 
               <Route path="staff/add/fueling" element={<AddFueling />} />
               <Route path="staff/add/maintenance" element={<AddMaintenance />} />
+              <Route path="maintenance/tasks" element={<MaintenanceTasks />} />
+              <Route path="maintenance/tasks/add" element={<AddMaintenanceTask />} />
+              <Route path="fueling/tasks" element={<FuelingTasks />} />
+              <Route path="fueling/tasks/add" element={<AddFuelingTask />} />
 
               <Route path="vehicles" element={<VehiclesListPage />} />
               <Route path="vehicles/add" element={<VehiclesAddPage />} />

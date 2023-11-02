@@ -31,6 +31,7 @@ export function Sidebar({ className, links }: SidebarProps) {
                                             {item.icon}
                                             {item.title}
                                         </Button>
+
                                     )}
 
                                 </NavLink>

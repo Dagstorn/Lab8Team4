@@ -1,15 +1,21 @@
-import { AlarmClock, CarFront, FileText, ListOrdered, User2, Users2 } from "lucide-react";
+import { AlarmClock, CarFront, FileText, Fuel, ListOrdered, User2, Users2, Wrench } from "lucide-react";
 
 export const sidebarNavItems = [
+
+    {
+        title: "Personal data",
+        href: "/admin/personal_data",
+        icon: <User2 className="mr-2 h-4 w-4" />,
+    },
     {
         title: "Reports",
         href: "/admin/reports",
         icon: <FileText className="mr-2 h-4 w-4" />,
     },
     {
-        title: "Personal data",
-        href: "/admin/personal_data",
-        icon: <User2 className="mr-2 h-4 w-4" />,
+        title: "Vehicles List",
+        href: "/admin/vehicles",
+        icon: <CarFront className="mr-2 h-4 w-4" />,
     },
     {
         title: "Drivers List",
@@ -32,10 +38,17 @@ export const sidebarNavItems = [
         icon: <Users2 className="mr-2 h-4 w-4" />,
     },
     {
-        title: "Vehicles List",
-        href: "/admin/vehicles",
-        icon: <CarFront className="mr-2 h-4 w-4" />,
+        title: "Fueling Tasks",
+        href: "/admin/fueling/tasks",
+        icon: <Fuel className="mr-2 h-4 w-4" />,
     },
+    {
+        title: "Maintenance Tasks",
+        href: "/admin/maintenance/tasks",
+        icon: <Wrench className="mr-2 h-4 w-4" />,
+    },
+
+
 
     {
         title: "Auction Vehicles",

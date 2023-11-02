@@ -159,9 +159,9 @@ const ViewTaskPage = () => {
             // get data with custom Hook
             const completedRouteData = await sendRequest(`/api/tasks/${task.id}/complete/`, 'post', {
                 Authorization: `Bearer ${auth.tokens.access}`
-            }, { time_spent: time_spent, distance_covered: distance_covered, timeEnded: timeEnded })
+            }, { time_spent: time_spent, distance_covered: distance_covered, time_ended: timeEnded })
 
-            if (response) {
+            if (completedRouteData) {
                 // set data to response result
                 setCompletedRoute(completedRouteData);
                 getData();
