@@ -16,6 +16,8 @@ urlpatterns = [
     # ===============================
     
     # ADMIN API endpoints
+    path('admin/personal_data/', views.admin_personal_data),
+
     ## Drivers
     path('drivers/', views.drivers_list),
     path('drivers/paginated/', views.getDriversPaginated),
@@ -51,10 +53,11 @@ urlpatterns = [
     path('staff/fueling/<str:pk>/', views.fueling_detail),
     path('staff/maintenance/', views.maintenance_staff),
     path('staff/maintenance/<str:pk>/', views.maintenance_detail),
-
-    
+    path('staff/admin/', views.admin_staff),
+    path('staff/admin/<str:pk>/', views.admin_detail),
     ## Auction vehicles
     path('auction/', views.auction_vehicles),
+    path('auction/vehicles/', views.auction_vehicles_list),
 
     # ===============================
 
@@ -69,7 +72,7 @@ urlpatterns = [
     path('fueling/reports/add/', views.addFuelingReport),
 
     # MAINTENANCE PERSON API endpoints
-    path('maintenance/perosnal_data/', views.maintenance_personal_data),
+    path('maintenance/personal_data/', views.maintenance_personal_data),
     path('maintenance/jobs/', views.maintenance_jobs_list),
     path('maintenance/jobs/<str:pk>/', views.maintenance_jobs_detail),
     path('maintenance/jobs/<str:pk>/parts/', views.maintenance_parts),

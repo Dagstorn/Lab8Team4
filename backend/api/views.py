@@ -14,9 +14,9 @@ from rest_framework import status
 
 from .decorators import user_type_required
 
-from .serializers import DriverSerializer, VehicleSerializer,AuctionVehicleSerializer, AppointmentSerializer, TaskSerializer, CompletedRouteSerializer, FuelingSerializer, MaintenanceSerializer, FuelingProofSerializer, MaintenanceJobSerializer, RepairPartsSerializer
+from .serializers import DriverSerializer, VehicleSerializer,AuctionVehicleSerializer, AppointmentSerializer, TaskSerializer, CompletedRouteSerializer, FuelingSerializer, MaintenanceSerializer, FuelingProofSerializer, MaintenanceJobSerializer, RepairPartsSerializer, AdminSerializer
 
-from accounts.models import Driver, FuelingPerson, MaintenancePerson, DriverReport
+from accounts.models import Admin, Driver, FuelingPerson, MaintenancePerson, DriverReport
 from vehicles.models import Vehicle, AuctionVehicle, FuelingProof, MaintenanceJob, MaintenanceRecord, VehicleReport, RepairingPart, RepairedPartRecord
 from tasks.models import Appointment, Task, CompletedRoute
 
@@ -38,6 +38,51 @@ def do_time_windows_overlap(time_start1, time_end1, time_start2, time_end2):
     
 
 ## -- For API calls From Admin -- ##
+
+
+# function to get and edit personal data of logged in admin person
+@api_view(['GET', 'PATCH'])
+@permission_classes([IsAuthenticated])
+@user_type_required(['admin'])
+def admin_personal_data(request):
+    # get maintenance_person by unique identifier
+    admin = request.user.admin_acc
+
+    # process different methods
+    if request.method == 'GET':
+        # serialize admin data and convert it to appropriate format
+        serializer = AdminSerializer(admin, many=False)
+        return Response(serializer.data)
+    elif request.method in ['PATCH']:
+        try:
+            user = admin.user
+            if 'first_name' in request.data:
+                user.first_name = request.data.pop('first_name')
+                user.save()
+            if 'last_name' in request.data:
+                user.last_name = request.data.pop('last_name')
+                user.save()
+            if 'phone' in request.data:
+                admin.phone = request.data.pop('phone')
+                admin.save()
+            if 'email' in request.data:
+                user.email = request.data.pop('email')
+                user.save()
+            if 'username' in request.data:
+                user.username = request.data.pop('username')
+                user.save()
+            # process password update manually
+            if 'password' in request.data:
+                new_password = request.data.pop('password')
+                if len(new_password) > 0:
+                    user.set_password(new_password)
+                    user.save()
+
+            serializer = AdminSerializer(admin,many=False)
+            return Response(serializer.data)
+        except:
+            return Response({'error': "Something went wrong!"}, status=status.HTTP_400_BAD_REQUEST)
+
 
 
 
@@ -281,13 +326,13 @@ def getFuelingData(vehicle):
 def getMaintenanceData(vehicle):
     report = dict()
     # get all associated maintenance records
-    maintenance_records = vehicle.maintenance_records.all().order_by('date')
+    maintenance_records = vehicle.maintenance_records.all().order_by('completed_on')
     for rec in maintenance_records:
         # append data under keys with months
-        if rec.date.year in report:
-            report[rec.date.year].append({'month': rec.date.strftime('%B'), 'count': 1, 'cost': rec.cost})
+        if rec.completed_on.year in report:
+            report[rec.completed_on.year].append({'month': rec.completed_on.strftime('%B'), 'count': 1, 'cost': rec.cost})
         else:
-            report[rec.date.year] = [{'month': rec.date.strftime('%B'), 'count': 1, 'cost': rec.cost}]
+            report[rec.completed_on.year] = [{'month': rec.completed_on.strftime('%B'), 'count': 1, 'cost': rec.cost}]
     
     # iterate through all data and combine values for same keys
     for year in report:
@@ -388,8 +433,8 @@ def getReportDataSavePDF(request, pk):
 
 
 @api_view(['GET'])
-# @permission_classes([IsAuthenticated])
-# @user_type_required(['admin'])
+@permission_classes([IsAuthenticated])
+@user_type_required(['admin'])
 def general_reports(request):
     try:
         # create report dictionary to store all information
@@ -419,6 +464,9 @@ def general_reports(request):
                         fueling_report[year].append(entry)
         
         report['fueling'] = fueling_report
+        print("here =-=-=-=-=-=-=-=-=- 1 ")
+        data_test = getMaintenanceData(vehicle=vehicle) 
+        print("here =-=-=-=-=-=-=-=-=- 2 ")
 
         
         list_of_maintenance_reports_by_vehicles = []
@@ -428,6 +476,7 @@ def general_reports(request):
                 list_of_maintenance_reports_by_vehicles.append(data)
 
         maintenance_report = {}
+        print("here =-=-=-=-=-=-=-=-=- 4 ")
      
         for item in list_of_maintenance_reports_by_vehicles:
             for year, values in item.items():
@@ -444,6 +493,8 @@ def general_reports(request):
                     else:
                         maintenance_report[year].append(entry)
         
+        print("here =-=-=-=-=-=-=-=-=- 5 ")
+
         report['maintenance'] = maintenance_report
         # return data   
         return Response(report)
@@ -454,7 +505,12 @@ def general_reports(request):
 
 
 
-
+@api_view(['GET'])
+def auction_vehicles_list(request):
+    a_vehicles = AuctionVehicle.objects.all()
+    # serialze and return data
+    serializer = AuctionVehicleSerializer(a_vehicles, many=True)
+    return Response(serializer.data)
 
 @api_view(['GET', 'POST'])
 # @permission_classes([IsAuthenticated])
@@ -583,6 +639,92 @@ def maintenance_detail(request, pk):
         user.delete()
         return Response({'message': 'Driver object deleted successfully'})
 
+
+# Retrieve list of admins or create new Admin object
+@api_view(['GET', 'POST'])
+@permission_classes([IsAuthenticated])
+@user_type_required(['admin'])
+def admin_staff(request):
+    if request.method == 'GET':   
+        # get all fueling persons
+        admins = Admin.objects.all()
+        # serialze and return data
+        serializer = AdminSerializer(admins, many=True)
+        return Response(serializer.data)
+    elif request.method == 'POST':
+        try:
+            password = ''
+            if request.data.get('password'):
+                if len(request.data.get('password')) > 0:
+                    password = request.data.get('password')
+            else:
+                # initiate random strong password generator
+                pwgen = PasswordGenerator()
+                # get new random password
+                password = pwgen.generate()
+ 
+            # get email from POST data
+            username = request.data.get('username')
+            # create new User object with email and password
+            user = User.objects.create_user(username=username, password=password)
+            # create new Driver object using User object we just created and POST data
+            new_obj = Admin.objects.create(
+                user = user,
+                phone = request.data.get('phone')
+            )
+            serializer = AdminSerializer(new_obj, many=False)
+            return Response(serializer.data)
+        except:
+            return Response({'message': "Wrong data format or missing data"}, status=status.HTTP_400_BAD_REQUEST)
+        
+
+# Handle single driver methods
+# retrieve single driver data, update driver data, delete driver
+@api_view(['GET', 'PUT', 'PATCH', 'DELETE'])
+@permission_classes([IsAuthenticated])
+@user_type_required(['admin'])
+def admin_detail(request, pk):
+    try:
+        # get admin by unique identifier
+        admin = Admin.objects.get(pk=pk)
+    except Exception as e:
+        # in case if there is no admin with such id, or any other unexpected eror
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+    # process different methods
+    if request.method == 'GET':
+        # serialize admin data and convert it to appropriate format
+        serializer = AdminSerializer(admin, many=False)
+        return Response(serializer.data)
+    elif request.method in ['PUT', 'PATCH']:
+        try:
+            user = admin.user
+            if 'first_name' in request.data:
+                user.first_name = request.data.pop('first_name')
+                user.save()
+            if 'last_name' in request.data:
+                user.last_name = request.data.pop('last_name')
+                user.save()
+            if 'phone' in request.data:
+                admin.phone = request.data.pop('phone')
+                admin.save()
+            if 'email' in request.data:
+                user.email = request.data.pop('email')
+                user.save()
+            if 'username' in request.data:
+                user.username = request.data.pop('username')
+                user.save()
+
+            if 'password' in request.data:
+                new_password = request.data.pop('password')
+                if len(new_password) > 0:
+                    user = admin.user
+                    user.set_password(new_password)
+                    user.save()
+            serializer = AdminSerializer(admin, many=False)
+            return Response(serializer.data)
+        except:
+            return Response({'error': "Wrong data!"}, status=status.HTTP_400_BAD_REQUEST)
 
 # Retrieve list of fueling persons or create new Fueling person object
 @api_view(['GET', 'POST'])

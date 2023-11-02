@@ -1,10 +1,10 @@
 from rest_framework import serializers
-from accounts.models import Driver, FuelingPerson, MaintenancePerson
+from accounts.models import Driver, FuelingPerson, MaintenancePerson, Admin
 from vehicles.models import Vehicle, FuelingProof, MaintenanceJob, AuctionVehicle, RepairingPart
 from tasks.models import Appointment, Task, CompletedRoute
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
-
+from django.contrib.auth.models import User
 
 def getRole(user):
     if hasattr(user, 'admin_acc'):
@@ -36,6 +36,17 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     
 
 # Accountss Serializers
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('id', 'username', 'email', 'first_name', 'last_name')
+
+class AdminSerializer(serializers.ModelSerializer):
+    user = UserSerializer(many=False)
+    class Meta:
+        model = Admin
+        fields = '__all__'
+
 class DriverSerializer(serializers.ModelSerializer):
     class Meta:
         model = Driver
