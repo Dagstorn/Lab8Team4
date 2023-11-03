@@ -56,7 +56,7 @@ final response = await http.post(
 
 You need to initialize SharedPreferences first. Example is in driver_personal.dart
 
-`dart
+```dart
 const baseApiUrl = 'http://10.0.2.2:8000';
 
 // Get JWT auth token from storage
@@ -73,7 +73,8 @@ print('Response: ${response.body}');
 }
 } catch (e) {
 print(e);
-}`
+}
+```
 
 ## API description for mobile app part
 
