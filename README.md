@@ -39,7 +39,7 @@ However API from flutter should connect not to 127.0.0.1:8000 but rather to http
 
 Example flutter api call:
 
-```
+```dart
 const baseApiUrl = 'http://10.0.2.2:8000/api';
 final response = await http.post(
     Uri.parse('$baseApiUrl/users/token/'),
@@ -248,6 +248,3 @@ returns list of vehicles
   - for PACTH method
     - update fields that are recieved
 
-```
-
-```
