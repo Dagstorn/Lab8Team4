@@ -50,6 +50,28 @@ final response = await http.post(
 );
 ```
 
+## Example API call with access token
+
+### All api calls must inlcue JWT access token for authorization
+
+You need to initialize SharedPreferences first. Example is in driver_personal.dart
+
+`const baseApiUrl = 'http://10.0.2.2:8000';
+// get JWT auth token from storage
+String? accessToken = _prefs!.getString("auth_token");
+try {
+  final response = await http
+      .get(Uri.parse('$baseApiUrl/api/driver/tasks/'), headers: {
+    'Authorization': 'Bearer $accessToken',
+  });
+  if (response.statusCode == 200) {
+    // Request was successful, process the response
+    print('Response: ${response.body}');
+  }
+} catch (e) {
+  print(e);
+}`
+
 ## API description for mobile app part
 
 ### ================= FOR DRIVER ======================
