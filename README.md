@@ -60,7 +60,7 @@ You need to initialize SharedPreferences first. Example is in driver_personal.da
 const baseApiUrl = 'http://10.0.2.2:8000';
 
 // Get JWT auth token from storage
-String? accessToken = \_prefs!.getString("auth_token");
+String? accessToken = _prefs!.getString("auth_token");
 try {
 final response = await http.get(
 Uri.parse('$baseApiUrl/api/driver/tasks/'),
