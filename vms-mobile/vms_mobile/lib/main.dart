@@ -1,22 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:vms_mobile/pages/driver/driver_dashboard.dart';
+import 'package:vms_mobile/pages/driver/driver_personal.dart';
 import 'package:vms_mobile/pages/login_page.dart';
 
-Future<void> main() async {
-  //ensure that the Flutter framework is properly initialized
+void main() async {
+  // ensure that the Flutter framework is fully initialized before application starts
   WidgetsFlutterBinding.ensureInitialized();
-  // obtain an instance of SharedPreferences to read and write data  from storage.
+  // retrieve an instance of SharedPreferences.
+  // This instance will allow to read and write data to device storage.
   SharedPreferences prefs = await SharedPreferences.getInstance();
-  runApp(MyApp(token: prefs.getString('auth_token')));
+  runApp(MyApp(token: prefs.getString("auth_token")));
 }
 
 class MyApp extends StatelessWidget {
+  // JWT token for authorization
   final String? token;
-  const MyApp({super.key, required this.token});
 
-  // function to decide what screen to show depending on login state
+  const MyApp({super.key, this.token});
+
+  // function which conditionally renders screen
+  // if not logged in or JWT auth token is expired we render Login screen
+  // otherwise we render personal page based on role
   Widget userTypeScreenResolver() {
     // if there is no token render login screen
     if (token == null) {
@@ -26,23 +31,26 @@ class MyApp extends StatelessWidget {
     if (JwtDecoder.isExpired(token!)) {
       return const LoginPage();
     }
-    // decode token and get user role
+    // decode JWT token and get user role
     Map<String, dynamic> jwtDecodedToken = JwtDecoder.decode(token!);
     String role = jwtDecodedToken['role'];
+
     // render different screens depending on user role
     if (role == 'driver') {
-      return const DriverDashboard();
+      return const DriverPersonal();
     } else {
       return const LoginPage();
     }
   }
 
+  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'VMS',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        primaryColor: Colors.black,
+        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF69DC9E)),
         useMaterial3: true,
       ),
       home: userTypeScreenResolver(),
