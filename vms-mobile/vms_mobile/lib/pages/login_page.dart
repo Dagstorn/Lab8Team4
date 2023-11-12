@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:vms_mobile/pages/driver/driver_personal.dart';
+import 'package:vms_mobile/pages/driver/driver_main.dart';
 import '../constants.dart';
 import 'package:http/http.dart' as http;
 import 'package:jwt_decoder/jwt_decoder.dart';
@@ -90,10 +90,8 @@ class _LoginPageState extends State<LoginPage> {
           //  naviagte user to corresponding view
           if (role == 'driver') {
             // ignore: use_build_context_synchronously
-            Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => const DriverPersonal()));
+            Navigator.push(context,
+                MaterialPageRoute(builder: (context) => const DriverMain()));
           }
         } else {
           // Handle error, e.g., incorrect credentials

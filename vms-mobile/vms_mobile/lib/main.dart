@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:vms_mobile/pages/driver/driver_personal.dart';
+import 'package:vms_mobile/pages/driver/driver_main.dart';
 import 'package:vms_mobile/pages/login_page.dart';
 
 void main() async {
@@ -37,7 +37,7 @@ class MyApp extends StatelessWidget {
 
     // render different screens depending on user role
     if (role == 'driver') {
-      return const DriverPersonal();
+      return const DriverMain();
     } else {
       return const LoginPage();
     }
@@ -50,6 +50,7 @@ class MyApp extends StatelessWidget {
       title: 'VMS',
       theme: ThemeData(
         primaryColor: Colors.black,
+        scaffoldBackgroundColor: const Color(0xFFEFEFEF),
         colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF69DC9E)),
         useMaterial3: true,
       ),
