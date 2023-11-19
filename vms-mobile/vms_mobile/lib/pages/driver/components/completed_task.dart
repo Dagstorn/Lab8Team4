@@ -3,18 +3,15 @@ import 'package:intl/intl.dart';
 import 'package:vms_mobile/models/types.dart';
 import 'package:vms_mobile/pages/driver/task_map.dart';
 
-class TaskItem extends StatefulWidget {
+class CompletedTask extends StatefulWidget {
   final Task task;
-  final VoidCallback updateDataCallback;
-
-  const TaskItem(
-      {super.key, required this.task, required this.updateDataCallback});
+  const CompletedTask({super.key, required this.task});
 
   @override
-  State<TaskItem> createState() => _TaskItemState();
+  State<CompletedTask> createState() => _CompletedTaskState();
 }
 
-class _TaskItemState extends State<TaskItem> {
+class _CompletedTaskState extends State<CompletedTask> {
   late final String formattedTimeWindow;
 
   @override
@@ -54,51 +51,39 @@ class _TaskItemState extends State<TaskItem> {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => TaskMap(
-                task: widget.task,
-                updateDataCallback: widget.updateDataCallback),
+    return Container(
+      padding: const EdgeInsets.all(16.0),
+      margin: const EdgeInsets.only(
+        bottom: 8.0,
+        top: 8.0,
+        left: 12.0,
+        right: 12.0,
+      ),
+      decoration: BoxDecoration(
+        color: const Color.fromARGB(255, 255, 255, 255),
+        borderRadius: BorderRadius.circular(16.0),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            widget.task.description,
+            style: const TextStyle(
+              fontSize: 16.0,
+              fontWeight: FontWeight.bold,
+            ),
           ),
-        );
-      },
-      child: Container(
-        padding: const EdgeInsets.all(16.0),
-        margin: const EdgeInsets.only(
-          bottom: 8.0,
-          top: 8.0,
-          left: 12.0,
-          right: 12.0,
-        ),
-        decoration: BoxDecoration(
-          color: const Color.fromARGB(255, 255, 255, 255),
-          borderRadius: BorderRadius.circular(16.0),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              widget.task.description,
-              style: const TextStyle(
-                fontSize: 16.0,
-                fontWeight: FontWeight.bold,
-              ),
+          Text(
+            formattedTimeWindow,
+            style: const TextStyle(
+              fontSize: 16.0,
+              fontWeight: FontWeight.bold,
             ),
-            Text(
-              formattedTimeWindow,
-              style: const TextStyle(
-                fontSize: 16.0,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 8.0),
-            Text('From: ${widget.task.fromPoint}'),
-            Text('To: ${widget.task.toPoint}'),
-          ],
-        ),
+          ),
+          const SizedBox(height: 8.0),
+          Text('From: ${widget.task.fromPoint}'),
+          Text('To: ${widget.task.toPoint}'),
+        ],
       ),
     );
   }

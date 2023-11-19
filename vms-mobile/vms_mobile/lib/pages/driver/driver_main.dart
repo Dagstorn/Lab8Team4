@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vms_mobile/pages/driver/appointments.dart';
-import 'package:vms_mobile/pages/driver/map_page.dart';
+import 'package:vms_mobile/pages/driver/tasks_history.dart';
 import 'package:vms_mobile/pages/driver/personal_page.dart';
 import 'package:vms_mobile/pages/driver/tasks_list.dart';
 
 final driverPages = [
   const TasksList(),
-  const TaskMap(),
+  const TasksHistory(),
   const AppointmentsPage(),
   const PersonalPage()
 ];

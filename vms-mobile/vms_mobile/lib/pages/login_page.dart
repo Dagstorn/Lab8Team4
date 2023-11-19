@@ -101,6 +101,7 @@ class _LoginPageState extends State<LoginPage> {
         }
       } catch (e) {
         // Handle network or API errors
+        print(e);
         setState(() {
           error = 'Something went wrong! $e';
         });

@@ -1,19 +1,20 @@
 import 'package:flutter/material.dart';
-import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:vms_mobile/constants.dart';
 import 'package:vms_mobile/models/types.dart';
 import 'package:http/http.dart' as http;
-import 'package:vms_mobile/pages/driver/components/task_item.dart';
-import '../../constants.dart';
+import 'dart:convert';
 
-class TasksList extends StatefulWidget {
-  const TasksList({super.key});
+import 'package:vms_mobile/pages/driver/components/completed_task.dart';
+
+class TasksHistory extends StatefulWidget {
+  const TasksHistory({super.key});
 
   @override
-  State<TasksList> createState() => _TasksListState();
+  State<TasksHistory> createState() => _TasksHistoryState();
 }
 
-class _TasksListState extends State<TasksList> {
+class _TasksHistoryState extends State<TasksHistory> {
   SharedPreferences? _prefs;
   Future<List<Task>>? taskListFuture;
 
@@ -32,8 +33,8 @@ class _TasksListState extends State<TasksList> {
     _prefs = await SharedPreferences.getInstance();
 
     try {
-      final response =
-          await http.get(Uri.parse('$baseApiUrl/api/driver/tasks/'), headers: {
+      final response = await http
+          .get(Uri.parse('$baseApiUrl/api/routes_history/'), headers: {
         'Authorization': 'Bearer ${_prefs!.getString("auth_token")}',
       });
 
@@ -55,21 +56,14 @@ class _TasksListState extends State<TasksList> {
     return [];
   }
 
-  void updateDataCallback() {
-    setState(() {
-      taskListFuture = fetchData();
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
         automaticallyImplyLeading: false,
-        // backgroundColor: Color.fromARGB(255, 11, 11, 11),
         title: const Text(
-          "Currently assigned tasks",
+          "Completed tasks history",
           style: TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 22.0,
@@ -93,8 +87,7 @@ class _TasksListState extends State<TasksList> {
                     itemCount: snapshot.data?.length,
                     itemBuilder: (context, index) {
                       Task task = snapshot.data![index];
-                      return TaskItem(
-                          task: task, updateDataCallback: updateDataCallback);
+                      return CompletedTask(task: task);
                     },
                   );
                 }
