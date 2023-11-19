@@ -16,7 +16,6 @@ import { useEffect } from "react";
 import useAuth from "./hooks/useAuth";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Spinner } from "@nextui-org/react";
-import { useToast } from "@/shared/shad-ui/ui/use-toast";
 import jwt_decode from "jwt-decode";
 import { useHttp } from "./hooks/http-hook";
 
@@ -48,7 +47,6 @@ const LoginPage = () => {
     const { loading, error, sendRequest, clearError } = useHttp();
 
     // display toast messages library
-    const { toast } = useToast();
 
     // form schema
     const form = useForm<z.infer<typeof formSchema>>({

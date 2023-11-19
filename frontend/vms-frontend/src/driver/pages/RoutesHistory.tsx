@@ -1,7 +1,6 @@
 import { useHttp } from '@/shared/hooks/http-hook';
 import useAuth from '@/shared/hooks/useAuth';
 import { Separator } from '@/shared/shad-ui/ui/separator'
-import { useToast } from '@/shared/shad-ui/ui/use-toast';
 import { CompletedRoute, RoutePoints, point } from '@/shared/types/types';
 import { useEffect, useState } from 'react';
 import RouteMap from '../components/RouteMap';
@@ -14,7 +13,6 @@ const RoutesHistory = () => {
     // state which stores drivers list
     const [routes, setRoutes] = useState<CompletedRoute[]>([]);
     const { loading, error, sendRequest, clearError } = useHttp();
-    const { toast } = useToast();
 
     const [points, setPoints] = useState<RoutePoints>();
 
@@ -28,7 +26,7 @@ const RoutesHistory = () => {
             const responseData = await sendRequest('/api/routes_history', 'get', {
                 Authorization: `Bearer ${auth.tokens.access}`
             })
-            if (response) {
+            if (responseData) {
                 // set data to response result
                 setRoutes(responseData)
             }

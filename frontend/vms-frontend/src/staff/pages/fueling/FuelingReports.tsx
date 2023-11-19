@@ -14,7 +14,6 @@ import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import useAuth from "@/shared/hooks/useAuth";
 import { useHttp } from "@/shared/hooks/http-hook";
-import { useToast } from "@/shared/shad-ui/ui/use-toast";
 import FuelingProofDetail from "@/staff/components/fueling/FuelingProofDetail";
 
 const FuelingReports = () => {
@@ -23,7 +22,6 @@ const FuelingReports = () => {
     // state which stores drivers list
     const [reports, setReports] = useState<FuelingReport[]>([]);
     const { loading, error, sendRequest, clearError } = useHttp();
-    const { toast } = useToast();
 
 
     // when conponent mounts - meaning when it is created we get data

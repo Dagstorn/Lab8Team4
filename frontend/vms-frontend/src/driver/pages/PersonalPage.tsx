@@ -8,7 +8,7 @@ const PersonalPage = () => {
     const auth = useAuth();
     const [fullname, setFullname] = useState("");
 
-    const { error, sendRequest, clearError } = useHttp();
+    const { sendRequest, clearError } = useHttp();
 
 
     // when conponent mounts - meaning when it is created we get data

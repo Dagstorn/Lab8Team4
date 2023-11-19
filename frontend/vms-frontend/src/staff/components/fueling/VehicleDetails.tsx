@@ -29,7 +29,7 @@ const VehicleDetails = ({ vehicle }: Props) => {
 
             </TableCell>
             <TableCell>{vehicle.year}</TableCell>
-            <TableCell>{vehicle.license_plat}</TableCell>
+            <TableCell>{vehicle.license_plate}</TableCell>
 
             <TableCell className="text-right">
                 <Button variant="outline" onClick={onOpen} >View details</Button>

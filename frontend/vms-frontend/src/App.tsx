@@ -11,7 +11,6 @@ import TasksPage from "./admin/pages/tasks/TasksPage.tsx";
 import AppointmentDetailPage from "./admin/pages/tasks/AppointmentDetailPage.tsx";
 import StaffListPage from "./admin/pages/staff/StaffList.tsx";
 import VehiclesListPage from "./admin/pages/vehicles/VehiclesListPage.tsx";
-import MakeAppointmentPage from "./driver/pages/MakeAppointmentPage";
 import MainLayout from "./shared/MainLayout";
 import LoginPage from "./shared/LoginPage";
 import { AuthContext } from "./shared/contex/auth-context.tsx";
@@ -190,7 +189,7 @@ function App() {
             <Route path="auction" element={<AuctionPage />} />
 
             <Route element={<RequireAuth allowedRole={"driver"} />}>
-              <Route path="appointments/add" element={<MakeAppointmentPage />} />
+              {/* <Route path="appointments/add" element={<MakeAppointmentPage />} /> */}
 
               <Route path="driver" element={<PersonalPageLayout />} >
                 <Route path="personal_page" element={<PersonalPage />} />

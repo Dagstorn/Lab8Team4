@@ -1,4 +1,3 @@
-import { Button } from "@/shared/shad-ui/ui/button";
 import {
     Table,
     TableBody,
@@ -10,11 +9,9 @@ import { Separator } from "@/shared/shad-ui/ui/separator";
 import { Vehicle } from "@/shared/types/types";
 
 import { Spinner } from "@nextui-org/react";
-import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import useAuth from "@/shared/hooks/useAuth";
 import { useHttp } from "@/shared/hooks/http-hook";
-import { useToast } from "@/shared/shad-ui/ui/use-toast";
 import VehicleDetails from "@/staff/components/fueling/VehicleDetails";
 
 const FuelingVehiclesList = () => {
@@ -23,7 +20,6 @@ const FuelingVehiclesList = () => {
     // state which stores drivers list
     const [vehicles, setVehicles] = useState<Vehicle[]>([]);
     const { loading, error, sendRequest, clearError } = useHttp();
-    const { toast } = useToast();
 
 
     // when conponent mounts - meaning when it is created we get data
@@ -37,7 +33,7 @@ const FuelingVehiclesList = () => {
             const responseData = await sendRequest('/api/vehicles', 'get', {
                 Authorization: `Bearer ${auth.tokens.access}`
             })
-            if (response) {
+            if (responseData) {
                 // set data to response result
                 setVehicles(responseData)
             }

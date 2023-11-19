@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Spinner } from "@nextui-org/react";
-import { useJsApiLoader, GoogleMap, Marker, Autocomplete, Polyline } from "@react-google-maps/api";
+import { useJsApiLoader, GoogleMap, Marker, Polyline } from "@react-google-maps/api";
 import { RoutePoints } from "@/shared/types/types";
 
 const center = { lat: 51.089888409978656, lng: 71.40146902770996 }

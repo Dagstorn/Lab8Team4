@@ -1,4 +1,4 @@
-import { Vehicle } from "../types/types";
+import { AuctionVehicle, Vehicle } from "../types/types";
 
 export const formatTimeRange = (startISO: string, endISO: string) => {
     const startDate = new Date(startISO);
@@ -18,17 +18,18 @@ export const formatTimeRange = (startISO: string, endISO: string) => {
     const minute2 = String(endDate.getMinutes()).padStart(2, '0');
     // return `${year}-${month}-${day} ${hour}:${minute}:${second}`;
     [2023, 2024]
-    let commonDate = [];
-    let diffrence1 = [];
-    let diffrence2 = [];
+    let commonDate: String[] = [];
+    let diffrence1: String[] = [];
+    let diffrence2: String[] = [];
     // Compare date components (year, month, day)
     const now = new Date();
+
     if (now.getFullYear() !== year1) {
         if (year1 === year2) {
-            commonDate.push(year1);
+            commonDate.push(String(year1));
         } else {
-            diffrence1.push(year1);
-            diffrence2.push(year2);
+            diffrence1.push(String(year1));
+            diffrence2.push(String(year2));
         }
     }
     if (month1 === month2) {
@@ -99,7 +100,7 @@ export const formatSingleDateTime = (dateTimeString: string) => {
 }
 
 
-export const getVehicleInfo = (vehicle: Vehicle) => {
+export const getVehicleInfo = (vehicle: Vehicle | AuctionVehicle) => {
     return <div className="flex flex-col text-base">
         <div className="flex">
             <span className="w-2/6 font-bold">Year:</span>

@@ -8,7 +8,7 @@ import {
 } from "@/shared/shad-ui/ui/table";
 import { Separator } from "@/shared/shad-ui/ui/separator";
 import { Admin, FuelingPerson, MaintenancePerson } from "@/shared/types/types";
-import { Fuel, Info, Wrench } from 'lucide-react';
+import { Fuel, Wrench } from 'lucide-react';
 import { Link } from "react-router-dom";
 import useAuth from "@/shared/hooks/useAuth";
 import { useEffect, useState } from "react";

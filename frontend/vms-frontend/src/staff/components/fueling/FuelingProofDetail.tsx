@@ -16,7 +16,7 @@ interface Props {
 const FuelingProofDetail = ({ fuelingReport }: Props) => {
     const auth = useAuth();
     const [vehicle, setVehicle] = useState<Vehicle>();
-    const { loading, error, sendRequest, clearError } = useHttp();
+    const { sendRequest, clearError } = useHttp();
 
     // when conponent mounts - meaning when it is created we get data
     useEffect(() => {
@@ -28,7 +28,7 @@ const FuelingProofDetail = ({ fuelingReport }: Props) => {
             const vehicleData = await sendRequest(`/api/vehicles/${fuelingReport.vehicle.id}/`, 'get', {
                 Authorization: `Bearer ${auth.tokens.access}`
             })
-            if (response) {
+            if (vehicleData) {
                 // set data to response result
                 setVehicle(vehicleData)
             }

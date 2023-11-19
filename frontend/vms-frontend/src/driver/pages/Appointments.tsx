@@ -1,5 +1,4 @@
 import { Separator } from '@/shared/shad-ui/ui/separator'
-import React from 'react'
 
 const Appointments = () => {
     return (
