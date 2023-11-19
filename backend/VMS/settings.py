@@ -7,8 +7,9 @@ SECRET_KEY = 'django-insecure-l#o-dan)#1j_&ow4(qh08r3fvfm)_p7)-sdswjefk!_c$#0o2m
 
 DEBUG = True
 
-ALLOWED_HOSTS = ['10.0.2.2', '127.0.0.1', 'localhost', 'http://127.0.0.1:5173']
-
+ALLOWED_HOSTS = ['10.0.2.2', '127.0.0.1', '192.168.18.15', 'localhost', 'http://127.0.0.1:5173']
+# 192.168.18.15 - laptop ip
+# '10.0.2.2' - alias for localhost for virtual android device emulator
 
 INSTALLED_APPS = [
     'django.contrib.admin',

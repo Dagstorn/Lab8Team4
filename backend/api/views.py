@@ -54,6 +54,8 @@ def admin_personal_data(request):
         serializer = AdminSerializer(admin, many=False)
         return Response(serializer.data)
     elif request.method in ['PATCH']:
+        print("=-=--=-=-=-=-=-=")
+        print(request.data)
         try:
             user = admin.user
             if 'first_name' in request.data:
@@ -1130,10 +1132,13 @@ def getDriver(request):
         serializer = DriverSerializer(driver, many=False)
         return Response(serializer.data)
     elif request.method == 'PATCH':
+
         if 'email' in request.data:
             request.data.pop('email')
+        
         if 'user' in request.data:
             request.data.pop('user')
+        
         if 'password' in request.data:
             new_password = request.data.pop('password')
             if len(new_password) > 0:
@@ -1142,8 +1147,9 @@ def getDriver(request):
                 user.save()
                 driver.password = new_password
                 driver.save()
-
+                
         serializer = DriverSerializer(driver, data=request.data, partial=True)
+
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
@@ -1234,6 +1240,7 @@ def getDriverTasks(request):
     try:
         # get all tasks related to current driver with status not Completed and not Canceled
         tasks = request.user.driver_acc.tasks.all().exclude(status__in=["Completed", "Canceled"])
+
         serializer = TaskSerializer(tasks, many=True)
         return Response(serializer.data)
     except:
@@ -1273,11 +1280,13 @@ def tasks_detail(request, pk):
 
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
-@user_type_required(['driver'])
+# @permission_classes([IsAuthenticated])
+# @user_type_required(['driver'])
 def getRoutesHistory(request):
+    driver = Driver.objects.get(email="johnwilson@gmail.com")
     try:
-        routes = request.user.driver_acc.routes.all()
+        # routes = request.user.driver_acc.routes.all()
+        routes = driver.user.driver_acc.routes.all()
         serializer = CompletedRouteSerializer(routes, many=True)
         return Response(serializer.data)
     except:
@@ -1290,18 +1299,27 @@ def getRoutesHistory(request):
 @permission_classes([IsAuthenticated])
 @user_type_required(['driver'])
 def completeTask(request, tid):
+    print("-=-=-=-=-=-=-=-=-=-=-= 1")
+
     try:
         task = Task.objects.get(id=tid)
+
+        print("-=-=-=-=-=-=-=-=-=-=-= 2")
+        print(request.data)
         task.status = "Completed"
         time_spent = request.data.get('time_spent')
         timeEnded = request.data.get('time_ended')
         task.time_to = timeEnded
         distance_covered = request.data.get('distance_covered')
-
+        print("-=-=-=-=-=-=-=-=-=-=-= 3")
+        print(time_spent)
+        print(timeEnded)
+        print(distance_covered)
         vehicle = task.car
-        vehicle.mileage = vehicle.mileage + distance_covered
+        vehicle.mileage = vehicle.mileage + float(distance_covered)
         vehicle.save()
         task.save()
+        print("-=-=-=-=-=-=-=-=-=-=-= 4")
 
         comp_route = CompletedRoute.objects.create(
             driver = request.user.driver_acc,
@@ -1312,6 +1330,7 @@ def completeTask(request, tid):
             time_spent = time_spent,
             distance_covered = distance_covered
         )
+        print("success")
 
         serializer = CompletedRouteSerializer(comp_route, many=False)
         return Response(serializer.data)
