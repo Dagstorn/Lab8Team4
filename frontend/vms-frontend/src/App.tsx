@@ -71,6 +71,10 @@ import MaintenanceTasks from "./admin/pages/staff/MaintenanceTasks.tsx";
 import AddMaintenanceTask from "./admin/pages/staff/AddmaintenanceTask.tsx";
 import FuelingTasks from "./admin/pages/staff/FuelingTasks.tsx";
 import AddFuelingTask from "./admin/pages/staff/AddFuelingTask.tsx";
+import AboutUsPage from "./generic_pages/about_us.tsx";
+import ServicesPage from "./generic_pages/services.tsx";
+import ContactsPage from "./generic_pages/contacts.tsx";
+import StaffPage from "./generic_pages/staff.tsx";
 
 function App() {
   // global state holders for currently logged in user
@@ -187,6 +191,10 @@ function App() {
           <Route path="/" element={<MainLayout />} >
             <Route index element={<Homepage />} />
             <Route path="auction" element={<AuctionPage />} />
+            <Route path="aboutus" element={<AboutUsPage />} />
+            <Route path="services" element={<ServicesPage />} />
+            <Route path="contacts" element={<ContactsPage />} />
+            <Route path="staff" element={<StaffPage />} />
 
             <Route element={<RequireAuth allowedRole={"driver"} />}>
               {/* <Route path="appointments/add" element={<MakeAppointmentPage />} /> */}

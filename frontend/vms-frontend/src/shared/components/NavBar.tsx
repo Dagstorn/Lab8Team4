@@ -8,19 +8,19 @@ import { useContext } from "react";
 import { AuthContext } from "../contex/auth-context";
 let routes = [
   {
-    href: "/",
+    href: "/aboutus/",
     label: "About Us",
   },
   {
-    href: "/",
+    href: "/services/",
     label: "Services",
   },
   {
-    href: "/",
+    href: "/contacts/",
     label: "Contacts",
   },
   {
-    href: "/",
+    href: "/staff/",
     label: "Staff",
   },
   {
