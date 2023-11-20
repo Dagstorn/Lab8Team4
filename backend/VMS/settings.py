@@ -1,13 +1,29 @@
 from pathlib import Path
 from datetime import timedelta
+import environ
 
 BASE_DIR = Path(__file__).resolve().parent.parent
+APPS_DIR = BASE_DIR / "VMS"
 
-SECRET_KEY = 'django-insecure-l#o-dan)#1j_&ow4(qh08r3fvfm)_p7)-sdswjefk!_c$#0o2m'
+env = environ.Env()
+
+READ_DOT_ENV_FILE = env.bool("DJANGO_READ_DOT_ENV_FILE", default=True)
+if READ_DOT_ENV_FILE:
+    # OS environment variables take precedence over variables from .env
+    env.read_env(str(BASE_DIR / ".env"))
+
+CSRF_TRUSTED_ORIGINS = ['https://vmslab.online', 'http://vmslab.online']
+
+# SECRET_KEY = 'django-insecure-l#o-dan)#1j_&ow4(qh08r3fvfm)_p7)-sdswjefk!_c$#0o2m'
+SECRET_KEY = env("DJANGO_SECRET_KEY")
 
 DEBUG = True
 
-ALLOWED_HOSTS = ['10.0.2.2', '127.0.0.1', '192.168.18.15', 'localhost', 'http://127.0.0.1:5173']
+# ALLOWED_HOSTS = ['vmslab.online']
+ALLOWED_HOSTS = ["localhost", "0.0.0.0", "127.0.0.1"]
+
+
+# ALLOWED_HOSTS = ['10.0.2.2', '127.0.0.1', '192.168.18.15', 'localhost', 'http://127.0.0.1:5173']
 # 192.168.18.15 - laptop ip
 # '10.0.2.2' - alias for localhost for virtual android device emulator
 
@@ -46,6 +62,7 @@ SIMPLE_JWT = {
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     "corsheaders.middleware.CorsMiddleware",
     'django.middleware.common.CommonMiddleware',
@@ -61,7 +78,7 @@ ROOT_URLCONF = 'VMS.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'dist'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -77,12 +94,46 @@ TEMPLATES = [
 WSGI_APPLICATION = 'VMS.wsgi.application'
 
 
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
+# local
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'vms',
+        'USER': 'LoWdLWugnBzlWqXQoTMrNjnCjhXJKlYK',
+        'PASSWORD': 'PTj5GjuGCkUE3VsBxx5nGXvKNY3PqsDJo60u6MLj0rJP8uG2eGScL0kX60qdDoJg',
+        'HOST': 'postgres',
+        'PORT': '5432',
     }
 }
+
+# prod
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': 'vms',
+#         'USER': 'LoWdLWugnBzlWqXQoTMrNjnCjhXJKlYK',
+#         'PASSWORD': 'TkctTO80rxKMk5S2XQCsDIl0ULNmvhAaCKI5P0zgrYgUMqQ8AhEGZArH74gGlwiF',
+#         'HOST': 'postgres',
+#         'PORT': '5432',
+#     }
+# }
+DATABASES["default"]["ATOMIC_REQUESTS"] = True
+
 
 # DATABASES = {
 #     "default": {
@@ -120,11 +171,15 @@ USE_I18N = True
 
 USE_TZ = True
 
-STATIC_URL = 'static/'
-STATICFILES_DIRS = [ BASE_DIR / "static" ]
+STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles' 
+STATICFILES_DIRS = [ 
+    BASE_DIR / "dist/assets", 
+    BASE_DIR / "dist",
+]
 
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+MEDIA_ROOT = APPS_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
