@@ -9,6 +9,7 @@ import 'package:geocoding/geocoding.dart';
 import 'package:location/location.dart' as my_location;
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:http/http.dart' as http;
+import 'package:fluttertoast/fluttertoast.dart';
 
 class TaskMap extends StatefulWidget {
   final Task task;
@@ -31,6 +32,7 @@ class _TaskMapState extends State<TaskMap> {
   bool inTask = false;
   SharedPreferences? _prefs;
   String? distance;
+  String startError = "";
 
   static const CameraPosition initialPosition = CameraPosition(
     target: LatLng(51.089863, 71.402145),
@@ -83,13 +85,15 @@ class _TaskMapState extends State<TaskMap> {
             infoWindow: const InfoWindow(title: 'Current location'),
           ),
         );
-        setState(() {
-          markers = newSet;
-          _currentP =
-              LatLng(currentLocation.latitude!, currentLocation.longitude!);
-          cameraToPosition(_currentP!);
-        });
-        print(_currentP);
+        if (mounted) {
+          setState(() {
+            markers = newSet;
+            _currentP =
+                LatLng(currentLocation.latitude!, currentLocation.longitude!);
+            cameraToPosition(_currentP!);
+          });
+          print(_currentP);
+        }
       }
     });
   }
@@ -214,6 +218,28 @@ class _TaskMapState extends State<TaskMap> {
   }
 
   void btnProecess() async {
+    if (!inTask) {
+      int targetTime =
+          DateTime.parse(widget.task.timeFrom).millisecondsSinceEpoch;
+      int currentTime = DateTime.now().millisecondsSinceEpoch;
+      if (currentTime < targetTime) {
+        setState(() {
+          startError =
+              "You can't start the task since it is scheduled for ${widget.task.timeFrom}";
+        });
+        Fluttertoast.showToast(
+            msg:
+                "You can't start the task since it is scheduled for ${widget.task.timeFrom}",
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.CENTER,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Colors.red,
+            textColor: Colors.white,
+            fontSize: 16.0);
+      } else {
+        startTask();
+      }
+    }
     if (inTask) {
       final GoogleMapController controller = await _controller.future;
       controller.dispose();
@@ -222,10 +248,20 @@ class _TaskMapState extends State<TaskMap> {
 
       DateTime targetTime = DateTime.parse(widget.task.timeFrom);
       DateTime currentTime = DateTime.now();
+      print("start time ------->");
+      print(targetTime);
+      print("end time ------->");
+      print(currentTime);
 
       // Calculate the difference in milliseconds
       int differenceInMilliseconds = currentTime.millisecondsSinceEpoch -
           targetTime.millisecondsSinceEpoch;
+      print("start time in mill------->");
+      print(targetTime.millisecondsSinceEpoch);
+      print("end time in mill ------->");
+      print(currentTime.millisecondsSinceEpoch);
+      print("difference time ------->");
+      print(differenceInMilliseconds);
 
       String iso8601String = currentTime.toIso8601String();
       if (distance == null) {
@@ -242,6 +278,9 @@ class _TaskMapState extends State<TaskMap> {
         'distance_covered': distanceInMetersAsInt.toString()
       };
       try {
+        print("sending to api");
+        print("-=-=-=-=-=-=-=--=-=-=-=-=-=-=");
+
         final response = await http.post(
           Uri.parse('$baseApiUrl/api/tasks/${widget.task.id}/complete/'),
           headers: {
@@ -250,19 +289,27 @@ class _TaskMapState extends State<TaskMap> {
           },
           body: json.encode(data),
         );
+        print("got response from api");
+
+        print("-=-=-=-=-=-=-=--=-=-=-=-=-=-=");
 
         if (response.statusCode == 200) {
           final jsonResponse = json.decode(response.body);
+          print("response is good");
+
           print("-=-=-=-=-=-=-=--=-=-=-=-=-=-=");
           print(jsonResponse);
           widget.updateDataCallback();
           Navigator.pop(context);
+        } else {
+          print("response is bad");
+          print("xxxxxxx");
+          print(response);
+          print(response.body);
         }
       } catch (e) {
         print(e);
       }
-    } else {
-      startTask();
     }
   }
 

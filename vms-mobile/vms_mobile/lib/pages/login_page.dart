@@ -61,18 +61,27 @@ class _LoginPageState extends State<LoginPage> {
       // make an api call
       try {
         // send data and get jwt token
+        print("trying =-=-=-=");
         final response = await http.post(
           Uri.parse('$baseApiUrl/api/users/token/'),
-          body: {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: jsonEncode({
             'username': username,
             'password': password,
-          },
+          }),
         );
+        print("response =-=-=-=");
+
         // decoded response result
         var jsonResponse = jsonDecode(response.body);
+        print(jsonResponse);
 
         // check if call was successfull
         if (response.statusCode == 200) {
+          print("response is 200 =-=-=-=");
+
           // store jwt token and user data in persistent storage
           var authToken = jsonResponse['access'];
           print(authToken);
@@ -94,12 +103,16 @@ class _LoginPageState extends State<LoginPage> {
                 MaterialPageRoute(builder: (context) => const DriverMain()));
           }
         } else {
+          print("eresponse is not 200");
+
           // Handle error, e.g., incorrect credentials
           setState(() {
             error = 'Invlaid credentials!';
           });
         }
       } catch (e) {
+        print("erroror =-=-=-= -0--0-0-0-0-0-0-0-0-0-0");
+
         // Handle network or API errors
         print(e);
         setState(() {

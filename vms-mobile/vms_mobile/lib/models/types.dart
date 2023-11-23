@@ -117,3 +117,41 @@ class Task {
     );
   }
 }
+
+class CompletedRoute {
+  int id;
+  Driver driver;
+  Vehicle vehicle;
+  String fromPoint;
+  String toPoint;
+  DateTime timeFrom;
+  DateTime timeTo;
+  double distanceCovered;
+  int timeSpent;
+
+  CompletedRoute({
+    required this.id,
+    required this.driver,
+    required this.vehicle,
+    required this.fromPoint,
+    required this.toPoint,
+    required this.timeFrom,
+    required this.timeTo,
+    required this.distanceCovered,
+    required this.timeSpent,
+  });
+
+  factory CompletedRoute.fromJson(Map<String, dynamic> json) {
+    return CompletedRoute(
+      id: json['id'] ?? 0,
+      driver: Driver.fromJson(json['driver'] ?? {}),
+      vehicle: Vehicle.fromJson(json['vehicle'] ?? {}),
+      fromPoint: json['from_point'] ?? '',
+      toPoint: json['to_point'] ?? '',
+      timeFrom: DateTime.parse(json['time_from'] ?? ''),
+      timeTo: DateTime.parse(json['time_to'] ?? ''),
+      distanceCovered: json['distance_covered'] ?? 0.0,
+      timeSpent: json['time_spent'] ?? 0,
+    );
+  }
+}

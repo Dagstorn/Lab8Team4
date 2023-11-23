@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:vms_mobile/models/types.dart';
-import 'package:vms_mobile/pages/driver/task_map.dart';
 
 class CompletedTask extends StatefulWidget {
-  final Task task;
+  final CompletedRoute task;
   const CompletedTask({super.key, required this.task});
 
   @override
@@ -17,8 +16,8 @@ class _CompletedTaskState extends State<CompletedTask> {
   @override
   void initState() {
     super.initState();
-    formattedTimeWindow =
-        formatTimeWindow(widget.task.timeFrom, widget.task.timeTo);
+    formattedTimeWindow = formatTimeWindow(
+        widget.task.timeFrom.toString(), widget.task.timeTo.toString());
   }
 
   String formatTime(DateTime dateTime) {
@@ -49,6 +48,20 @@ class _CompletedTaskState extends State<CompletedTask> {
     return formattedTime;
   }
 
+  String formatTimeTonormal(int milliseconds) {
+    // Calculate hours, minutes, and seconds from milliseconds
+    int seconds = (milliseconds / 1000).floor();
+    int hours = (seconds / 3600).floor();
+    int minutes = ((seconds % 3600) / 60).floor();
+    seconds = seconds % 60;
+
+    // Format the time as a string
+    String formattedTime =
+        '$hours:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+
+    return formattedTime;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -67,7 +80,14 @@ class _CompletedTaskState extends State<CompletedTask> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            widget.task.description,
+            'Time spent: ${formatTimeTonormal(widget.task.timeSpent)}',
+            style: const TextStyle(
+              fontSize: 16.0,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          Text(
+            'Distance covered: ${widget.task.distanceCovered / 1000} km',
             style: const TextStyle(
               fontSize: 16.0,
               fontWeight: FontWeight.bold,

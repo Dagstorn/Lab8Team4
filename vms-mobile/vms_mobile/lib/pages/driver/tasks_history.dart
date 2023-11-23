@@ -16,7 +16,7 @@ class TasksHistory extends StatefulWidget {
 
 class _TasksHistoryState extends State<TasksHistory> {
   SharedPreferences? _prefs;
-  Future<List<Task>>? taskListFuture;
+  Future<List<CompletedRoute>>? taskListFuture;
 
   @override
   void initState() {
@@ -29,7 +29,7 @@ class _TasksHistoryState extends State<TasksHistory> {
     _prefs = await SharedPreferences.getInstance();
   }
 
-  Future<List<Task>> fetchData() async {
+  Future<List<CompletedRoute>> fetchData() async {
     _prefs = await SharedPreferences.getInstance();
 
     try {
@@ -37,23 +37,34 @@ class _TasksHistoryState extends State<TasksHistory> {
           .get(Uri.parse('$baseApiUrl/api/routes_history/'), headers: {
         'Authorization': 'Bearer ${_prefs!.getString("auth_token")}',
       });
-
+      print("response");
       if (response.statusCode == 200) {
-        final jsonResponse = json.decode(response.body);
+        print("response is good");
 
-        List<Task> taskList = [];
+        final jsonResponse = json.decode(response.body);
+        print(jsonResponse);
+
+        List<CompletedRoute> taskList = [];
         for (var item in jsonResponse) {
-          Task newTask = Task.fromJson(item);
+          print("item");
+          print(item);
+          CompletedRoute newTask = CompletedRoute.fromJson(item);
           taskList.add(newTask);
         }
+        print(taskList);
 
         return taskList;
+      } else {
+        print("response is bad");
+        print(response.body);
+        print("response is not ok =============0 ");
+        return [];
       }
     } catch (e) {
       print(e);
+      print("in catch =============0 ");
       return [];
     }
-    return [];
   }
 
   @override
@@ -73,20 +84,22 @@ class _TasksHistoryState extends State<TasksHistory> {
       body: Column(
         children: [
           Expanded(
-            child: FutureBuilder<List<Task>>(
-              future: taskListFuture,
+            child: FutureBuilder<List<CompletedRoute>>(
+              future: fetchData(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState != ConnectionState.done) {
                   return const Center(child: CircularProgressIndicator());
                 } else if (snapshot.hasError) {
                   return Text('Error: ${snapshot.error}');
                 } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  print("snapshot");
+                  print(snapshot.data);
                   return const Text('No data available.');
                 } else {
                   return ListView.builder(
                     itemCount: snapshot.data?.length,
                     itemBuilder: (context, index) {
-                      Task task = snapshot.data![index];
+                      CompletedRoute task = snapshot.data![index];
                       return CompletedTask(task: task);
                     },
                   );
