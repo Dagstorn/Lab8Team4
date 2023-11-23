@@ -69,13 +69,17 @@ RUN chmod +x /start
 
 # copy application code to WORKDIR
 COPY --chown=django:django . ${APP_HOME}
+# Create the /vms/media/ directory
+RUN mkdir -p ${APP_HOME}/vms/media/
+RUN chown -R django:django ${APP_HOME}/vms/media/
 
 # make django owner of the WORKDIR directory as well.
 RUN chown django:django ${APP_HOME}
 
+
 USER django
 
 RUN DATABASE_URL="" \
-  DJANGO_SETTINGS_MODULE="VMS.settings" 
+  DJANGO_SETTINGS_MODULE="vms.settings" 
 
 ENTRYPOINT ["/entrypoint"]

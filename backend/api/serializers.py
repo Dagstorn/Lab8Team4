@@ -115,6 +115,8 @@ class TaskSerializer(serializers.ModelSerializer):
 
 class CompletedRouteSerializer(serializers.ModelSerializer):
     driver = DriverSerializer(many=False)
+    vehicle = VehicleSerializer(many=False)
+
     class Meta:
         model = CompletedRoute
         fields = '__all__'

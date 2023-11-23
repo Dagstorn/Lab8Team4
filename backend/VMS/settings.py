@@ -3,7 +3,7 @@ from datetime import timedelta
 import environ
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-APPS_DIR = BASE_DIR / "VMS"
+APPS_DIR = BASE_DIR / "vms"
 
 env = environ.Env()
 
@@ -19,8 +19,8 @@ SECRET_KEY = env("DJANGO_SECRET_KEY")
 
 DEBUG = True
 
-# ALLOWED_HOSTS = ['vmslab.online']
-ALLOWED_HOSTS = ["localhost", "0.0.0.0", "127.0.0.1"]
+ALLOWED_HOSTS = ['vmslab.online', '0.0.0.0', 'localhost', "127.0.0.1"]
+# ALLOWED_HOSTS = ["localhost", "0.0.0.0", "127.0.0.1"]
 
 
 # ALLOWED_HOSTS = ['10.0.2.2', '127.0.0.1', '192.168.18.15', 'localhost', 'http://127.0.0.1:5173']
@@ -73,7 +73,7 @@ MIDDLEWARE = [
 
 ]
 
-ROOT_URLCONF = 'VMS.urls'
+ROOT_URLCONF = 'vms.urls'
 
 TEMPLATES = [
     {
@@ -91,7 +91,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'VMS.wsgi.application'
+WSGI_APPLICATION = 'vms.wsgi.application'
 
 
 STORAGES = {
@@ -110,28 +110,28 @@ STORAGES = {
 #     }
 # }
 # local
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'vms',
-        'USER': 'LoWdLWugnBzlWqXQoTMrNjnCjhXJKlYK',
-        'PASSWORD': 'PTj5GjuGCkUE3VsBxx5nGXvKNY3PqsDJo60u6MLj0rJP8uG2eGScL0kX60qdDoJg',
-        'HOST': 'postgres',
-        'PORT': '5432',
-    }
-}
-
-# prod
 # DATABASES = {
 #     'default': {
 #         'ENGINE': 'django.db.backends.postgresql',
 #         'NAME': 'vms',
 #         'USER': 'LoWdLWugnBzlWqXQoTMrNjnCjhXJKlYK',
-#         'PASSWORD': 'TkctTO80rxKMk5S2XQCsDIl0ULNmvhAaCKI5P0zgrYgUMqQ8AhEGZArH74gGlwiF',
+#         'PASSWORD': 'PTj5GjuGCkUE3VsBxx5nGXvKNY3PqsDJo60u6MLj0rJP8uG2eGScL0kX60qdDoJg',
 #         'HOST': 'postgres',
 #         'PORT': '5432',
 #     }
 # }
+
+# prod
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'vms',
+        'USER': 'LoWdLWugnBzlWqXQoTMrNjnCjhXJKlYK',
+        'PASSWORD': 'TkctTO80rxKMk5S2XQCsDIl0ULNmvhAaCKI5P0zgrYgUMqQ8AhEGZArH74gGlwiF',
+        'HOST': 'postgres',
+        'PORT': '5432',
+    }
+}
 DATABASES["default"]["ATOMIC_REQUESTS"] = True
 
 
@@ -184,6 +184,7 @@ MEDIA_ROOT = APPS_DIR / 'media'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_CREDENTIALS = True
 
 # CORS_ALLOWED_ORIGINS = [
 #     "http://127.0.0.1:5173",

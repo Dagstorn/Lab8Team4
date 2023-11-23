@@ -7,6 +7,12 @@ admin.site.register(FuelingProof)
 admin.site.register(MaintenanceJob)
 admin.site.register(RepairingPart)
 admin.site.register(RepairedPartRecord)
-admin.site.register(MaintenanceRecord)
 admin.site.register(VehicleReport)
 admin.site.register(AuctionVehicle)
+
+class MaintenanceRecordAdmin(admin.ModelAdmin):
+    list_display = ('vehicle', 'maintenance_person', 'job','cost', 'completed_on')
+    list_editable = ('cost', 'completed_on')
+
+# Register your model with the custom admin class
+admin.site.register(MaintenanceRecord, MaintenanceRecordAdmin)

@@ -177,12 +177,13 @@ def driver_detail(request, pk):
         if 'user' in request.data:
             request.data.pop('user')
         if 'password' in request.data:
-            new_password = request.data.pop('password')
-            user = driver.user
-            user.set_password(new_password)
-            user.save()
-            driver.password = new_password
-            driver.save()
+            new_password = request.data.pop('password').strip()
+            if len(new_password) > 0:
+                user = driver.user
+                user.set_password(new_password)
+                user.save()
+                driver.password = new_password
+                driver.save()
 
         serializer = DriverSerializer(driver, data=request.data, partial=True)
         print(request.data)
@@ -464,9 +465,13 @@ def general_reports(request):
                         existing_entry["cost"] += entry["cost"]
                     else:
                         fueling_report[year].append(entry)
-        
-        report['fueling'] = fueling_report
 
+        month_order = {'January': 1, 'February': 2, 'March': 3, 'April': 4, 'May': 5, 'June': 6, 'July': 7, 'August': 8, 'September': 9, 'October': 10, 'November': 11, 'December': 12}
+
+        sorted_data = {year: sorted(months, key=lambda x: month_order[x['month']]) for year, months in fueling_report.items()}
+        
+
+        report['fueling'] = sorted_data
         
         list_of_maintenance_reports_by_vehicles = []
         for vehicle in Vehicle.objects.all(): 
@@ -491,8 +496,8 @@ def general_reports(request):
                     else:
                         maintenance_report[year].append(entry)
         
-
-        report['maintenance'] = maintenance_report
+        sorted_maintenance_data = {year: sorted(months, key=lambda x: month_order[x['month']]) for year, months in maintenance_report.items()}
+        report['maintenance'] = sorted_maintenance_data
         # return data   
         return Response(report)
     except:
@@ -521,21 +526,22 @@ def auction_vehicles(request):
     elif request.method == 'POST':
         print(request.FILES)
         print(request.FILES.get('image'))
-        try:
-            new_obj = AuctionVehicle.objects.create(
-                make = request.data.get('make'),
-                model = request.data.get('model'),
-                type = request.data.get('type'),
-                year = request.data.get('year'),
-                license_plate = request.data.get('license_plate'),
-                capacity = request.data.get('capacity'),
-                mileage = request.data.get('mileage'),
-                image = request.FILES.get('image'),
-                condition = request.data.get('condition'),
-                additional_information = request.data.get('additional_information'),
-            )
-        except:
-            return Response({'message': "Wrong data format or missing data"}, status=status.HTTP_400_BAD_REQUEST)
+        print(request.POST)
+        # try:
+        new_obj = AuctionVehicle.objects.create(
+            make = request.data.get('make'),
+            model = request.data.get('model'),
+            type = request.data.get('type'),
+            year = request.data.get('year'),
+            license_plate = request.data.get('license_plate'),
+            capacity = request.data.get('capacity'),
+            mileage = request.data.get('mileage'),
+            image = request.FILES.get('image'),
+            condition = request.data.get('condition'),
+            additional_information = request.data.get('additional_information'),
+        )
+        # except:
+        #     return Response({'message': "Wrong data format or missing data"}, status=status.HTTP_400_BAD_REQUEST)
         
         serializer = AuctionVehicleSerializer(new_obj, many=False)
         return Response(serializer.data)
@@ -1041,11 +1047,20 @@ def getTimes(request):
     drivers = Driver.objects.all()
     res = []
     for d in drivers:
+        print(d)
+        print("=========")
         for t in d.tasks.all():
+            print(t)
+            print("----------------------")
             t3 = t.time_from.astimezone(pytz.timezone('Asia/Almaty')).replace(microsecond=0).strftime('%Y-%m-%dT%H:%M')
             t4 = t.time_to.astimezone(pytz.timezone('Asia/Almaty')).replace(microsecond=0).strftime('%Y-%m-%dT%H:%M')
+            print("overlap?")
+            print(f'  {t3} - {t4}')
             if do_time_windows_overlap(t1, t2, str(t3),str(t4)):
+                print("yes!")
                 res.append({'driver': d.id,'car': t.car.id})
+
+    print(res)
     return Response(res)
 
 
@@ -1304,22 +1319,15 @@ def completeTask(request, tid):
     try:
         task = Task.objects.get(id=tid)
 
-        print("-=-=-=-=-=-=-=-=-=-=-= 2")
-        print(request.data)
         task.status = "Completed"
         time_spent = request.data.get('time_spent')
         timeEnded = request.data.get('time_ended')
         task.time_to = timeEnded
         distance_covered = request.data.get('distance_covered')
-        print("-=-=-=-=-=-=-=-=-=-=-= 3")
-        print(time_spent)
-        print(timeEnded)
-        print(distance_covered)
         vehicle = task.car
         vehicle.mileage = vehicle.mileage + float(distance_covered)
         vehicle.save()
         task.save()
-        print("-=-=-=-=-=-=-=-=-=-=-= 4")
 
         comp_route = CompletedRoute.objects.create(
             driver = request.user.driver_acc,
@@ -1328,9 +1336,9 @@ def completeTask(request, tid):
             time_from = task.time_from,
             time_to = timeEnded,
             time_spent = time_spent,
-            distance_covered = distance_covered
+            distance_covered = distance_covered,
+            vehicle = vehicle
         )
-        print("success")
 
         serializer = CompletedRouteSerializer(comp_route, many=False)
         return Response(serializer.data)
@@ -1614,7 +1622,8 @@ def maintenance_jobs_complete(request, pk):
             maintenance_person = maintenance_job.maintenance_person,
             job = maintenance_job,
             description = maintenance_job.description,
-            cost = request.data.get('cost')
+            cost = request.data.get('cost'),
+            completed_on = timezone.now()
         )
         # # set maintenance job status to complete and save
         maintenance_job.complete()

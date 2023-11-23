@@ -1,6 +1,7 @@
 from django.db import models
 from accounts.models import FuelingPerson, MaintenancePerson
 from tasks.models import Task
+from django.utils import timezone
 
 class Vehicle(models.Model):
     BODY_TYPES =(
@@ -55,9 +56,9 @@ class FuelingTask(models.Model):
 class FuelingProof(models.Model):
     vehicle = models.ForeignKey(Vehicle, on_delete=models.CASCADE, null=True, related_name="fueling_proofs")
     fueling_person = models.ForeignKey(FuelingPerson, on_delete=models.SET_NULL, null=True, blank=True, related_name="fueling_proofs")
-    driver_photo = models.ImageField(verbose_name="photo of the Driver", upload_to ='fueling_records/')
-    image_before = models.ImageField(verbose_name="image before fueling", upload_to ='fueling_records/')
-    image_after = models.ImageField(verbose_name="image after fueling", upload_to ='fueling_records/')
+    driver_photo = models.ImageField(verbose_name="photo of the Driver", null=True, blank=True, upload_to ='fueling_records/')
+    image_before = models.ImageField(verbose_name="image before fueling", null=True, blank=True, upload_to ='fueling_records/')
+    image_after = models.ImageField(verbose_name="image after fueling", null=True, blank=True, upload_to ='fueling_records/')
     date = models.DateTimeField(auto_now_add=False)
     type = models.CharField(max_length=100)
     amount = models.FloatField()
@@ -100,7 +101,7 @@ class MaintenanceRecord(models.Model):
     job = models.OneToOneField(MaintenanceJob, on_delete=models.SET_NULL, null=True, related_name="maintenance_record")
     description = models.TextField(max_length=1000)
     cost = models.PositiveBigIntegerField()
-    completed_on = models.DateTimeField(auto_now_add=True)
+    completed_on = models.DateTimeField(default= timezone.now())
 
 class RepairedPartRecord(models.Model):
     record = models.ForeignKey(MaintenanceRecord, on_delete=models.CASCADE, related_name="repaired_parts")

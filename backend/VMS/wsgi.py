@@ -14,8 +14,8 @@ from pathlib import Path
 from django.core.wsgi import get_wsgi_application
 
 BASE_DIR = Path(__file__).resolve(strict=True).parent.parent
-sys.path.append(str(BASE_DIR / "VMS"))
+sys.path.append(str(BASE_DIR / "vms"))
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'VMS.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'vms.settings')
 
 application = get_wsgi_application()
