@@ -34,13 +34,13 @@ const StaffListPage = () => {
     const getData = async () => {
         // get data with custom Hook
         const [fuelingStaffData, maintenanceStaffData, adminData] = await Promise.all([
-            sendRequest('/api/staff/fueling', 'get', {
+            sendRequest('/api/staff/fueling/', 'get', {
                 Authorization: `Bearer ${auth.tokens.access}`
             }),
-            sendRequest('/api/staff/maintenance', 'get', {
+            sendRequest('/api/staff/maintenance/', 'get', {
                 Authorization: `Bearer ${auth.tokens.access}`
             }),
-            sendRequest('/api/staff/admin', 'get', {
+            sendRequest('/api/staff/admin/', 'get', {
                 Authorization: `Bearer ${auth.tokens.access}`
             })
         ]);

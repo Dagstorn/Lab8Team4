@@ -59,7 +59,7 @@ const AppointmentDetailPage = () => {
                 sendRequest(`/api/appointments/${appointmentId}/`, 'get', {
                     Authorization: `Bearer ${auth.tokens.access}`
                 }),
-                sendRequest('/api/vehicles', 'get', {
+                sendRequest('/api/vehicles/', 'get', {
                     Authorization: `Bearer ${auth.tokens.access}`
                 })
             ]);

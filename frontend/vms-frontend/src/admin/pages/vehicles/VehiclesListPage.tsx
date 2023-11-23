@@ -6,6 +6,7 @@ import {
     TableHeader,
     TableRow,
 } from "@/shared/shad-ui/ui/table";
+
 import { Separator } from "@/shared/shad-ui/ui/separator";
 import { Vehicle, PaginatorObj } from "@/shared/types/types";
 import { Link } from "react-router-dom";
@@ -24,6 +25,7 @@ const VehiclesListPage = () => {
     const auth = useAuth();
     // state which stores drivers list
     const [vehicles, setVehicles] = useState<Vehicle[]>([]);
+    const [initialLoading, setinitialLoading] = useState(false);
     // paginator object stores data related to pagination like count, next page, prev page and page size
     const [paginationObj, setPaginationObj] = useState<PaginatorObj | null>(null);
     // custom HTTP hook to make  API calls
@@ -55,7 +57,7 @@ const VehiclesListPage = () => {
                     previous: responseData.previous
                 })
             }
-            setVehicles(responseData.results)
+            setVehicles(responseData.results);
         }
     }
     const removeFromList = (vehicleId: number) => {
@@ -66,7 +68,10 @@ const VehiclesListPage = () => {
     }
     // when conponent mounts - meaning when it is created we get data
     useEffect(() => {
+        setinitialLoading(true);
         getData(1);
+        setinitialLoading(false);
+
     }, []);
 
     return (
@@ -84,7 +89,8 @@ const VehiclesListPage = () => {
 
             <Separator />
             {error ? <div className="text-red-400 mt-4 ">Error: {error}</div> : null}
-            {vehicles.length === 0 && <div className="mt-10 w-full flex justify-center items-center text-center">
+
+            {!initialLoading && vehicles.length === 0 && <div className="mt-10 w-full flex justify-center items-center text-center">
                 <div className="mt-2 text-gray-500">
                     <div className="w-full flex justify-center">
                         <Info className="w-32" />
@@ -100,13 +106,13 @@ const VehiclesListPage = () => {
                 <Table>
                     <TableHeader>
                         <TableRow>
-                            <TableHead className="">Make & Model</TableHead>
-                            <TableHead className="">Status</TableHead>
-                            <TableHead className="">Body type</TableHead>
-                            <TableHead className="">Year</TableHead>
-                            <TableHead className="">Mileage</TableHead>
-                            <TableHead className="">License plate number</TableHead>
-                            <TableHead className="text-right">Action</TableHead>
+                            <TableHead className="w-1/6">Make & Model</TableHead>
+                            <TableHead className="w-1/12">Status</TableHead>
+                            <TableHead className="w-1/6">Body type</TableHead>
+                            <TableHead className="w-1/12">Year</TableHead>
+                            <TableHead className="w-1/12">Mileage</TableHead>
+                            <TableHead className="w-1/6">License plate number</TableHead>
+                            <TableHead className="w-1/6 text-right">Action</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -124,8 +130,7 @@ const VehiclesListPage = () => {
 
 
 
-            {error ? <span>{error}</span> : null
-            }
+            {error ? <span>{error}</span> : null}
         </>
     );
 };

@@ -23,7 +23,7 @@ const RoutesHistory = () => {
         // retrieve data from api
         const getData = async () => {
             // get data with custom Hook
-            const responseData = await sendRequest('/api/routes_history', 'get', {
+            const responseData = await sendRequest('/api/routes_history/', 'get', {
                 Authorization: `Bearer ${auth.tokens.access}`
             })
             if (responseData) {

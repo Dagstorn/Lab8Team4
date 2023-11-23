@@ -30,7 +30,7 @@ const FuelingVehiclesList = () => {
         const getData = async () => {
 
             // get data with custom Hook
-            const responseData = await sendRequest('/api/vehicles', 'get', {
+            const responseData = await sendRequest('/api/vehicles/', 'get', {
                 Authorization: `Bearer ${auth.tokens.access}`
             })
             if (responseData) {

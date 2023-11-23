@@ -72,7 +72,7 @@ const TasksPage = () => {
             // remove task from current app state
             const updatedList = tasks.filter((item: Task) => item.id !== task.id);
             // send data with custom Hook to delete task from database
-            const response = await sendRequest(`/api/tasks/${task.id}`, 'delete', {
+            const response = await sendRequest(`/api/tasks/${task.id}/`, 'delete', {
                 Authorization: `Bearer ${auth.tokens.access}`
             })
             if (response) {

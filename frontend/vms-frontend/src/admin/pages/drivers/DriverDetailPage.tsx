@@ -72,7 +72,7 @@ const DriverDetailPage = () => {
         const formData = new FormData();
         formData.append('pdfFile', bl, `${getFileName(driver)}.pdf`);
         // make api call and send file to backend 
-        const response = await sendRequest(`/api/drivers/${driver.id}/report_data/savePDF`, 'post', {
+        const response = await sendRequest(`/api/drivers/${driver.id}/report_data/savePDF/`, 'post', {
             Authorization: `Bearer ${auth.tokens.access}`,
             'Content-Type': 'multipart/form-data',
         }, formData);

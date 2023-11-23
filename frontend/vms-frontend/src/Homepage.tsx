@@ -15,7 +15,7 @@ function DriversListPage() {
     </div>
     <div className="col-span-3 flex items-center">
       <img className="w-full h-auto mr-2"
-        src={`/vehicleIcons/hero.jpg`} alt="" />
+        src={`/static/vehicleIcons/hero.jpg`} alt="" />
     </div>
   </div>;
 }

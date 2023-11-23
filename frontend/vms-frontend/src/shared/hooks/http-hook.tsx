@@ -12,12 +12,14 @@ export const useHttp = () => {
         const controller = new AbortController();
         activeHttpRequests.current.push(controller);
         setLoading(true);
+        // const finalUrl = 'https://vmslab.online' + url;
+        const finalUrl = url;
 
         try {
 
             const response = await axios({
                 method: method.toLowerCase(),
-                url: url,
+                url: finalUrl,
                 signal: controller.signal,
                 headers: headers,
                 data: postValues || {}
@@ -27,7 +29,6 @@ export const useHttp = () => {
             setError('');
             return response.data;
         } catch (err: any) {
-
             setLoading(false);
             let errMes = "";
             if (err.code !== 'ERR_CANCELED') {
@@ -50,8 +51,9 @@ export const useHttp = () => {
                     errMes = err.message
                     setError(errMes)
                 }
+                toast({ title: errMes, variant: "destructive" })
+
             }
-            toast({ title: errMes, variant: "destructive" })
 
         }
     }, []);

@@ -138,7 +138,10 @@ function App() {
         throw new Error("no token");
       }
       // get new Access token using refresh token
-      const response = await axios.post("/api/users/token/refresh/", {
+      // const finalUrl = 'https://vmslab.online' + "/api/users/token/refresh/";
+      const finalUrl = "/api/users/token/refresh/";
+
+      const response = await axios.post(finalUrl, {
         "refresh": refreshToken
       });
       // save if response is good

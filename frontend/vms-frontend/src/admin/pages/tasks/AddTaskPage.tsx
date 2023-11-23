@@ -40,10 +40,10 @@ const AddTaskPage = () => {
     const getData = async (startDateTime: string, endDateTime: string) => {
         // get drivers and vehicles with custom Hook
         const [driversData, vehiclesData, notAvailable] = await Promise.all([
-            sendRequest('/api/drivers', 'get', {
+            sendRequest('/api/drivers/', 'get', {
                 Authorization: `Bearer ${auth.tokens.access}`
             }),
-            sendRequest('/api/vehicles', 'get', {
+            sendRequest('/api/vehicles/', 'get', {
                 Authorization: `Bearer ${auth.tokens.access}`
             }),
             sendRequest('/api/tasks/checktime/', 'post', {
@@ -57,17 +57,19 @@ const AddTaskPage = () => {
         if (driversData && vehiclesData && notAvailable) {
             // get list of drivers and vehicles that are not available at the selected time
             setBusyDrivers(new Set(notAvailable.map((obj: { driver: number, car: number }) => obj.driver)))
-            setBusyCars(new Set(notAvailable.map((obj: { driver: number, car: number }) => obj.car)))
+            const initialSet = new Set<number>(notAvailable.map((obj: { driver: number, car: number }) => obj.car));
+
             setDrivers(driversData);
             setVehicles(vehiclesData);
             // if vehicle status is not active - meaning that it is on maintenance we make it not available for selection 
-            const newActiveItemsSet = new Set(busyCars);
+            const busyCarsSet = new Set<number>([...initialSet]);
             vehiclesData.forEach((vehicle: Vehicle) => {
                 if (vehicle.status !== 'active') {
-                    newActiveItemsSet.add(vehicle.id);
+                    busyCarsSet.add(vehicle.id);
                 }
-                setBusyCars(newActiveItemsSet);
             });
+            setBusyCars(busyCarsSet);
+
         }
     }
     // function to process selection of first date

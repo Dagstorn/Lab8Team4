@@ -36,7 +36,7 @@ const EditTaskPage = () => {
 
     // initialization of react hook form
     const {
-        register, handleSubmit, formState: { errors, isSubmitting }, setValue, setError, getValues
+        register, handleSubmit, formState: { errors, isSubmitting }, setValue, clearErrors, setError, getValues
     } = useForm();
 
     // useEffect will run everytime taskId changes and will retrieve initial data
@@ -63,10 +63,10 @@ const EditTaskPage = () => {
     const getData = async (startDateTime: string, endDateTime: string, currentData: { driver: number, vehicle: number } | null) => {
         // get drivers and vehicles with custom Hook
         const [driversData, vehiclesData, notAvailable] = await Promise.all([
-            sendRequest('/api/drivers', 'get', {
+            sendRequest('/api/drivers/', 'get', {
                 Authorization: `Bearer ${auth.tokens.access}`
             }),
-            sendRequest('/api/vehicles', 'get', {
+            sendRequest('/api/vehicles/', 'get', {
                 Authorization: `Bearer ${auth.tokens.access}`
             }),
             sendRequest('/api/tasks/checktime/', 'post', {
@@ -116,18 +116,19 @@ const EditTaskPage = () => {
     }
 
     const startDateHandler = (e: ChangeEvent<HTMLInputElement>) => {
-        setError('startDate', { type: 'custom', message: '' });
-        if (getValues('endDate')) {
-            getData(e.target.value, getValues('endDate'), null);
+        // setError('startDate', { type: 'custom', message: '' });
+        clearErrors();
+        if (getValues('time_to')) {
+            getData(e.target.value, getValues('time_to'), null);
         }
     }
     const endDateHandler = (e: ChangeEvent<HTMLInputElement>) => {
-        if (!getValues('startDate')) {
-            setError('startDate', { type: 'custom', message: 'Select start date and time!' });
+        if (!getValues('time_from')) {
+            setError('time_from', { type: 'custom', message: 'Select start date and time!' });
         }
 
-        if (getValues('startDate')) {
-            getData(getValues('startDate'), e.target.value, null);
+        if (getValues('time_from')) {
+            getData(getValues('time_from'), e.target.value, null);
         }
     }
     // function to process form submission

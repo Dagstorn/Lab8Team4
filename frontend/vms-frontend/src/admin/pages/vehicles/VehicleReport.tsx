@@ -47,13 +47,14 @@ const VehicleReport = () => {
             sendRequest(`/api/vehicles/${vehicleId}/`, 'get', {
                 Authorization: `Bearer ${auth.tokens.access}`
             }),
-            sendRequest(`/api/vehicles/${vehicleId}/report_data`, 'get', {
+            sendRequest(`/api/vehicles/${vehicleId}/report_data/`, 'get', {
                 Authorization: `Bearer ${auth.tokens.access}`
             })
         ]);
         if (vehicleData && reportData) {
             // set data to response result
             setVehicle(vehicleData);
+            console.log(reportData);
             // counters for total distance and total number of usages
             let totalDist = 0;
             let totalUsages = 0;
@@ -126,7 +127,7 @@ const VehicleReport = () => {
         const formData = new FormData();
         formData.append('pdfFile', bl, 'my-document.pdf');
 
-        await sendRequest(`/api/vehicles/${vehicleId}/report_data/savePDF`, 'post', {
+        await sendRequest(`/api/vehicles/${vehicleId}/report_data/savePDF/`, 'post', {
             Authorization: `Bearer ${auth.tokens.access}`,
             'Content-Type': 'multipart/form-data',
         }, formData);
@@ -255,7 +256,7 @@ const VehicleReport = () => {
 
                     </div>}
 
-                    {vehicleReportData && Object.keys(vehicleReportData['maintenance']).length > 0 && <div className='w-100 h-[400px]'>
+                    {vehicleReportData && Object.keys(vehicleReportData['usage']).length > 0 && <div className='w-100 h-[400px]'>
                         <div className='flex justify-center items-center mt-2'>
                             <h1 className=" text-xl font-bold mr-4 text-center">Number of usages per months</h1>
                             <Select onValueChange={(year) => setUsageNumberYearFilter(parseInt(year))}>
@@ -290,7 +291,7 @@ const VehicleReport = () => {
 
                     </div>}
 
-                    {vehicleReportData && Object.keys(vehicleReportData['maintenance']).length > 0 && <div className='mt-6 w-100 h-[400px]'>
+                    {vehicleReportData && Object.keys(vehicleReportData['usage']).length > 0 && <div className='mt-6 w-100 h-[400px]'>
                         <div className='flex justify-center items-center mt-2'>
                             <h1 className=" text-xl font-bold mr-4 text-center">Distance covered per months</h1>
                             <Select onValueChange={(year) => setUsageDistanceYearFilter(parseInt(year))}>

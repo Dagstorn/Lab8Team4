@@ -38,7 +38,7 @@ const CompleteJob = () => {
             const responseData = await sendRequest(`/api/maintenance/jobs/${jobId}/`, 'get', {
                 Authorization: `Bearer ${auth.tokens.access}`
             })
-            const repairPartsData = await sendRequest(`/api/maintenance/jobs/${jobId}/parts`, 'get', {
+            const repairPartsData = await sendRequest(`/api/maintenance/jobs/${jobId}/parts/`, 'get', {
                 Authorization: `Bearer ${auth.tokens.access}`
             })
             if (responseData && repairPartsData) {

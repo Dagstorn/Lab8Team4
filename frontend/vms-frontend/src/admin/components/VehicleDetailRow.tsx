@@ -4,7 +4,7 @@ import { Button } from '@/shared/shad-ui/ui/button'
 import { TableCell, TableRow } from '@/shared/shad-ui/ui/table'
 import { useToast } from '@/shared/shad-ui/ui/use-toast'
 import { Vehicle } from '@/shared/types/types'
-import {  useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure, Chip } from "@nextui-org/react";
 import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from "@nextui-org/react";
 import { formatDistance } from '@/shared/utils/utils'
@@ -52,7 +52,7 @@ const VehicleDetailRow = ({ vehicle, removeFromList }: { vehicle: Vehicle, remov
             <TableCell>
                 <div className="flex items-center">
                     <img className="w-10 h-auto mr-2"
-                        src={`/vehicleIcons/${vehicle.type.toLowerCase()}.png`} alt="" />
+                        src={`/static/vehicleIcons/${vehicle.type.toLowerCase()}.png`} alt="" />
                     {vehicle.type}
                 </div>
             </TableCell>

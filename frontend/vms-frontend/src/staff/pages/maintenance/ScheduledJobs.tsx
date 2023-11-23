@@ -29,7 +29,7 @@ const ScheduledJobs = () => {
         // retrieve data from api
         const getData = async () => {
             // get data with custom Hook
-            const responseData = await sendRequest('/api/maintenance/jobs', 'get', {
+            const responseData = await sendRequest('/api/maintenance/jobs/', 'get', {
                 Authorization: `Bearer ${auth.tokens.access}`
             })
             if (responseData) {

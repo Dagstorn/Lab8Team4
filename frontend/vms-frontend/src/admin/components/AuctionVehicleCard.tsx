@@ -13,7 +13,7 @@ const AuctionVehicleCard = ({ vehicle }: { vehicle: AuctionVehicle }) => {
                         <AspectRatio ratio={16 / 9}>
                             <img className="w-full h-full object-cover disable-pixeling"
 
-                                src={`http://127.0.0.1:8000/${vehicle.image}`} alt="Image" />
+                                src={`${vehicle.image}`} alt="Image" />
                         </AspectRatio>
                     </div>
                     <div className="mt-2 w-4/6">
