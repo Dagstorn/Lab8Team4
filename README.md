@@ -2,6 +2,7 @@
 
 Frontend - React\
 Backedn - Django, Postrgresql
+Mobile - Flutter Android
 
 ## Installation & Running:
 
@@ -11,70 +12,13 @@ open terminal/cmd in some folder
 
 `git clone https://github.com/Dagstorn/Lab8Team4.git`
 
-`python -m venv venv`
-
-On mac:
-
-`source venv/bin/activate`
-
-On windows CMD
-
-`venv\Scripts\activate`
-
-On windows Powershell
-
-`.\venv\Scripts\Activate.ps1`
-
-After venv is activated
+install docker
 
 `cd Lab8Team4/backend`
 
-`pip install -r requirements.txt`
-
-`python manage.py runserver`
+`docker-compose -f local.yml up --build`
 
 Now python local server is running on localhost port 8000
-
-However API from flutter should connect not to 127.0.0.1:8000 but rather to http://10.0.2.2:8000 which is a routing alias to your host machine's localhost when running inside Android emulator
-
-Example flutter api call:
-
-```dart
-const baseApiUrl = 'http://10.0.2.2:8000/api';
-final response = await http.post(
-    Uri.parse('$baseApiUrl/users/token/'),
-    body: {
-        'username': username,
-        'password': password,
-    },
-);
-```
-
-## Example API call with access token
-
-### All api calls must inlcue JWT access token for authorization
-
-You need to initialize SharedPreferences first. Example is in driver_personal.dart
-
-```dart
-const baseApiUrl = 'http://10.0.2.2:8000';
-
-// Get JWT auth token from storage
-String? accessToken = _prefs!.getString("auth_token");
-try {
-final response = await http.get(
-Uri.parse('$baseApiUrl/api/driver/tasks/'),
-headers: {
-'Authorization': 'Bearer $accessToken',
-};
-if (response.statusCode == 200) {
-// Request was successful, process the response
-print('Response: ${response.body}');
-}
-} catch (e) {
-print(e);
-}
-```
 
 ## API description for mobile app part
 
@@ -247,4 +191,3 @@ returns list of vehicles
     - get specific vehicle by id
   - for PACTH method
     - update fields that are recieved
-
