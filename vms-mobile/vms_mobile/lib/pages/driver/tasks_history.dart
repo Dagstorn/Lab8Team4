@@ -94,7 +94,23 @@ class _TasksHistoryState extends State<TasksHistory> {
                 } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
                   print("snapshot");
                   print(snapshot.data);
-                  return const Text('No data available.');
+                  return const Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.info_outline,
+                          size: 64.0,
+                          color: Colors.grey,
+                        ),
+                        SizedBox(height: 16.0),
+                        Text(
+                          "No completed tasks yet...",
+                          style: TextStyle(color: Colors.grey, fontSize: 16.0),
+                        ),
+                      ],
+                    ),
+                  );
                 } else {
                   return ListView.builder(
                     itemCount: snapshot.data?.length,

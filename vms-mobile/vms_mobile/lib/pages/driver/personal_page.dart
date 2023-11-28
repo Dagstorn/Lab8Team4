@@ -187,7 +187,8 @@ class _PersonalPageState extends State<PersonalPage> {
                       // For now, let's just print a message
                       print('Logout pressed');
                       clearSharedPreferences();
-                      Navigator.popUntil(context, (route) => route.isFirst);
+                      Navigator.pop(context);
+                      // Navigator.popUntil(context, (route) => route.isFirst);
                     },
                     style: ButtonStyle(
                       shape: MaterialStateProperty.all(

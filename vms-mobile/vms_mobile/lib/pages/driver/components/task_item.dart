@@ -29,9 +29,20 @@ class _TaskItemState extends State<TaskItem> {
   }
 
   String formatTimeWindow(String timeFrom, String timeTo) {
-    final DateTime startDateTime = DateTime.parse(timeFrom);
-    final DateTime endDateTime = DateTime.parse(timeTo);
+    print("times ====================== ");
+    print(timeFrom);
+    print(timeTo);
+
+    final DateTime startDateTime =
+        DateFormat("yyyy-MM-ddTHH:mm:ssZ").parse(timeFrom);
+    final DateTime endDateTime =
+        DateFormat("yyyy-MM-ddTHH:mm:ssZ").parse(timeTo);
     final String formattedTime;
+
+    print("parced ====================== ");
+    print(startDateTime);
+    print(endDateTime);
+
     final DateFormat monthDayFormat = DateFormat('MMM d,');
     final DateFormat dateFormat = DateFormat('MMM d, HH:mm');
 

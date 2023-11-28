@@ -124,8 +124,8 @@ class CompletedRoute {
   Vehicle vehicle;
   String fromPoint;
   String toPoint;
-  DateTime timeFrom;
-  DateTime timeTo;
+  String timeFrom;
+  String timeTo;
   double distanceCovered;
   int timeSpent;
 
@@ -148,8 +148,8 @@ class CompletedRoute {
       vehicle: Vehicle.fromJson(json['vehicle'] ?? {}),
       fromPoint: json['from_point'] ?? '',
       toPoint: json['to_point'] ?? '',
-      timeFrom: DateTime.parse(json['time_from'] ?? ''),
-      timeTo: DateTime.parse(json['time_to'] ?? ''),
+      timeFrom: json['time_from'],
+      timeTo: json['time_to'],
       distanceCovered: json['distance_covered'] ?? 0.0,
       timeSpent: json['time_spent'] ?? 0,
     );

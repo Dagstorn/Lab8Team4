@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vms_mobile/constants.dart';
 import 'package:vms_mobile/models/types.dart';
@@ -218,7 +219,11 @@ class _TaskMapState extends State<TaskMap> {
   }
 
   void btnProecess() async {
+    print("pressed =======>");
+    print(inTask);
     if (!inTask) {
+      print("start =======>");
+
       int targetTime =
           DateTime.parse(widget.task.timeFrom).millisecondsSinceEpoch;
       int currentTime = DateTime.now().millisecondsSinceEpoch;
@@ -237,10 +242,13 @@ class _TaskMapState extends State<TaskMap> {
             textColor: Colors.white,
             fontSize: 16.0);
       } else {
+        print("in else, starting task =======>");
+
         startTask();
       }
-    }
-    if (inTask) {
+    } else {
+      print("end =======>");
+
       final GoogleMapController controller = await _controller.future;
       controller.dispose();
       // /api/tasks/<id>/complete/

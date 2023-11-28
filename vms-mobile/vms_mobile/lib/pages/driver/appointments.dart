@@ -5,8 +5,35 @@ class AppointmentsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
-      child: Text("data"),
+    return Scaffold(
+      appBar: AppBar(
+        centerTitle: true,
+        automaticallyImplyLeading: false,
+        title: const Text(
+          "Appointments",
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 22.0,
+          ),
+        ),
+      ),
+      body: const Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.info_outline,
+              size: 64.0,
+              color: Colors.grey,
+            ),
+            SizedBox(height: 16.0),
+            Text(
+              "No appointments yet...",
+              style: TextStyle(color: Colors.grey, fontSize: 16.0),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
