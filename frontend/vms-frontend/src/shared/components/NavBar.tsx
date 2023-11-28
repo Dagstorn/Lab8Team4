@@ -1,6 +1,6 @@
 import Container from "./Container";
 import { Sheet, SheetContent, SheetTrigger } from "@/shared/shad-ui/ui/sheet";
-import { Menu } from "lucide-react";
+import { Menu, Search } from "lucide-react";
 import { Button } from "@/shared/shad-ui/ui/button";
 import { Link } from "react-router-dom";
 import ProfileButton from "./ProfileButton";
@@ -84,6 +84,18 @@ function NavBar() {
                 </Button>
               </Link>
               }
+              {auth.isLoggedIn && auth.role == "fueling" && <Link to="/fueling">
+                <Button variant="ghost" >
+                  Fueling dashboard
+                </Button>
+              </Link>
+              }
+
+              <Link to="/search/">
+                <Button variant="ghost" >
+                  <Search className="w-4 mr-1" />Search
+                </Button>
+              </Link>
             </nav>
           </div>
 

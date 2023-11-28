@@ -47,7 +47,7 @@ export interface AuctionVehicle {
     mileage: number,
     image: string,
     condition: string,
-    additional_indormation: string,
+    additional_information: string,
 }
 export interface Appointment {
     id: number;

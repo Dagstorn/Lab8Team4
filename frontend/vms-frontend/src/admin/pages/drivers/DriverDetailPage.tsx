@@ -37,6 +37,7 @@ const DriverDetailPage = () => {
                 Authorization: `Bearer ${auth.tokens.access}`
             })
             if (driverData) {
+                console.log(driverData);
                 // save data in components state
                 setDriver(driverData);
             }
@@ -64,6 +65,7 @@ const DriverDetailPage = () => {
 
     // function to construct pdf file and send it to backend
     const constructPDF = async (driver: Driver) => {
+        console.log("making pdf");
         // get blob from generatePDF function which will give access to pdf file created from targetRef
         const pdfBlob = await generatePDF(targetRef, { filename: getFileName(driver), page: { margin: Margin.MEDIUM } })
         // actual blob file
@@ -72,10 +74,13 @@ const DriverDetailPage = () => {
         const formData = new FormData();
         formData.append('pdfFile', bl, `${getFileName(driver)}.pdf`);
         // make api call and send file to backend 
+        console.log("sending pdf");
+
         const response = await sendRequest(`/api/drivers/${driver.id}/report_data/savePDF/`, 'post', {
             Authorization: `Bearer ${auth.tokens.access}`,
             'Content-Type': 'multipart/form-data',
         }, formData);
+        console.log("sent pdf");
 
         if (response) {
             toast({ title: `Report downloaded and saved ✓` })
@@ -89,9 +94,7 @@ const DriverDetailPage = () => {
             {driver && <div className="flex items-center mb-2">
                 <h1 className="text-2xl font-bold mr-4">Driver details</h1>
                 <Link className="mr-4" to={`/admin/drivers/${driverID}/edit/`}><Button variant="secondary"><Pencil className="w-4 mr-1" /> Edit driver data</Button></Link>
-                <Button onClick={() => setShowPassword(false, () => {
-                    constructPDF(driver)
-                })}><Download className='w-4 mr-2' />Save as PDF</Button>
+                <Button onClick={() => constructPDF(driver)}><Download className='w-4 mr-2' />Save as PDF</Button>
             </div>}
             <Separator />
             <div ref={targetRef}>

@@ -28,6 +28,16 @@ const TaskDetails = ({ task, deleteTask }: Props) => {
         }
         return <Chip color="danger">No status?</Chip>
     }
+    const getStatusInTable = () => {
+        if (task.status === "Assigned") {
+            return <Chip variant="flat" color="warning">{task.status}</Chip>
+        } else if (task.status === "In progress") {
+            return <Chip variant="flat" color="secondary">{task.status}</Chip>
+        } else if (task.status === "Completed") {
+            return <Chip variant="flat" color="success">{task.status}</Chip>
+        }
+        return <Chip variant="flat" color="danger">No status?</Chip>
+    }
     const processDeleteTask = () => {
         deleteTask(task);
 
@@ -38,7 +48,7 @@ const TaskDetails = ({ task, deleteTask }: Props) => {
             <TableCell> {formatTimeRange(task.time_from, task.time_to)}</TableCell>
             <TableCell>{`${task.car.make} ${task.car.model} ${task.car.year}`}</TableCell>
             <TableCell>
-                <Chip color="warning" variant="flat">{task.status}</Chip>
+                {getStatusInTable()}
             </TableCell>
             <TableCell className="text-right">
                 <Button variant="outline" onClick={onOpen} >View details</Button>

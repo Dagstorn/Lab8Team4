@@ -46,9 +46,10 @@ const VehicleDetails = ({ vehicle }: Props) => {
                                 {getVehicleInfo(vehicle)}
                             </ModalBody>
                             <ModalFooter>
-                                <Button color="danger" variant="ghost" onClick={onClose}>
+                                <Button color="danger" variant="secondary" onClick={onClose}>
                                     Close
                                 </Button>
+
                                 <Link to={`/fueling/vehicles/${vehicle.id}/add_fueling_report`}>
                                     <Button color="primary" onClick={onClose}>
                                         Add Fueling Report

@@ -77,9 +77,7 @@ const MaintenanceVehiclesList = () => {
                         <Spinner></Spinner>
                     </div>}
                 </div>
-
             </div>
-
             <Separator />
             <FadeTransition show={vehicles.length > 0}>
                 <Table>
@@ -99,7 +97,6 @@ const MaintenanceVehiclesList = () => {
                                 return <VehicleDetails key={vehicle.id} vehicle={vehicle} changeStatus={changeStatus} />
                             })
                         }
-
                     </TableBody>
                 </Table>
                 {paginationObj && <Paginator getData={getData} paginatorData={paginationObj} />}

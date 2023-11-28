@@ -1,4 +1,4 @@
-import { CarFront, FileText, LayoutDashboard } from "lucide-react";
+import { CarFront, FileText, LayoutDashboard, ListOrdered } from "lucide-react";
 
 export const sidebarNavItems = [
     {
@@ -15,5 +15,10 @@ export const sidebarNavItems = [
         title: "Fueling Reports",
         href: "/fueling/reports",
         icon: <FileText className="mr-2 h-4 w-4" />,
+    },
+    {
+        title: "Fueling Tasks",
+        href: "/fueling/tasks",
+        icon: <ListOrdered className="mr-2 h-4 w-4" />,
     },
 ]

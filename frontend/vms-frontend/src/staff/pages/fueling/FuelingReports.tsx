@@ -1,4 +1,3 @@
-import { Button } from "@/shared/shad-ui/ui/button";
 import {
     Table,
     TableBody,
@@ -7,21 +6,37 @@ import {
     TableRow,
 } from "@/shared/shad-ui/ui/table";
 import { Separator } from "@/shared/shad-ui/ui/separator";
-import { FuelingReport } from "@/shared/types/types";
-
+import { FuelingReport, Vehicle } from "@/shared/types/types";
+import { Autocomplete, AutocompleteItem } from "@nextui-org/react";
 import { Spinner } from "@nextui-org/react";
-import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import useAuth from "@/shared/hooks/useAuth";
 import { useHttp } from "@/shared/hooks/http-hook";
 import FuelingProofDetail from "@/staff/components/fueling/FuelingProofDetail";
-
 const FuelingReports = () => {
     const auth = useAuth();
 
     // state which stores drivers list
+    const [allReports, setAllReports] = useState<FuelingReport[]>([]);
     const [reports, setReports] = useState<FuelingReport[]>([]);
+    const [vehicles, setVehicles] = useState<Vehicle[]>([]);
+
     const { loading, error, sendRequest, clearError } = useHttp();
+
+
+    const onSelectionChange = (id: any) => {
+        if (id) {
+            setReports(allReports.filter(report => report.vehicle.id === Number(id)));
+        } else {
+            showAll();
+            return;
+        }
+
+    };
+    useEffect(() => {
+
+    }, [reports])
+
 
 
     // when conponent mounts - meaning when it is created we get data
@@ -31,40 +46,70 @@ const FuelingReports = () => {
         // retrieve data from api
         const getData = async () => {
             // get data with custom Hook
-            const responseData = await sendRequest('/api/fueling/reports/', 'get', {
+            const responseData = await sendRequest('/api/fueling/records/', 'get', {
                 Authorization: `Bearer ${auth.tokens.access}`
             })
+            console.log(responseData);
             if (responseData) {
                 // set data to response result
-                setReports(responseData)
+                setReports(responseData);
+                setAllReports(responseData);
+                let distinctVehicleIds: Set<number> = new Set();
+                let distinctVehicles: Vehicle[] = [];
+
+                responseData.forEach(report => {
+                    if (!distinctVehicleIds.has(report.vehicle.id)) {
+                        distinctVehicleIds.add(report.vehicle.id);
+                        distinctVehicles.push(report.vehicle);
+                    }
+                });
+
+                setVehicles(distinctVehicles);
+
             }
 
         }
         getData();
     }, []);
 
-
+    const showAll = () => {
+        setReports(allReports);
+        console.log("cleared.....")
+    }
 
     return (
         <>
-            <div className="flex justify-between">
-                <h1 className="text-2xl font-bold mb-4">Vehicles list</h1>
-                <Link to="/admin/vehicles/add"><Button variant='default'>Add vehicle</Button></Link>
+            <div className="flex gap-6 items-center mb-2">
+                <h1 className="text-2xl font-bold">Fueling records information</h1>
+                {loading && <div className="">
+                    <Spinner></Spinner>
+                </div>}
+                <Autocomplete
+                    placeholder="Select vehicle"
+                    variant="underlined"
+                    size="sm"
+                    defaultItems={vehicles}
+                    className="max-w-xs"
+                    allowsCustomValue={true}
+                    onSelectionChange={onSelectionChange}
+                    onClear={showAll}
+                    onReset={showAll}
+                >
+                    {(vehicle) => <AutocompleteItem key={vehicle.id}>{`${vehicle.make} ${vehicle.model} ${vehicle.year}`}</AutocompleteItem>}
+                </Autocomplete>
             </div>
 
             <Separator />
-            {loading && <div className="flex justify-center mt-4">
-                <Spinner></Spinner>
-            </div>}
+
             <Table>
                 <TableHeader>
                     <TableRow>
-                        <TableHead>Date and Time</TableHead>
-                        <TableHead>Vehicle</TableHead>
-                        <TableHead>Fuel type</TableHead>
-                        <TableHead>Fuel amount</TableHead>
-                        <TableHead>Fuel cost</TableHead>
-                        <TableHead className="text-right">Action</TableHead>
+                        <TableHead className="w-1/6">Date and Time</TableHead>
+                        <TableHead className="w-1/6">Vehicle</TableHead>
+                        <TableHead className="w-1/6">Fuel type</TableHead>
+                        <TableHead className="w-1/6">Fuel amount</TableHead>
+                        <TableHead className="w-1/6">Fuel cost</TableHead>
+                        <TableHead className="w-1/6 text-right">Action</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>

@@ -29,7 +29,7 @@ const DriverDetailPage = () => {
         // retrieve data from api
         const getData = async () => {
             // get data with custom Hook
-            const vehicleData = await sendRequest(`/api/vehicles/${vehicleId}/`, 'get', {
+            const vehicleData = await sendRequest(`/api/fueling/vehicles/${vehicleId}/`, 'get', {
                 Authorization: `Bearer ${auth.tokens.access}`
             })
             if (vehicleData) {
@@ -45,7 +45,7 @@ const DriverDetailPage = () => {
     async function onSubmit(values: FieldValues) {
         clearError();
         if (vehicle) {
-            values.car = vehicle.id;
+            values.vehicle = vehicle.id;
         } else {
             toast({ title: "Please try again!" })
             return;
@@ -53,18 +53,22 @@ const DriverDetailPage = () => {
 
         values.image_before = values.photoBefore[0]
         values.image_after = values.photoAfter[0]
-
+        console.log(values);
         // send task data to backend
-        const response = await sendRequest('/api/fueling/reports/add/', 'post', {
+        const response = await sendRequest('/api/fueling/records/', 'post', {
             Authorization: `Bearer ${auth.tokens.access}`,
             "Content-Type": "multipart/form-data"
-        }, values)
+        }, values);
+
+        console.log(response);
+
+
         if (response) {
             reset();
-            navigate("/fueling/reports/");
             toast({
                 title: "Fueling record was added successfully!",
             })
+            navigate("/fueling/reports/");
         }
 
 
@@ -87,7 +91,7 @@ const DriverDetailPage = () => {
                             <div className="mb-4">
                                 <label htmlFor="">Date and time</label>
                                 <input
-                                    {...register('datetime', {
+                                    {...register('upload_time', {
                                         required: "Date-time is required"
                                     })}
                                     type='datetime-local' required

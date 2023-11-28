@@ -62,6 +62,8 @@ import AddJob from "./staff/pages/maintenance/AddJob.tsx";
 import EditJob from "./staff/pages/maintenance/EditJob.tsx";
 import CompleteJob from "./staff/pages/maintenance/CompleteJob.tsx";
 import EditPersonalData from "./staff/pages/maintenance/EditPersonalData.tsx";
+import FuelingEditPersonalData from "./staff/pages/fueling/FuelingEditPersonalData.tsx";
+
 import PersonalData from "./admin/pages/PersonalData.tsx";
 import EditAdminData from "./admin/pages/EditAdminData.tsx";
 import AuctionPage from "./shared/pages/AuctionPage.tsx";
@@ -75,6 +77,8 @@ import AboutUsPage from "./generic_pages/about_us.tsx";
 import ServicesPage from "./generic_pages/services.tsx";
 import ContactsPage from "./generic_pages/contacts.tsx";
 import StaffPage from "./generic_pages/staff.tsx";
+import SearchPage from "./shared/pages/SearchPage.tsx";
+import PFuelingTasks from "./staff/pages/fueling/PFuelingTasks.tsx";
 
 function App() {
   // global state holders for currently logged in user
@@ -194,6 +198,7 @@ function App() {
           <Route path="/" element={<MainLayout />} >
             <Route index element={<Homepage />} />
             <Route path="auction" element={<AuctionPage />} />
+            <Route path="search" element={<SearchPage />} />
             <Route path="aboutus" element={<AboutUsPage />} />
             <Route path="services" element={<ServicesPage />} />
             <Route path="contacts" element={<ContactsPage />} />
@@ -258,6 +263,9 @@ function App() {
           <Route element={<RequireAuth allowedRole={"fueling"} />}>
             <Route path="fueling" element={<AdminLayout links={fuelingLinks} />}>
               <Route path="" element={<FuelingPersonalPage />} />
+              <Route path="edit" element={<FuelingEditPersonalData />} />
+
+              <Route path="tasks" element={<PFuelingTasks />} />
               <Route path="vehicles" element={<FuelingVehiclesList />} />
               <Route path="vehicles/:vid/add_fueling_report" element={<AddFuelingReport />} />
               <Route path="reports" element={<FuelingReports />} />

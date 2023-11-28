@@ -127,10 +127,13 @@ const VehicleReport = () => {
         const formData = new FormData();
         formData.append('pdfFile', bl, 'my-document.pdf');
 
-        await sendRequest(`/api/vehicles/${vehicleId}/report_data/savePDF/`, 'post', {
+        const response = await sendRequest(`/api/vehicles/${vehicleId}/report_data/savePDF/`, 'post', {
             Authorization: `Bearer ${auth.tokens.access}`,
             'Content-Type': 'multipart/form-data',
         }, formData);
+
+        console.log("-=-=-=-===-=-=-=-=-=-=-");
+        console.log(response);
         if (error) {
             toast({ title: "Report was not saved! Try again" })
         }
