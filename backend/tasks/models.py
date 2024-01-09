@@ -42,7 +42,7 @@ class Task(models.Model):
         return f'Task for {self.driver} on {self.time_from.strftime("%Y-%m-%d")}'
 
     class Meta:
-        ordering = ['time_from']
+        ordering = ['-time_from']
 
 
 class CompletedRoute(models.Model):

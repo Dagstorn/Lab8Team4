@@ -14,6 +14,7 @@ urlpatterns = [
     path('users/token/verify/', TokenVerifyView.as_view(), name='token_verify'),
 
     # ===============================
+    path('gsearch/', views.global_search),
     
     # ADMIN API endpoints
     path('admin/personal_data/', views.admin_personal_data),
@@ -23,7 +24,7 @@ urlpatterns = [
     path('drivers/paginated/', views.getDriversPaginated),
     path('drivers/<str:pk>/', views.driver_detail),
     path('drivers/<str:pk>/report_data/', views.getDriverReportData),
-    path('drivers/<str:pk>/report_data/savePDF', views.driverDataSavePDF),
+    path('drivers/<str:pk>/report_data/savePDF/', views.driverDataSavePDF),
 
     ## Reports
     path('reports/', views.general_reports),
@@ -33,7 +34,7 @@ urlpatterns = [
     path('vehicles/paginated/', views.getVehiclesPaginated),
     path('vehicles/<str:pk>/', views.vehicle_detail),
     path('vehicles/<str:pk>/report_data/', views.getReportData),
-    path('vehicles/<str:pk>/report_data/savePDF', views.getReportDataSavePDF),
+    path('vehicles/<str:pk>/report_data/savePDF/', views.getReportDataSavePDF),
 
     ## Appointments
     path('appointments/paginated/', views.getAppointments),
@@ -79,7 +80,9 @@ urlpatterns = [
     path('fueling/vehicles/', views.fueling_get_vehicles),
     path('fueling/reports/', views.getFuelingReports),
     path('fueling/records/', views.fueling_records),
+    path('fueling/tasks/', views.fueling_tasks),
     path('fueling/records/<str:pk>/', views.fueling_record_detail),
+    path('fueling/vehicles/<str:pk>/', views.fueling_vehicle_detail),
 
     # MAINTENANCE PERSON API endpoints
     path('maintenance/personal_data/', views.maintenance_personal_data),

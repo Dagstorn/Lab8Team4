@@ -12,20 +12,13 @@ if READ_DOT_ENV_FILE:
     # OS environment variables take precedence over variables from .env
     env.read_env(str(BASE_DIR / ".env"))
 
-CSRF_TRUSTED_ORIGINS = ['https://vmslab.online', 'http://vmslab.online']
+CSRF_TRUSTED_ORIGINS = ['https://vmslab.online', 'http://vmslab.online', 'http://127.0.0.1:8000', 'http://0.0.0.0:8000']
 
-# SECRET_KEY = 'django-insecure-l#o-dan)#1j_&ow4(qh08r3fvfm)_p7)-sdswjefk!_c$#0o2m'
 SECRET_KEY = env("DJANGO_SECRET_KEY")
 
 DEBUG = True
 
-ALLOWED_HOSTS = ['vmslab.online', '0.0.0.0', 'localhost', "127.0.0.1"]
-# ALLOWED_HOSTS = ["localhost", "0.0.0.0", "127.0.0.1"]
-
-
-# ALLOWED_HOSTS = ['10.0.2.2', '127.0.0.1', '192.168.18.15', 'localhost', 'http://127.0.0.1:5173']
-# 192.168.18.15 - laptop ip
-# '10.0.2.2' - alias for localhost for virtual android device emulator
+ALLOWED_HOSTS = env.list("DJANGO_ALLOWED_HOSTS", default=["localhost", "0.0.0.0"])
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -70,7 +63,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-
 ]
 
 ROOT_URLCONF = 'vms.urls'
@@ -105,47 +97,16 @@ STORAGES = {
 
 # DATABASES = {
 #     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',
-#     }
-# }
-# local
-# DATABASES = {
-#     'default': {
 #         'ENGINE': 'django.db.backends.postgresql',
 #         'NAME': 'vms',
 #         'USER': 'LoWdLWugnBzlWqXQoTMrNjnCjhXJKlYK',
-#         'PASSWORD': 'PTj5GjuGCkUE3VsBxx5nGXvKNY3PqsDJo60u6MLj0rJP8uG2eGScL0kX60qdDoJg',
+#         'PASSWORD': 'TkctTO80rxKMk5S2XQCsDIl0ULNmvhAaCKI5P0zgrYgUMqQ8AhEGZArH74gGlwiF',
 #         'HOST': 'postgres',
 #         'PORT': '5432',
 #     }
 # }
-
-# prod
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'vms',
-        'USER': 'LoWdLWugnBzlWqXQoTMrNjnCjhXJKlYK',
-        'PASSWORD': 'TkctTO80rxKMk5S2XQCsDIl0ULNmvhAaCKI5P0zgrYgUMqQ8AhEGZArH74gGlwiF',
-        'HOST': 'postgres',
-        'PORT': '5432',
-    }
-}
+DATABASES = {"default": env.db("DATABASE_URL")}
 DATABASES["default"]["ATOMIC_REQUESTS"] = True
-
-
-# DATABASES = {
-#     "default": {
-#         "ENGINE": "django.db.backends.postgresql",
-#         "NAME": "vmsdb",
-#         "USER": "vmsdbuser",
-#         "PASSWORD": "vms123",
-#         "HOST": "localhost",
-#         "PORT": "5432",
-#     }
-# }
-
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -185,14 +146,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
-
-# CORS_ALLOWED_ORIGINS = [
-#     "http://127.0.0.1:5173",
-#     "http://localhost:8080",
-#     "http://localhost:5173",
-#     "http://127.0.0.1:8000",
-# ]
-
 CORS_ALLOW_METHODS = [
   'DELETE',
   'GET',

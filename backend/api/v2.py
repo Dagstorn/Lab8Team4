@@ -11,7 +11,7 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError
 from rest_framework import status
-from django.db.models import Q
+
 from .decorators import user_type_required
 
 from .serializers import DriverSerializer, VehicleSerializer,AuctionVehicleSerializer, AppointmentSerializer, TaskSerializer, CompletedRouteSerializer, FuelingSerializer, MaintenanceSerializer, FuelingProofSerializer, MaintenanceJobSerializer, RepairPartsSerializer, AdminSerializer, FuelingTaskSerializer
@@ -414,29 +414,20 @@ def getReportData(request, pk):
 @user_type_required(['admin'])
 def getReportDataSavePDF(request, pk):
     try:
-        print("hererereererere")
         # get vehicle by vehicle id from the url
         vehicle = Vehicle.objects.get(pk=pk)
-        print(vehicle)
         # check if there is already reports on vehicle
         if len(VehicleReport.objects.filter(vehicle=vehicle)) > 0:
             # if vehicle has reports update the file and date
-            print(request.FILES)
             veh_reprot = vehicle.reports.all()[0]
             veh_reprot.report_file = request.FILES.get('pdfFile')
             veh_reprot.date = datetime.now().strftime('%Y-%m-%d')
-            veh_reprot.save()
-            print("updated")
         else:
             # otherwise create new report
-            print("new report")
-
             VehicleReport.objects.create(
                 vehicle = vehicle,
                 report_file = request.FILES.get('pdfFile')
             )
-            print("created, ok!")
-
 
         return Response({'status': 'ok'})
     except:
@@ -1058,7 +1049,7 @@ def getTimes(request):
     for d in drivers:
         print(d)
         print("=========")
-        for t in d.tasks.filter(status__in=['Assigned', 'In progress', 'Delayed']):
+        for t in d.tasks.all():
             print(t)
             print("----------------------")
             t3 = t.time_from.astimezone(pytz.timezone('Asia/Almaty')).replace(microsecond=0).strftime('%Y-%m-%dT%H:%M')
@@ -1304,11 +1295,13 @@ def tasks_detail(request, pk):
 
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
-@user_type_required(['driver'])
+# @permission_classes([IsAuthenticated])
+# @user_type_required(['driver'])
 def getRoutesHistory(request):
+    driver = Driver.objects.get(email="johnwilson@gmail.com")
     try:
-        routes = request.user.driver_acc.routes.all()
+        # routes = request.user.driver_acc.routes.all()
+        routes = driver.user.driver_acc.routes.all()
         serializer = CompletedRouteSerializer(routes, many=True)
         return Response(serializer.data)
     except:
@@ -1401,20 +1394,6 @@ def fueling_get_vehicles(request):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 @user_type_required(['fueling'])
-def fueling_tasks(request):
-    try:
-        tasks = FuelingTask.objects.all()
-    except:
-        raise ValidationError("Wrong data format or missing data", code=status.HTTP_400_BAD_REQUEST)
-    
-    serializer = FuelingTaskSerializer(tasks, many=True)
-    return Response(serializer.data)
-
-
-
-@api_view(['GET'])
-@permission_classes([IsAuthenticated])
-@user_type_required(['fueling'])
 def getFuelingReports(request):
     try:
         reports = request.user.fueling_acc.fueling_proofs.all()
@@ -1423,6 +1402,7 @@ def getFuelingReports(request):
     
     serializer = FuelingProofSerializer(reports, many=True)
     return Response(serializer.data)
+
 
 @api_view(['GET', 'POST'])
 @permission_classes([IsAuthenticated])
@@ -1483,32 +1463,6 @@ def fueling_record_detail(request, pk):
 
         serializer = FuelingProofSerializer(record, many=False)
         return Response(serializer.data)        
-
-# get specific vehicle by id or edit it
-@api_view(['GET', 'PATCH'])
-@permission_classes([IsAuthenticated])
-@user_type_required(['fueling'])
-def fueling_vehicle_detail(request, pk):
-    try:
-        # get vehicle by unique identifier
-        vehicle = Vehicle.objects.get(pk=pk)
-    except Exception as e:
-        # in case if there is no driver with such id, or any other unexpected eror
-        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
-
-    # process different methods
-    if request.method == 'GET':
-        # serialize driver data and convert it to appropriate format
-        serializer = VehicleSerializer(vehicle, many=False)
-        return Response(serializer.data)
-    elif request.method  == 'PATCH':
-        serializer = VehicleSerializer(vehicle, data=request.data, partial=True)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        else:
-            return Response({'error': "Something went wrong!"}, status=status.HTTP_400_BAD_REQUEST)
-
 
 
 # function to get and edit personal data of logged in maintenance person
@@ -1752,51 +1706,3 @@ def maintenance_vehicle_list(request):
     return Response(serializer.data)
 
 
-
-@api_view(['GET'])
-def global_search(request):
-    query = request.GET.get('query', '')
-    if len(query) > 0:
-        query = query.split('/')[0]
-
-    if len(query) == 0:
-        results = {
-            'drivers': [],
-            'fueling': [],
-            'maintenance': []
-        }
-        return Response(results)
-    
-    drivers = Driver.objects.filter(
-        Q(name__icontains=query) |
-        Q(surname__icontains=query) |
-        Q(email__icontains=query) | 
-        Q(address__icontains=query) | 
-        Q(department__icontains=query) | 
-        Q(phone__icontains=query)
-    )
-
-    fueling = FuelingPerson.objects.filter(
-        Q(name__icontains=query) |
-        Q(surname__icontains=query) |
-        Q(email__icontains=query) | 
-        Q(phone__icontains=query)
-    )
-    maintenance = MaintenancePerson.objects.filter(
-        Q(name__icontains=query) |
-        Q(surname__icontains=query) |
-        Q(email__icontains=query) | 
-        Q(phone__icontains=query)
-    )
-
-    driver_serializer = DriverSerializer(drivers, many=True)
-    fueling_serializer = FuelingSerializer(fueling, many=True)
-    maintenance_serializer = MaintenanceSerializer(maintenance, many=True)
-
-    results = {
-        'drivers': driver_serializer.data,
-        'fueling': fueling_serializer.data,
-        'maintenance': maintenance_serializer.data,
-    }
-
-    return Response(results)

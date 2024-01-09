@@ -1,7 +1,7 @@
-# Lab8Team4
+# VMS - Vehicle Management System
 
 Frontend - React\
-Backedn - Django, Postrgresql
+Backedn - Django, Postrgresql\
 Mobile - Flutter Android
 
 ## Installation & Running:
@@ -14,11 +14,13 @@ open terminal/cmd in some folder
 
 install docker
 
-`cd Lab8Team4/backend`
+`cd vms/backend`
 
 `docker-compose -f local.yml up --build`
 
 Now python local server is running on localhost port 8000
+
+For mobile application to be able to run project needs to be hosted and runned with production.yml file using docker-compose and 'baseApiUrl' in vms-mobile/vms_mobile/lib/pages/constants.dart needs to contain correct domain name
 
 ## API description for mobile app part
 
